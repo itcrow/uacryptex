@@ -1,0 +1,26 @@
+[package]
+name = "uacryptex-ffi"
+description = "C ABI FFI layer for uacryptex (Go cgo and other language bindings)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+uacryptex-core = { path = "../uacryptex-core" }
+der.workspace = true
+
+[features]
+# Forward to core: constant-time GF(2^m) scalar multiplication for DSTU 4145 sign/verify.
+ct-scalar-mul = ["uacryptex-core/ct-scalar-mul"]
+
+[dev-dependencies]
+hex = "0.4"
+uacryptex-core = { path = "../uacryptex-core" }
+
+[build-dependencies]
+cbindgen = "0.28"

@@ -1,0 +1,60 @@
+[package]
+name = "uacryptex-core"
+description = "Pure Rust Ukrainian cryptographic library core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[example]]
+name = "gen_cms_fixtures"
+path = "examples/gen_cms_fixtures.rs"
+
+[dependencies]
+thiserror.workspace = true
+zeroize.workspace = true
+getrandom = "0.3"
+kupyna = "0.1.0"
+sha1.workspace = true
+sha2.workspace = true
+aes.workspace = true
+cbc.workspace = true
+cipher.workspace = true
+block-padding.workspace = true
+md5.workspace = true
+des.workspace = true
+p192 = { workspace = true, features = ["ecdsa"] }
+p224 = { workspace = true, features = ["ecdsa"] }
+p256 = { workspace = true, features = ["ecdsa"] }
+p384 = { workspace = true, features = ["ecdsa"] }
+p521 = { workspace = true, features = ["ecdsa"] }
+k256 = { workspace = true, features = ["ecdsa"] }
+rand_core.workspace = true
+num-bigint-dig.workspace = true
+num-traits = "0.2"
+elliptic-curve.workspace = true
+hmac.workspace = true
+der.workspace = true
+x509-cert.workspace = true
+x509-ocsp.workspace = true
+x509-tsp.workspace = true
+
+[dev-dependencies]
+hex = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "crypto"
+harness = false
+
+[features]
+# Constant-time GF(2^m) scalar multiplication (Montgomery-style fixed loop + conditional add).
+ct-scalar-mul = []
+# Legacy GOST R 34.10-94 over GF(p) (deprecated; old certs / KZ interop only).
+legacy-gost3410 = []
+
+[lints.rust]
+unsafe_code = "forbid"

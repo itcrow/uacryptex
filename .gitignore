@@ -1,0 +1,42 @@
+# Build outputs
+/target/
+/dist/
+
+# libFuzzer (scripts/fuzz.sh)
+/fuzz/corpus/
+/fuzz/artifacts/
+
+# Native FFI (scripts/build-ffi.sh; .gitkeep preserves empty dirs)
+**/native/lib/**/*.a
+**/native/lib/**/*.so
+**/native/lib/**/*.dylib
+**/native/lib/**/*.dll
+**/native/lib/**/*.lib
+**/native/lib/**/shared/
+
+# Go
+*.test
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+
+# Node.js
+node_modules/
+
+# PHP (composer install in php/)
+vendor/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db

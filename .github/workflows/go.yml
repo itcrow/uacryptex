@@ -1,0 +1,45 @@
+name: Go
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            target: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            target: aarch64-apple-darwin
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            target: x86_64-pc-windows-msvc
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - run: ./scripts/build-ffi.sh ${{ matrix.goos }} ${{ matrix.goarch }}
+      - run: ./scripts/sync-native-libs.sh
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: Test Go binding
+        working-directory: go
+        env:
+          CGO_ENABLED: "1"
+        run: go test -v ./...
+      - name: Python binding smoke test
+        if: matrix.os == 'ubuntu-latest'
+        run: make python-test

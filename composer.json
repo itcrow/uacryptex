@@ -1,0 +1,26 @@
+{
+    "name": "itcrow/uacryptex",
+    "description": "Ukrainian cryptography for PHP (DSTU/GOST PKI via uacryptex Rust core)",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "ext-ffi": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Itcrow\\Uacryptex\\": "php/src/"
+        }
+    },
+    "archive": {
+        "exclude": [
+            "/go",
+            "/nodejs",
+            "/python",
+            "/crates",
+            "/fuzz",
+            "/target",
+            "/testdata"
+        ]
+    }
+}

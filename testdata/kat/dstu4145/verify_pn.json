@@ -1,0 +1,28 @@
+{
+  "id": "verify-pn",
+  "source": "cryptonite/src/cryptoniteAtest/c/atest_dstu4145.c::dstu4145_verify_pn",
+  "description": "DSTU 4145-2002 signature verification, polynomial basis, m=163",
+  "field": {
+    "f": [163, 7, 6, 3, 0],
+    "a": 1
+  },
+  "curve": {
+    "b": "5ff6108462a2dc8210ab403925e638a19c1455d21",
+    "n": "400000000000000000002bec12be2262d39bcf14d",
+    "base_point": {
+      "x": "72d867f93a93ac27df9ff01affe74885c8c540420",
+      "y": "0224a9c3947852b97c5599d5f4ab81122adc3fd9b"
+    }
+  },
+  "public_key": {
+    "x": "57de7fde023ff929cb6ac785ce4b79cf64abdc2da",
+    "y": "3e85444324bcf06ad85abf6ad7b5f34770532b9aa"
+  },
+  "hash": "09c9c44277910c9aaee486883a2eb95b7180166ddf73532eeb76edaef52247ff",
+  "signature": {
+    "r": "a7088d06937ade9af524a4800d4a01aa0c2cea7402",
+    "s": "ca5a61b332a3d65b0f238c8e2b83317395860d1002",
+    "encoding": "little_endian"
+  },
+  "expected": "valid"
+}

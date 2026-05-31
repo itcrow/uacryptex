@@ -1,0 +1,23 @@
+{
+  "name": "@itcrow/uacryptex",
+  "version": "0.1.0",
+  "description": "Ukrainian cryptography for Node.js (DSTU/GOST PKI via uacryptex Rust core)",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": ["lib", "native"],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "koffi": "^2.9.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itcrow/uacryptex.git",
+    "directory": "nodejs"
+  }
+}

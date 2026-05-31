@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uacryptex"
+version = "0.1.0"
+description = "Ukrainian cryptography for Python (DSTU/GOST PKI via uacryptex Rust core)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "itcrow" }]
+
+[project.urls]
+Repository = "https://github.com/itcrow/uacryptex"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["uacryptex*"]
+
+[tool.setuptools.package-data]
+uacryptex = ["native/lib/**/*"]

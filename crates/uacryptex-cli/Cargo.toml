@@ -1,0 +1,15 @@
+[package]
+name = "uacryptex-cli"
+description = "Developer CLI for uacryptex (version, KAT runner)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "uacryptex"
+path = "src/main.rs"
+
+[dependencies]
+uacryptex-core = { path = "../uacryptex-core" }
