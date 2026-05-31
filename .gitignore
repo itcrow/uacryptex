@@ -16,6 +16,7 @@
 
 # Go
 *.test
+go/uacryptex/internal/native/*.a
 
 # Python
 __pycache__/

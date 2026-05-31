@@ -48,10 +48,15 @@ jobs:
         if: matrix.target == 'x86_64-pc-windows-gnu'
         run: echo "/c/mingw64/bin" >> "$GITHUB_PATH"
       - name: Build FFI
+        shell: bash
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_AR: aarch64-linux-gnu-ar
-        run: ./scripts/build-ffi.sh ${{ matrix.goos }} ${{ matrix.goarch }}
+        run: |
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            export PATH="/c/mingw64/bin:${PATH}"
+          fi
+          ./scripts/build-ffi.sh "${{ matrix.goos }}" "${{ matrix.goarch }}"
       - uses: actions/upload-artifact@v4
         with:
           name: native-${{ matrix.goos }}-${{ matrix.goarch }}

@@ -55,7 +55,11 @@ jobs:
         run: ./scripts/verify-version.sh
       - name: Build native library
         shell: bash
-        run: ./scripts/build-ffi.sh ${{ matrix.goos }} ${{ matrix.goarch }}
+        run: |
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then
+            export PATH="/c/mingw64/bin:${PATH}"
+          fi
+          ./scripts/build-ffi.sh "${{ matrix.goos }}" "${{ matrix.goarch }}"
       - name: Package native library
         shell: bash
         run: |

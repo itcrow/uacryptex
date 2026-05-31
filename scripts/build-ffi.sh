@@ -68,8 +68,15 @@ SHARED_DIR="${OUT_DIR}/shared"
 mkdir -p "$SHARED_DIR"
 case "$GOOS" in
   windows)
+    if [[ ! -f "${SRC}/libuacryptex_ffi.a" ]]; then
+      echo "Missing ${SRC}/libuacryptex_ffi.a after cargo build (target ${TARGET})" >&2
+      ls -la "${SRC}/" >&2 || true
+      exit 1
+    fi
     cp "${SRC}/libuacryptex_ffi.a" "${OUT_DIR}/"
-    cp "${SRC}/uacryptex_ffi.dll" "${SHARED_DIR}/"
+    if [[ -f "${SRC}/uacryptex_ffi.dll" ]]; then
+      cp "${SRC}/uacryptex_ffi.dll" "${SHARED_DIR}/"
+    fi
     ;;
   darwin)
     cp "${SRC}/libuacryptex_ffi.a" "${OUT_DIR}/"

@@ -26,4 +26,14 @@ for dest in "${DESTS[@]}"; do
   echo "synced -> ${dest}"
 done
 
+WIN_STATIC="${ROOT}/native/lib/windows/amd64/libuacryptex_ffi.a"
+if [[ -f "$WIN_STATIC" ]]; then
+  test -f "${ROOT}/go/native/lib/windows/amd64/libuacryptex_ffi.a" || {
+    echo "Go Windows static lib missing after sync" >&2
+    exit 1
+  }
+  # Co-locate for cgo: MinGW on Windows often fails -L/-l search with ${SRCDIR} paths.
+  cp "$WIN_STATIC" "${ROOT}/go/uacryptex/internal/native/libuacryptex_ffi.a"
+fi
+
 echo "Done. Client packages now embed native/lib for all built platforms."
