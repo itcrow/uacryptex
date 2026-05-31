@@ -67,9 +67,9 @@ pub fn pkcs8_type(key: &PrivateKeyInfo) -> Pkcs8PrivateKeyType {
         Pkcs8PrivateKeyType::Dstu
     } else if oid_matches_str(OidId::EcPublicKeyType, &oid) {
         Pkcs8PrivateKeyType::Ecdsa
-    } else if oid_matches_str(OidId::Gost34310WithGost34311, &oid) {
-        Pkcs8PrivateKeyType::Gost3410
-    } else if oid_matches_str(OidId::PkiGost3410, &oid) {
+    } else if oid_matches_str(OidId::Gost34310WithGost34311, &oid)
+        || oid_matches_str(OidId::PkiGost3410, &oid)
+    {
         Pkcs8PrivateKeyType::Gost3410
     } else {
         Pkcs8PrivateKeyType::Unknown
@@ -313,7 +313,7 @@ pub fn pkcs8_generate(aid: Option<&[u8]>) -> Result<PrivateKeyInfo> {
     let probe = PrivateKeyInfo {
         version: Uint::new(&[0]).map_err(|e| Error::Internal(format!("version: {e}")))?,
         private_key_algorithm: algorithm.clone(),
-        private_key: OctetString::new(&[1u8]).map_err(|e| Error::Internal(format!("key: {e}")))?,
+        private_key: OctetString::new([1u8]).map_err(|e| Error::Internal(format!("key: {e}")))?,
         attributes: None,
     };
     match pkcs8_type(&probe) {

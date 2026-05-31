@@ -109,7 +109,7 @@ pub fn other_cert_id(cert: &Cert, da: &DigestAdapter) -> Result<OtherCertId> {
 
 fn crl_issued_time(crl: &Crl) -> Result<UtcTime> {
     match &crl.tbs().this_update {
-        Time::UtcTime(ut) => Ok(ut.clone()),
+        Time::UtcTime(ut) => Ok(*ut),
         Time::GeneralTime(gt) => {
             let secs = gt.to_unix_duration().as_secs();
             UtcTime::from_unix_duration(Duration::from_secs(secs))
@@ -175,7 +175,8 @@ pub fn revocation_values_from_ocsp(ocsp_der: &[u8]) -> Result<RevocationValues> 
     })
 }
 
-/// Build `RevocationValues` with CRLs only.
+/// Build `RevocationValues` with CRLs only (reserved for CAdES-X-L).
+#[allow(dead_code)]
 pub fn revocation_values_from_crls(crls: &[Crl]) -> Result<RevocationValues> {
     let crl_vals = crls
         .iter()

@@ -1,5 +1,7 @@
 //! Stable C ABI for uacryptex. All business logic lives in `uacryptex-core`.
 
+#![allow(clippy::not_unsafe_ptr_arg_deref, clippy::large_enum_variant)]
+
 mod buf;
 mod cert;
 mod cms;

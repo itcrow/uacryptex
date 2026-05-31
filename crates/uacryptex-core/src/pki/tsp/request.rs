@@ -38,7 +38,7 @@ impl TspReq {
                             .expect("gost3411 oid"),
                         parameters: None,
                     },
-                    hashed_message: der::asn1::OctetString::new(&[]).expect("empty hash"),
+                    hashed_message: der::asn1::OctetString::new([]).expect("empty hash"),
                 },
                 req_policy: None,
                 nonce: None,

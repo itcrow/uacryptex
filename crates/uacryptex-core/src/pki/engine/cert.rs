@@ -37,6 +37,7 @@ pub fn ecert_alloc(
 }
 
 /// `ecert_generate`.
+#[allow(clippy::too_many_arguments)]
 pub fn ecert_generate(
     engine: &CertificateEngine<'_>,
     request: &CertificationRequest,

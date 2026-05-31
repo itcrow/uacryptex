@@ -31,7 +31,7 @@ fn pkcs5_get_type_unknown() {
             oid,
             parameters: None,
         },
-        encrypted_data: OctetString::new(&[]).unwrap(),
+        encrypted_data: OctetString::new([]).unwrap(),
     };
     assert_eq!(pkcs5_get_type(&epki), Pkcs5Type::Unknown);
 }
@@ -44,7 +44,7 @@ fn pkcs5_decrypt_rejects_non_pbes2() {
             oid,
             parameters: None,
         },
-        encrypted_data: OctetString::new(&[]).unwrap(),
+        encrypted_data: OctetString::new([]).unwrap(),
     };
     let err = pkcs5_decrypt_dstu(&epki, "123456").unwrap_err();
     assert!(matches!(err, Error::Unsupported(_)));

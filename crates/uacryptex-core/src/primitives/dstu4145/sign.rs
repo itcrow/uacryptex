@@ -44,7 +44,7 @@ fn truncate_be_bytes(buf: &mut [u8], bit_len: usize) {
     if byte_off >= buf.len() {
         return;
     }
-    buf[byte_off] &= ((1u8 << (bit_len & 7)) - 1) as u8;
+    buf[byte_off] &= (1u8 << (bit_len & 7)) - 1;
     for b in buf.iter_mut().skip(byte_off + 1) {
         *b = 0;
     }
@@ -57,7 +57,7 @@ pub fn generate_private_key(params: &CurveParams, rng: &mut dyn RandomBytes) -> 
     let mut n = WordArray::from_le_bytes(&params.n);
     n.change_len(field_len);
     let n_bit_len = int_bit_len(&n);
-    let key_len = (n_bit_len + 7) / 8;
+    let key_len = n_bit_len.div_ceil(8);
     let mut d = vec![0u8; key_len];
     loop {
         rng.fill(&mut d)?;

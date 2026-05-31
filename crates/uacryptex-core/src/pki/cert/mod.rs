@@ -164,14 +164,12 @@ impl Cert {
 
     /// Compressed DSTU public key from SPKI (`spki_get_pub_key`).
     pub fn spki_public_key_bytes(&self) -> Result<Vec<u8>> {
-        Ok(
-            crate::primitives::dstu4145::compressed_key_from_spki_bitstring(
-                self.inner
-                    .tbs_certificate
-                    .subject_public_key_info
-                    .subject_public_key
-                    .raw_bytes(),
-            )?,
+        crate::primitives::dstu4145::compressed_key_from_spki_bitstring(
+            self.inner
+                .tbs_certificate
+                .subject_public_key_info
+                .subject_public_key
+                .raw_bytes(),
         )
     }
 

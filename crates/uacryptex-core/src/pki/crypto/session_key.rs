@@ -84,9 +84,7 @@ fn iso15946_generate_secretc(zx: &[u8], entity_info: Option<&[u8]>) -> Result<[u
     ctx.update(&shared_info)?;
 
     let digest = ctx.final_hash()?;
-    digest
-        .try_into()
-        .map_err(|_| Error::Internal("iso15946 kek length".into()))
+    Ok(digest)
 }
 
 fn build_shared_info(entity_info: Option<&[u8]>) -> Result<Vec<u8>> {

@@ -18,6 +18,16 @@ use crate::primitives::dstu4145::{
 use crate::primitives::intl::{ecdsa_public_key_from_spki, ecdsa_verify, EcdsaCurve};
 use crate::{Error, Result};
 
+#[cfg(feature = "legacy-gost3410")]
+fn legacy_gost3410_signature_oid(sign_oid: &str) -> bool {
+    is_gost3410_signature_oid(sign_oid)
+}
+
+#[cfg(not(feature = "legacy-gost3410"))]
+fn legacy_gost3410_signature_oid(_sign_oid: &str) -> bool {
+    false
+}
+
 enum VerifyKind {
     Dstu4145 {
         params: crate::primitives::dstu4145::CurveParams,
@@ -83,16 +93,7 @@ impl VerifyAdapter {
                 VerifyKind::Ecdsa { curve, qx, qy },
                 digest_aid_from_signature_oid(&sign_oid)?,
             )
-        } else if {
-            #[cfg(feature = "legacy-gost3410")]
-            {
-                is_gost3410_signature_oid(&sign_oid)
-            }
-            #[cfg(not(feature = "legacy-gost3410"))]
-            {
-                false
-            }
-        } {
+        } else if legacy_gost3410_signature_oid(&sign_oid) {
             #[cfg(feature = "legacy-gost3410")]
             {
                 use crate::primitives::gost3410::{pubkey_be_from_spki_bitstring, ParamsId};

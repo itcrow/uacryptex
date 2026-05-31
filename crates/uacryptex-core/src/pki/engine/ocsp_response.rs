@@ -69,7 +69,7 @@ impl OcspResponseEngine {
 
         let root_cert = root_va.cert()?;
         let digest_aid = da.algorithm_der();
-        let (name_hash, key_hash) = issuer_id_hashes(&root_cert, digest_aid)?;
+        let (name_hash, key_hash) = issuer_id_hashes(root_cert, digest_aid)?;
         let responder_id = match id_type {
             ResponderIdType::ByHashKey => {
                 let key_bytes = ocsp_cert

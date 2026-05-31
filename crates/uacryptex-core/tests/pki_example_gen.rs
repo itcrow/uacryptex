@@ -292,6 +292,7 @@ fn build_csr_parts(
     Ok((req, sda, san))
 }
 
+#[allow(clippy::too_many_arguments)]
 fn issue_certificate(
     issuer_store: &mut Pkcs12,
     subject_store: Option<&mut Pkcs12>,
@@ -353,6 +354,7 @@ fn generate_root_certificate(
     Ok(cert)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn generate_end_entity_certificate(
     issuer_store: &mut Pkcs12,
     issuer_cert: &Cert,

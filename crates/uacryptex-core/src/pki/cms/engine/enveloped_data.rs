@@ -164,7 +164,7 @@ impl<'a> EnvelopedDataEngine<'a> {
         let encrypted_data = cipher.encrypt(&session_key, data)?;
 
         let mut encrypted_content = EncryptedContentInfo {
-            content_type: data_oid.clone(),
+            content_type: *data_oid,
             content_encryption_algorithm: decode_aid(&cipher_aid)?,
             encrypted_content: None,
         };
@@ -280,7 +280,7 @@ fn generate_recipient_info(
     let kari = KeyAgreeRecipientInfo {
         version: 3,
         originator: originator.clone(),
-        ukm: Some(OctetString::new(&ukm).map_err(|e| Error::Internal(format!("ukm: {e}")))?),
+        ukm: Some(OctetString::new(ukm).map_err(|e| Error::Internal(format!("ukm: {e}")))?),
         key_encryption_algorithm,
         recipient_encrypted_keys: RecipientEncryptedKeys(
             SetOfVec::try_from(vec![rekey])

@@ -50,6 +50,14 @@ criterion = { version = "0.5", features = ["html_reports"] }
 name = "crypto"
 harness = false
 
+[[test]]
+name = "gost3410_kat"
+required-features = ["legacy-gost3410"]
+
+[[test]]
+name = "gost3410_compress_kat"
+required-features = ["legacy-gost3410"]
+
 [features]
 # Constant-time GF(2^m) scalar multiplication (Montgomery-style fixed loop + conditional add).
 ct-scalar-mul = []

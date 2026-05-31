@@ -65,11 +65,13 @@ fn encrypted_content_bytes(env_data: &EnvelopedData, external: Option<&[u8]>) ->
     ))
 }
 
+type UnwrapInfo = (Vec<u8>, Option<Vec<u8>>, Vec<u8>);
+
 fn unwrap_info(
     env_data: &EnvelopedData,
     originator_cert_opt: Option<&Cert>,
     recipient_cert: &Cert,
-) -> Result<(Vec<u8>, Option<Vec<u8>>, Vec<u8>)> {
+) -> Result<UnwrapInfo> {
     for recipient in env_data.recipient_infos.0.iter() {
         let RecipientInfo::Kari(kari) = recipient else {
             continue;

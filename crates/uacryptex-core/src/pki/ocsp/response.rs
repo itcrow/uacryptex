@@ -25,6 +25,12 @@ pub struct OcspResp {
     inner: OcspResponse,
 }
 
+impl Default for OcspResp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl OcspResp {
     /// `ocspresp_alloc`.
     pub fn new() -> Self {

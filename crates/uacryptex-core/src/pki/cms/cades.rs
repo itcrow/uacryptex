@@ -114,13 +114,14 @@ pub fn build_content_info_cades_lt(
         sa,
         content,
         content_type,
-        &[ref_cert.clone()],
+        std::slice::from_ref(ref_cert),
         validation_crls,
     )?;
     apply_cades_x_attrs(container, ref_cert, ocsp_response)?.encode_content_info()
 }
 
 /// Build CMS SignedData with CAdES-A (LT + id-aa-ets-archiveTimeStamp).
+#[allow(clippy::too_many_arguments)]
 pub fn build_content_info_cades_a(
     sa: &SignAdapter,
     content: &[u8],
@@ -137,7 +138,7 @@ pub fn build_content_info_cades_a(
         sa,
         content,
         content_type,
-        &[ref_cert.clone()],
+        std::slice::from_ref(ref_cert),
         validation_crls,
     )?;
     let container = apply_cades_x_attrs(container, ref_cert, ocsp_response)?;

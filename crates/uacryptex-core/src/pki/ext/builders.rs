@@ -509,9 +509,7 @@ pub(crate) fn pkix_key_id_from_spki_der(spki_der: &[u8]) -> Result<Vec<u8>> {
         .map_err(|e| Error::Internal(format!("spki algorithm encode: {e}")))?;
     let algo = spki.algorithm.oid.to_string();
 
-    let digest_aid = if spki_uses_gost3411(&algo) {
-        spki_aid
-    } else if DigestAdapter::init_by_aid(&spki_aid).is_ok() {
+    let digest_aid = if spki_uses_gost3411(&algo) || DigestAdapter::init_by_aid(&spki_aid).is_ok() {
         spki_aid
     } else {
         algorithm_identifier_der(OidId::PkiSha1, None)?

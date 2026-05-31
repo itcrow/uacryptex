@@ -1,6 +1,6 @@
 //! Cipher adapter (`cipher_adapter_init`, `cryptonite_manager.c`).
 
-use der::{Any, Decode, Encode};
+use der::{Any, Decode};
 use x509_cert::spki::AlgorithmIdentifier;
 
 use crate::pki::crypto::aid::{oid_str_under, sbox_from_algorithm_der, spki_algorithm_der};
@@ -156,9 +156,9 @@ pub fn get_gost28147_aid(
     let sbox = sbox_from_algorithm_der(&spki_aid)?;
     let dke = compress_sbox(&sbox);
 
-    let iv_oct = der::asn1::OctetString::new(&iv)
+    let iv_oct = der::asn1::OctetString::new(iv)
         .map_err(|e| Error::Internal(format!("iv octet string: {e}")))?;
-    let dke_oct = der::asn1::OctetString::new(&dke)
+    let dke_oct = der::asn1::OctetString::new(dke)
         .map_err(|e| Error::Internal(format!("dke octet string: {e}")))?;
     let params = Gost28147Params {
         iv: iv_oct,

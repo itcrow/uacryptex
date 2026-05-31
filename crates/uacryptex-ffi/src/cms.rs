@@ -438,9 +438,7 @@ fn cms_verify_impl(data: &[u8], cms_der: &[u8]) -> Result<(), Error> {
         let cert = certs
             .iter()
             .find_map(|choice| {
-                let CertificateChoices::Certificate(c) = choice else {
-                    return None;
-                };
+                let CertificateChoices::Certificate(c) = choice;
                 let cert = Cert::decode(&c.to_der().ok()?).ok()?;
                 cert_matches_signer_id(&cert, &sinfo.sid)
                     .ok()

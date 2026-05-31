@@ -42,7 +42,7 @@ fn ffi_cms_sign_verify_roundtrip() {
     );
     assert_eq!(rc, RET_OK, "sign_open err={err:?}");
 
-    let data = vec![0xf0; 100];
+    let data = [0xf0; 100];
     let mut cms = UacryptexBuf::empty();
     let rc = uacryptex_cms_sign(data.as_ptr(), data.len(), key, &mut cms, &mut err);
     assert_eq!(rc, RET_OK, "sign err={err:?}");
@@ -73,7 +73,7 @@ fn ffi_cms_sign_cades_t_verify() {
     );
     assert_eq!(rc, RET_OK, "sign_open err={err:?}");
 
-    let data = vec![0xf0; 100];
+    let data = [0xf0; 100];
     let serial = 128u8.to_be_bytes();
     let tsp_time = 1_359_151_200i64;
     let mut cms = UacryptexBuf::empty();
@@ -121,7 +121,7 @@ fn ffi_cms_sign_cades_c_verify() {
     );
     assert_eq!(rc, RET_OK, "sign_open err={err:?}");
 
-    let data = vec![0xf0; 100];
+    let data = [0xf0; 100];
     let mut cms = UacryptexBuf::empty();
     let rc = uacryptex_cms_sign_cades_c(
         data.as_ptr(),
@@ -214,7 +214,7 @@ fn ffi_cms_sign_cades_x_verify() {
     );
     assert_eq!(rc, RET_OK, "ocsp generate err={err:?}");
 
-    let data = vec![0xf0; 100];
+    let data = [0xf0; 100];
     let mut cms = UacryptexBuf::empty();
     let rc = uacryptex_cms_sign_cades_x(
         data.as_ptr(),
@@ -310,7 +310,7 @@ fn ffi_cms_sign_cades_a_verify() {
     );
     assert_eq!(rc, RET_OK, "ocsp generate err={err:?}");
 
-    let data = vec![0xf0; 100];
+    let data = [0xf0; 100];
     let serial = 128u8.to_be_bytes();
     let mut cms = UacryptexBuf::empty();
     let rc = uacryptex_cms_sign_cades_a(
@@ -418,7 +418,7 @@ fn ffi_cms_envelop_roundtrip() {
 
 #[test]
 fn ffi_cms_verify_pki_example_vector() {
-    let data = vec![0xf0; 100];
+    let data = [0xf0; 100];
     let cert = uacryptex_core::pki::cert::Cert::decode(USERFIZ_CERT).unwrap();
     let sa = uacryptex_core::pki::crypto::SignAdapter::init_by_cert(USERFIZ_KEY, &cert).unwrap();
     let cms = uacryptex_core::pki::cms::build_content_info(
