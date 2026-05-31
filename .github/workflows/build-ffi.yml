@@ -30,7 +30,7 @@ jobs:
           - os: windows-latest
             goos: windows
             goarch: amd64
-            target: x86_64-pc-windows-msvc
+            target: x86_64-pc-windows-gnu
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -44,6 +44,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
           rustup target add aarch64-unknown-linux-gnu
+      - name: Add MinGW to PATH (Windows)
+        if: matrix.target == 'x86_64-pc-windows-gnu'
+        run: echo "/c/mingw64/bin" >> "$GITHUB_PATH"
       - name: Build FFI
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc

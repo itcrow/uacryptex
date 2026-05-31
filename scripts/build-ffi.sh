@@ -13,7 +13,7 @@ case "${GOOS}_${GOARCH}" in
   linux_arm64)   TARGET="aarch64-unknown-linux-gnu" ;;
   darwin_amd64)  TARGET="x86_64-apple-darwin" ;;
   darwin_arm64)  TARGET="aarch64-apple-darwin" ;;
-  windows_amd64) TARGET="x86_64-pc-windows-msvc" ;;
+  windows_amd64) TARGET="x86_64-pc-windows-gnu" ;;
   *)
     echo "unsupported platform: ${GOOS}/${GOARCH}" >&2
     exit 1
@@ -38,6 +38,18 @@ setup_cross_linker() {
         fi
       fi
       ;;
+    x86_64-pc-windows-gnu)
+      # Go cgo on Windows uses MinGW (lib*.a), not MSVC import/static .lib.
+      if command -v x86_64-w64-mingw32-gcc >/dev/null 2>&1; then
+        export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="${CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER:-x86_64-w64-mingw32-gcc}"
+      elif command -v gcc >/dev/null 2>&1; then
+        export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="${CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER:-gcc}"
+      else
+        echo "MinGW gcc not found (required for x86_64-pc-windows-gnu)" >&2
+        echo "On GitHub Actions, add C:/mingw64/bin to PATH before build-ffi." >&2
+        exit 1
+      fi
+      ;;
   esac
 }
 
@@ -56,7 +68,7 @@ SHARED_DIR="${OUT_DIR}/shared"
 mkdir -p "$SHARED_DIR"
 case "$GOOS" in
   windows)
-    cp "${SRC}/uacryptex_ffi.lib" "${OUT_DIR}/"
+    cp "${SRC}/libuacryptex_ffi.a" "${OUT_DIR}/"
     cp "${SRC}/uacryptex_ffi.dll" "${SHARED_DIR}/"
     ;;
   darwin)

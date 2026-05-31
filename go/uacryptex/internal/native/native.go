@@ -8,7 +8,7 @@ package native
 #cgo linux,arm64 LDFLAGS: -L${SRCDIR}/../../../native/lib/linux/arm64 -luacryptex_ffi -lm -ldl -lpthread
 #cgo darwin,amd64 LDFLAGS: -L${SRCDIR}/../../../native/lib/darwin/amd64 -luacryptex_ffi -lm -lpthread
 #cgo darwin,arm64 LDFLAGS: -L${SRCDIR}/../../../native/lib/darwin/arm64 -luacryptex_ffi -lm -lpthread
-#cgo windows,amd64 LDFLAGS: -L${SRCDIR}/../../../native/lib/windows/amd64 -luacryptex_ffi
+#cgo windows,amd64 LDFLAGS: -L${SRCDIR}/../../../native/lib/windows/amd64 -luacryptex_ffi -lws2_32 -luserenv -lntdll -ladvapi32 -lbcrypt
 
 #include "uacryptex.h"
 #include <stdlib.h>

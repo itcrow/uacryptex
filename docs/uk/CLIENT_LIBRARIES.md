@@ -29,7 +29,7 @@
 |-----------|------------------------------|-----------------|
 | Linux amd64/arm64 | `libuacryptex_ffi.so` | `libuacryptex_ffi.a` |
 | macOS | `libuacryptex_ffi.dylib` | `libuacryptex_ffi.a` |
-| Windows | `uacryptex_ffi.dll` | `uacryptex_ffi.lib` |
+| Windows | `uacryptex_ffi.dll` | `libuacryptex_ffi.a` (MinGW; Go cgo) |
 
 **З git checkout:**
 

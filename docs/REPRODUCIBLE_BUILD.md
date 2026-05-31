@@ -25,7 +25,7 @@ Cross-compilation targets (release matrix):
 rustup target add x86_64-unknown-linux-gnu
 rustup target add aarch64-unknown-linux-gnu
 rustup target add aarch64-apple-darwin
-rustup target add x86_64-pc-windows-msvc
+rustup target add x86_64-pc-windows-gnu
 # Linux arm64 cross-linker (Debian/Fedora):
 # sudo dnf install gcc-aarch64-linux-gnu   # or gcc-aarch64-linux-gnu on Ubuntu
 ```
@@ -67,7 +67,7 @@ Other platforms:
 ```bash
 ./scripts/build-ffi.sh linux arm64
 ./scripts/build-ffi.sh darwin arm64
-./scripts/build-ffi.sh windows amd64   # → uacryptex_ffi.lib
+./scripts/build-ffi.sh windows amd64   # → libuacryptex_ffi.a (+ uacryptex_ffi.dll in shared/)
 ```
 
 ### 3. Release tarball (same as CI)
