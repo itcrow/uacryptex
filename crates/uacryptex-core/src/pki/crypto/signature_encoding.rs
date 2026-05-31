@@ -61,10 +61,9 @@ pub fn sign_bitstring_to_raw(sign_aid_der: &[u8], signature: &BitString) -> Resu
     }
 
     if is_ecdsa_signature_oid(&sign_oid) {
-        let sig = EcdsaSigValue::from_der(signature.raw_bytes())
-            .map_err(|e| Error::Internal(format!("ecdsa sig decode: {e}")))?;
-        let mut r = uint_to_cryptonite_component(&sig.r)?;
-        let mut s = uint_to_cryptonite_component(&sig.s)?;
+        let (r_body, s_body) = decode_ecdsa_sig_value_bodies(signature.raw_bytes())?;
+        let mut r = integer_body_to_cryptonite_component(&r_body);
+        let mut s = integer_body_to_cryptonite_component(&s_body);
         r.append(&mut s);
         return Ok(r);
     }
@@ -75,21 +74,77 @@ pub fn sign_bitstring_to_raw(sign_aid_der: &[u8], signature: &BitString) -> Resu
 }
 
 fn ecdsa_component_to_uint(component_le: &[u8]) -> Result<Uint> {
+    // Cryptonite stores ECDSA scalars little-endian; DER INTEGER is big-endian.
     let mut be = component_le.to_vec();
     be.reverse();
-    if be.first().is_some_and(|b| b & 0x80 != 0) {
-        be.insert(0, 0);
-    }
     Uint::new(&be).map_err(|e| Error::Internal(format!("ecdsa integer: {e}")))
 }
 
-fn uint_to_cryptonite_component(value: &Uint) -> Result<Vec<u8>> {
-    let mut be = value.as_bytes().to_vec();
-    while be.len() > 1 && be.last() == Some(&0) {
-        be.pop();
+fn decode_ecdsa_sig_value_bodies(der: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
+    let (seq_tag, seq, trailing) = read_der_tlv(der)?;
+    if seq_tag != 0x30 {
+        return Err(Error::Internal("expected ECDSA SEQUENCE".into()));
     }
-    be.reverse();
-    Ok(be)
+    if !trailing.is_empty() {
+        return Err(Error::Internal("trailing ECDSA sig DER".into()));
+    }
+    let (r_tag, r_body, rest) = read_der_tlv(seq)?;
+    let (s_tag, s_body, trailing) = read_der_tlv(rest)?;
+    if r_tag != 0x02 || s_tag != 0x02 {
+        return Err(Error::Internal("expected ECDSA INTEGER pair".into()));
+    }
+    if !trailing.is_empty() {
+        return Err(Error::Internal("trailing ECDSA SEQUENCE data".into()));
+    }
+    Ok((r_body.to_vec(), s_body.to_vec()))
+}
+
+fn read_der_tlv(input: &[u8]) -> Result<(u8, &[u8], &[u8])> {
+    if input.len() < 2 {
+        return Err(Error::Internal("truncated DER".into()));
+    }
+    let tag = input[0];
+    let (len, header_len) = read_der_length(&input[1..])?;
+    let content_start = 1 + header_len;
+    let content_end = content_start
+        .checked_add(len)
+        .ok_or_else(|| Error::Internal("DER length overflow".into()))?;
+    if input.len() < content_end {
+        return Err(Error::Internal("truncated DER content".into()));
+    }
+    Ok((
+        tag,
+        &input[content_start..content_end],
+        &input[content_end..],
+    ))
+}
+
+fn read_der_length(input: &[u8]) -> Result<(usize, usize)> {
+    if input.is_empty() {
+        return Err(Error::Internal("missing DER length".into()));
+    }
+    if input[0] & 0x80 == 0 {
+        return Ok((input[0] as usize, 1));
+    }
+    let nbytes = (input[0] & 0x7f) as usize;
+    if nbytes == 0 || input.len() < 1 + nbytes {
+        return Err(Error::Internal("invalid DER length".into()));
+    }
+    let mut len = 0usize;
+    for b in &input[1..=nbytes] {
+        len = (len << 8) | (*b as usize);
+    }
+    Ok((len, 1 + nbytes))
+}
+
+fn integer_body_to_cryptonite_component(body: &[u8]) -> Vec<u8> {
+    // Cryptonite `asn_INTEGER2ba`: copy INTEGER bytes, swap, trim trailing 0x00.
+    let mut le = body.to_vec();
+    le.reverse();
+    if le.last() == Some(&0) {
+        le.pop();
+    }
+    le
 }
 
 #[cfg(test)]
@@ -103,14 +158,18 @@ mod tests {
     #[test]
     fn ecdsa_sign_bitstring_roundtrip_matches_utest_creq_vector() {
         let sign_aid = hex("300A06082A8648CE3D040302");
-        let raw = hex(
-            "F6B6146A81D7A38EDA01E738F2BFF1FA5FEC6F163D382C31E03C0E9DAC29B375CA294D426A659C33BC27F03F89B301800230311DEA8503FF253826625C614BD9D3843C45EB84F362D1517CAEC5E4CF3736CB86D95E85413163F907005B564CFCBA5E",
-        );
         let expected_bs = hex(
             "0368003065023100F6B6146A81D7A38EDA01E738F2BFF1FA5FEC6F163D382C31E03C0E9DAC29B375CA294D426A659C33BC27F03F89B301800230311DEA8503FF253826625C614BD9D3843C45EB84F362D1517CAEC5E4CF3736CB86D95E85413163F907005B564CFCBA5E",
         );
-        let bs = sign_raw_to_bitstring(&sign_aid, &raw).unwrap();
-        assert_eq!(bs.to_der().unwrap(), expected_bs);
-        assert_eq!(sign_bitstring_to_raw(&sign_aid, &bs).unwrap(), raw);
+        let le_raw = hex(
+            "8001B3893FF027BC339C656A424D29CA75B329AC9D0E3CE0312C383D166FEC5FFAF1BFF238E701DA8EA3D7816A14B6F65EBAFC4C565B0007F9633141855ED986CB3637CFE4C5AE7C51D162F384EB453C84D3D94B615C62263825FF0385EA1D31",
+        );
+
+        let bs = BitString::new(0, &expected_bs[3..]).expect("utest_creq CERTIFICATE_SIGN");
+        assert_eq!(sign_bitstring_to_raw(&sign_aid, &bs).unwrap(), le_raw);
+
+        let encoded = sign_raw_to_bitstring(&sign_aid, &le_raw).unwrap();
+        assert_eq!(encoded.to_der().unwrap(), expected_bs);
+        assert_eq!(sign_bitstring_to_raw(&sign_aid, &encoded).unwrap(), le_raw);
     }
 }
