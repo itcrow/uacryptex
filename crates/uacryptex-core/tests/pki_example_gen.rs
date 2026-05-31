@@ -15,18 +15,18 @@ use uacryptex_core::pki::engine::{
     CrlType, OcspRequestEngine,
 };
 use uacryptex_core::pki::ext::{
-    ext_create_auth_info_access, ext_create_auth_key_id_from_cert, ext_create_auth_key_id_from_spki,
-    ext_create_basic_constraints, ext_create_cert_policies, ext_create_crl_distr_points,
-    ext_create_crl_number, ext_create_delta_crl_indicator, ext_create_ext_key_usage,
-    ext_create_freshest_crl, ext_create_key_usage, ext_create_private_key_usage,
-    ext_create_qc_statements, ext_create_subj_alt_name_directly, ext_create_subj_dir_attr_directly,
-    ext_create_subj_key_id, qc_statement_compliance, qc_statement_limit_value, CrlReasonCode,
-    KeyUsageBits, QcStatement,
+    ext_create_auth_info_access, ext_create_auth_key_id_from_cert,
+    ext_create_auth_key_id_from_spki, ext_create_basic_constraints, ext_create_cert_policies,
+    ext_create_crl_distr_points, ext_create_crl_number, ext_create_delta_crl_indicator,
+    ext_create_ext_key_usage, ext_create_freshest_crl, ext_create_key_usage,
+    ext_create_private_key_usage, ext_create_qc_statements, ext_create_subj_alt_name_directly,
+    ext_create_subj_dir_attr_directly, ext_create_subj_key_id, qc_statement_compliance,
+    qc_statement_limit_value, CrlReasonCode, KeyUsageBits, QcStatement,
 };
-use uacryptex_core::pki::utils::object_identifier_from_text;
 use uacryptex_core::pki::ocsp::OcspReq;
 use uacryptex_core::pki::oid::OidId;
 use uacryptex_core::pki::tsp::TspReq;
+use uacryptex_core::pki::utils::object_identifier_from_text;
 use uacryptex_core::storage::pkcs12::{
     pkcs12_create, pkcs12_decode, pkcs12_encode, pkcs12_generate_key, pkcs12_get_sign_adapter,
     pkcs12_select_key, pkcs12_set_certificates, pkcs12_store_key, Pkcs12, Pkcs12MacType,
@@ -39,20 +39,20 @@ pub const KEY_ALIAS: &str = "alias";
 const HASH_ROUNDS: u32 = 1024;
 
 const ROOT_SERIAL: [u8; 20] = [
-    0x00, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xff, 0x00, 0x00, 0x12, 0x34, 0x56, 0x78,
-    0x9a, 0xbc, 0xde, 0xff, 0x00,
+    0x00, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xff, 0x00, 0x00, 0x12, 0x34, 0x56, 0x78, 0x9a,
+    0xbc, 0xde, 0xff, 0x00,
 ];
 const USERFIZ_SERIAL: [u8; 20] = [
-    0x00, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xff, 0x00, 0x00, 0x12, 0x34, 0x56, 0x78,
-    0x9a, 0xbc, 0xde, 0xff, 0x02,
+    0x00, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xff, 0x00, 0x00, 0x12, 0x34, 0x56, 0x78, 0x9a,
+    0xbc, 0xde, 0xff, 0x02,
 ];
 const USERUR_SERIAL: [u8; 20] = [
-    0x00, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xff, 0x00, 0x00, 0x12, 0x34, 0x56, 0x78,
-    0x9a, 0xbc, 0xde, 0xff, 0x03,
+    0x00, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xff, 0x00, 0x00, 0x12, 0x34, 0x56, 0x78, 0x9a,
+    0xbc, 0xde, 0xff, 0x03,
 ];
 const OCSP_SERIAL: [u8; 20] = [
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0xa8, 0x6d,
-    0x18, 0xdb, 0xc8, 0xb0, 0x4c,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0xa8, 0x6d, 0x18,
+    0xdb, 0xc8, 0xb0, 0x4c,
 ];
 
 const ROOT_SUBJECT: &str = concat!(
@@ -502,7 +502,10 @@ fn generate_crls(
     Ok((full_crl, delta_crl))
 }
 
-fn add_full_crl_revocations(engine: &mut uacryptex_core::pki::engine::CrlEngine<'_>, revoke_time: i64) -> Result<()> {
+fn add_full_crl_revocations(
+    engine: &mut uacryptex_core::pki::engine::CrlEngine<'_>,
+    revoke_time: i64,
+) -> Result<()> {
     let entries: [(&str, CrlReasonCode); 5] = [
         ("123", CrlReasonCode::AaCompromise),
         ("456", CrlReasonCode::AffiliationChanged),
@@ -516,7 +519,10 @@ fn add_full_crl_revocations(engine: &mut uacryptex_core::pki::engine::CrlEngine<
     Ok(())
 }
 
-fn add_delta_crl_revocations(engine: &mut uacryptex_core::pki::engine::CrlEngine<'_>, revoke_time: i64) -> Result<()> {
+fn add_delta_crl_revocations(
+    engine: &mut uacryptex_core::pki::engine::CrlEngine<'_>,
+    revoke_time: i64,
+) -> Result<()> {
     let entries: [(&str, CrlReasonCode); 5] = [
         ("752", CrlReasonCode::AaCompromise),
         ("3468", CrlReasonCode::AffiliationChanged),
@@ -553,4 +559,3 @@ fn generate_tsp_request() -> Result<Vec<u8>> {
     let req: TspReq = etspreq_generate(&da, &test_data, None, &policy, false)?;
     req.encode()
 }
-

@@ -86,8 +86,7 @@ fn pkcs12_get_dh_adapter_after_select() {
 
 #[test]
 fn pkcs12_create_generate_store_encode_decode() {
-    let mut store =
-        pkcs12_create(Pkcs12MacType::Gost34311, "123456", 1024).expect("create");
+    let mut store = pkcs12_create(Pkcs12MacType::Gost34311, "123456", 1024).expect("create");
     pkcs12_generate_key(&mut store, None).expect("generate dstu key");
     pkcs12_store_key(&mut store, Some("key1"), Some("123456"), 1024).expect("store key");
     pkcs12_generate_key(&mut store, None).expect("generate second key");

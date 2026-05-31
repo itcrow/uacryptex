@@ -20,9 +20,8 @@ pub extern "C" fn uacryptex_sign_open(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<*mut UacryptexHandle, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         unsafe {
             if !(*out).is_null() {
                 return Err(Error::InvalidParam("out handle must be null".into()));
@@ -61,9 +60,8 @@ pub extern "C" fn uacryptex_sign_hash(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let digest = bytes_from_ptr(hash, hash_len)
             .map_err(|code| Error::InvalidParam(format!("invalid hash: code {code}")))?;
         if key.is_null() {
@@ -96,9 +94,8 @@ pub extern "C" fn uacryptex_sign_data(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let data = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
         if key.is_null() {

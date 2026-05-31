@@ -16,9 +16,7 @@ use uacryptex_core::pki::engine::{
 };
 use uacryptex_core::pki::ocsp::{OcspReq, OcspResponseStatus};
 use uacryptex_core::pki::oid::OidId;
-use uacryptex_core::storage::pkcs12::{
-    pkcs12_decode, pkcs12_get_sign_adapter, pkcs12_select_key,
-};
+use uacryptex_core::storage::pkcs12::{pkcs12_decode, pkcs12_get_sign_adapter, pkcs12_select_key};
 
 use pki_example_gen::PkiExample;
 
@@ -55,10 +53,8 @@ mod fixtures {
                         "../../../testdata/pki/pki_example/userfiz_private_key_ba.dat"
                     )
                     .to_vec(),
-                    userur_store: include_bytes!(
-                        "../../../testdata/pki/userur_private_key.dat"
-                    )
-                    .to_vec(),
+                    userur_store: include_bytes!("../../../testdata/pki/userur_private_key.dat")
+                        .to_vec(),
                     ocsp_store: include_bytes!(
                         "../../../testdata/pki/pki_example/ocsp_private_key_ba.dat"
                     )
@@ -132,7 +128,9 @@ fn run_pki_example_flow(fx: &PkiExample) {
     let ocsp_response = ocsp_resp_engine
         .generate(&fx.ocsp_request, &userfiz_va, ocsp_time)
         .expect("ocsp response");
-    ocsp_response.verify(&ocsp_va).expect("ocsp response signature");
+    ocsp_response
+        .verify(&ocsp_va)
+        .expect("ocsp response signature");
     assert_eq!(
         ocsp_response.response_status(),
         OcspResponseStatus::Successful
@@ -207,12 +205,7 @@ fn run_pki_example_flow(fx: &PkiExample) {
     let (container, external) = engine.generate().unwrap();
     assert!(external.is_none());
     let decrypted = container
-        .decrypt_data(
-            None,
-            Some(&fx.userfiz),
-            &recipient_dh,
-            &fx.userur,
-        )
+        .decrypt_data(None, Some(&fx.userfiz), &recipient_dh, &fx.userur)
         .unwrap();
     assert_eq!(decrypted, PLAINTEXT);
 }

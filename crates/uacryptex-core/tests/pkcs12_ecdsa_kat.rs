@@ -40,8 +40,7 @@ fn pkcs12_openssl_ecdsa_storage_roundtrip() {
 
 #[test]
 fn pkcs12_ecdsa_generate_store_change_password_roundtrip() {
-    let mut store =
-        pkcs12_create(Pkcs12MacType::Sha384, "123456", 1024).expect("create");
+    let mut store = pkcs12_create(Pkcs12MacType::Sha384, "123456", 1024).expect("create");
     pkcs12_generate_key(&mut store, Some(&p384_aid())).expect("generate");
     pkcs12_store_key(&mut store, Some("key"), None, 1024).expect("store key");
     pkcs12_change_password(&mut store, "123456", "12345").expect("change password");
@@ -67,7 +66,8 @@ fn pkcs12_ecdsa_generate_verify_cert_request() {
     pkcs12_set_certificates(&mut store, &[CRYPTONITE_CERT]).expect("set certificates");
     pkcs12_select_key(&mut store, Some("key"), None).expect("re-select key");
     let sa = pkcs12_get_sign_adapter(&store).expect("sign adapter after set certs");
-    sa.sign_data(CRYPTONITE_CERT).expect("sign certificate bytes");
+    sa.sign_data(CRYPTONITE_CERT)
+        .expect("sign certificate bytes");
 
     let mut va = pkcs12_get_verify_adapter(&store).expect("verify adapter");
     va.set_digest_algorithm(&sha224_digest_aid())

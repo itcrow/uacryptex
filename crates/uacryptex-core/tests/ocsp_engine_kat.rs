@@ -28,7 +28,8 @@ fn eocspreq_generate_signed_request() {
         "../../../testdata/pki/pki_example/userfiz_certificate.cer"
     ))
     .unwrap();
-    let private_key = include_bytes!("../../../testdata/pki/pki_example/userfiz_private_key_ba.dat");
+    let private_key =
+        include_bytes!("../../../testdata/pki/pki_example/userfiz_private_key_ba.dat");
 
     let root_va = VerifyAdapter::init_by_cert(&root).unwrap();
     let ocsp_va = VerifyAdapter::init_by_cert(&ocsp).unwrap();
@@ -75,7 +76,10 @@ fn eocspresp_generate_good_status() {
     .unwrap();
     let ocsp_key = include_bytes!("../../../testdata/pki/pki_example/ocsp_private_key_ba.dat");
     let full = Crl::decode(include_bytes!("../../../testdata/pki/pki_example/full.crl")).unwrap();
-    let delta = Crl::decode(include_bytes!("../../../testdata/pki/pki_example/delta.crl")).unwrap();
+    let delta = Crl::decode(include_bytes!(
+        "../../../testdata/pki/pki_example/delta.crl"
+    ))
+    .unwrap();
     let crls = [full, delta];
 
     let root_va = VerifyAdapter::init_by_cert(&root).unwrap();
@@ -124,7 +128,10 @@ fn eocspresp_generate_revoked_and_validate() {
     let user_key = include_bytes!("../../../testdata/pki/pki_example/userfiz_private_key_ba.dat");
     let ocsp_key = include_bytes!("../../../testdata/pki/pki_example/ocsp_private_key_ba.dat");
     let full = Crl::decode(include_bytes!("../../../testdata/pki/pki_example/full.crl")).unwrap();
-    let delta = Crl::decode(include_bytes!("../../../testdata/pki/pki_example/delta.crl")).unwrap();
+    let delta = Crl::decode(include_bytes!(
+        "../../../testdata/pki/pki_example/delta.crl"
+    ))
+    .unwrap();
     let crls = [full, delta];
 
     let root_va = VerifyAdapter::init_by_cert(&root).unwrap();
@@ -153,7 +160,9 @@ fn eocspresp_generate_revoked_and_validate() {
     resp_engine.set_crls(&crls).unwrap();
 
     let current_time = 1_359_151_200;
-    let response = resp_engine.generate(&request, &req_va, current_time).unwrap();
+    let response = resp_engine
+        .generate(&request, &req_va, current_time)
+        .unwrap();
     response.verify(&ocsp_va).unwrap();
     assert_eq!(response.response_status(), OcspResponseStatus::Successful);
 

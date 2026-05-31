@@ -38,10 +38,7 @@ pub fn decrypt_data(
     cipher.decrypt(&session_key, &ciphertext)
 }
 
-fn encrypted_content_bytes(
-    env_data: &EnvelopedData,
-    external: Option<&[u8]>,
-) -> Result<Vec<u8>> {
+fn encrypted_content_bytes(env_data: &EnvelopedData, external: Option<&[u8]>) -> Result<Vec<u8>> {
     if let Some(content) = env_data
         .encrypted_content_info
         .encrypted_content
@@ -63,7 +60,9 @@ fn encrypted_content_bytes(
         return Ok(ext.to_vec());
     }
 
-    Err(Error::InvalidParam("enveloped data has no encrypted content".into()))
+    Err(Error::InvalidParam(
+        "enveloped data has no encrypted content".into(),
+    ))
 }
 
 fn unwrap_info(
@@ -83,11 +82,8 @@ fn unwrap_info(
 
             let wrapped_key = rekey.encrypted_key.as_bytes().to_vec();
             let rnd_bytes = kari.ukm.as_ref().map(|os| os.as_bytes().to_vec());
-            let originator_pub_key = resolve_originator_public_key(
-                &kari.originator,
-                originator_cert_opt,
-                env_data,
-            )?;
+            let originator_pub_key =
+                resolve_originator_public_key(&kari.originator, originator_cert_opt, env_data)?;
             return Ok((wrapped_key, rnd_bytes, originator_pub_key));
         }
     }
@@ -95,13 +91,11 @@ fn unwrap_info(
     Err(Error::NotFound)
 }
 
-fn recipient_matches(
-    rid: &KeyAgreeRecipientIdentifier,
-    recipient_cert: &Cert,
-) -> Result<bool> {
+fn recipient_matches(rid: &KeyAgreeRecipientIdentifier, recipient_cert: &Cert) -> Result<bool> {
     match rid {
-        KeyAgreeRecipientIdentifier::IssuerAndSerialNumber(isn) => Ok(recipient_cert
-            .matches_issuer_and_serial(&isn.issuer, isn.serial_number.as_bytes())),
+        KeyAgreeRecipientIdentifier::IssuerAndSerialNumber(isn) => {
+            Ok(recipient_cert.matches_issuer_and_serial(&isn.issuer, isn.serial_number.as_bytes()))
+        }
         KeyAgreeRecipientIdentifier::RKeyId(rkey_id) => {
             let ski = pkix_key_id_from_spki_der(&recipient_cert.spki_der()?)?;
             Ok(ski == rkey_id.subject_key_identifier.0.as_bytes())

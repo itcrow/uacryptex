@@ -329,162 +329,630 @@ struct OidDef {
 }
 
 const OID_REGISTRY: &[OidDef] = &[
-    OidDef { id: OidId::Pki, components: &[1, 2, 804, 2, 1, 1, 1] },
-    OidDef { id: OidId::PkiAlg, components: &[1, 2, 804, 2, 1, 1, 1, 1] },
-    OidDef { id: OidId::PkiHash, components: &[1, 2, 804, 2, 1, 1, 1, 1, 2] },
-    OidDef { id: OidId::PkiGost3411, components: &[1, 2, 804, 2, 1, 1, 1, 1, 2, 1] },
-    OidDef { id: OidId::PkiHmacGost3411, components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 2] },
-    OidDef { id: OidId::PkiAsym, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3] },
-    OidDef { id: OidId::PkiDstu4145WithGost3411, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1] },
-    OidDef { id: OidId::PkiDstu4145PbLe, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1] },
-    OidDef { id: OidId::PkiSpecialCurvesPb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 1] },
-    OidDef { id: OidId::PkiDstu4145PbBe, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 1, 1] },
-    OidDef { id: OidId::PkiNamedCurvesPb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2] },
-    OidDef { id: OidId::PkiM163Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 0] },
-    OidDef { id: OidId::PkiM167Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 1] },
-    OidDef { id: OidId::PkiM173Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 2] },
-    OidDef { id: OidId::PkiM179Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 3] },
-    OidDef { id: OidId::PkiM191Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 4] },
-    OidDef { id: OidId::PkiM233Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 5] },
-    OidDef { id: OidId::PkiM257Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 6] },
-    OidDef { id: OidId::PkiM307Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 7] },
-    OidDef { id: OidId::PkiM367Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 8] },
-    OidDef { id: OidId::PkiM431Pb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 9] },
-    OidDef { id: OidId::PkiDstu4145OnbLe, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2] },
-    OidDef { id: OidId::PkiSpecialCurvesOnb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 1] },
-    OidDef { id: OidId::PkiDstu4145OnbBe, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 1, 1] },
-    OidDef { id: OidId::PkiNamedCurvesOnb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2] },
-    OidDef { id: OidId::PkiM173Onb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 0] },
-    OidDef { id: OidId::PkiM179Onb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 1] },
-    OidDef { id: OidId::PkiM191Onb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 2] },
-    OidDef { id: OidId::PkiM233Onb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 3] },
-    OidDef { id: OidId::PkiM431Onb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 4] },
-    OidDef { id: OidId::PkiSha1, components: &[1, 3, 14, 3, 2, 26] },
-    OidDef { id: OidId::PkiSha224, components: &[2, 16, 840, 1, 101, 3, 4, 2, 4] },
-    OidDef { id: OidId::PkiSha256, components: &[2, 16, 840, 1, 101, 3, 4, 2, 1] },
-    OidDef { id: OidId::PkiSha384, components: &[2, 16, 840, 1, 101, 3, 4, 2, 2] },
-    OidDef { id: OidId::PkiSha512, components: &[2, 16, 840, 1, 101, 3, 4, 2, 3] },
-    OidDef { id: OidId::Gost34310WithGost34311, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 2] },
-    OidDef { id: OidId::Gost28147Dstu, components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 1] },
-    OidDef { id: OidId::Gost28147Gost, components: &[1, 2, 643, 2, 2, 21] },
-    OidDef { id: OidId::Gost28147Ofb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 1, 2] },
-    OidDef { id: OidId::Gost28147Cfb, components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 1, 3] },
-    OidDef { id: OidId::Gost28147Wrap, components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 1, 5] },
-    OidDef { id: OidId::DhSinglePassCofactorDhGost34311kdfScheme, components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 4] },
-    OidDef { id: OidId::PkiCp, components: &[1, 2, 804, 2, 1, 1, 1, 2] },
-    OidDef { id: OidId::PkiUkrEdsCp, components: &[1, 2, 804, 2, 1, 1, 1, 2, 1] },
-    OidDef { id: OidId::PkiTspPolicy, components: &[1, 2, 804, 2, 1, 1, 1, 2, 3] },
-    OidDef { id: OidId::PkiTspPolicyDstuPb, components: &[1, 2, 804, 2, 1, 1, 1, 2, 3, 1] },
-    OidDef { id: OidId::PkiTspPolicyGost, components: &[1, 2, 804, 2, 1, 1, 1, 2, 3, 2] },
-    OidDef { id: OidId::PkiTspPolicyDstuOnb, components: &[1, 2, 804, 2, 1, 1, 1, 2, 3, 3] },
-    OidDef { id: OidId::PkiEku, components: &[1, 2, 804, 2, 1, 1, 1, 3] },
-    OidDef { id: OidId::PkiEkuStamp, components: &[1, 2, 804, 2, 1, 1, 1, 3, 9] },
-    OidDef { id: OidId::PkiDev, components: &[1, 2, 804, 2, 1, 1, 1, 11] },
-    OidDef { id: OidId::CeCrlReason, components: &[2, 5, 29, 21] },
-    OidDef { id: OidId::Data, components: &[1, 2, 840, 113549, 1, 7, 1] },
-    OidDef { id: OidId::SignedData, components: &[1, 2, 840, 113549, 1, 7, 2] },
-    OidDef { id: OidId::EnvelopedData, components: &[1, 2, 840, 113549, 1, 7, 3] },
-    OidDef { id: OidId::DigOid, components: &[1, 2, 840, 113549, 1, 7, 5] },
-    OidDef { id: OidId::EncOid, components: &[1, 2, 840, 113549, 1, 7, 6] },
-    OidDef { id: OidId::Email, components: &[1, 2, 840, 113549, 1, 9, 1] },
-    OidDef { id: OidId::UnstructuredName, components: &[1, 2, 840, 113549, 1, 9, 2] },
-    OidDef { id: OidId::ContentType, components: &[1, 2, 840, 113549, 1, 9, 3] },
-    OidDef { id: OidId::MessageDigest, components: &[1, 2, 840, 113549, 1, 9, 4] },
-    OidDef { id: OidId::SigningTime, components: &[1, 2, 840, 113549, 1, 9, 5] },
-    OidDef { id: OidId::CounterSignature, components: &[1, 2, 840, 113549, 1, 9, 6] },
-    OidDef { id: OidId::ChallengePassword, components: &[1, 2, 840, 113549, 1, 9, 7] },
-    OidDef { id: OidId::UnstructuredAddress, components: &[1, 2, 840, 113549, 1, 9, 8] },
-    OidDef { id: OidId::ExtendedCertAttr, components: &[1, 2, 840, 113549, 1, 9, 9] },
-    OidDef { id: OidId::SigningDescription, components: &[1, 2, 840, 113549, 1, 9, 13] },
-    OidDef { id: OidId::ExtensionRequest, components: &[1, 2, 840, 113549, 1, 9, 14] },
-    OidDef { id: OidId::Capabilities, components: &[1, 2, 840, 113549, 1, 9, 15] },
-    OidDef { id: OidId::OidRegistry, components: &[1, 2, 840, 113549, 1, 9, 16] },
-    OidDef { id: OidId::Friendlyname, components: &[1, 2, 840, 113549, 1, 9, 20] },
-    OidDef { id: OidId::Localkey, components: &[1, 2, 840, 113549, 1, 9, 21] },
-    OidDef { id: OidId::CertTypes, components: &[1, 2, 840, 113549, 1, 9, 22] },
-    OidDef { id: OidId::CrlTypes, components: &[1, 2, 840, 113549, 1, 9, 22] },
-    OidDef { id: OidId::AaSigningCertificate, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 12] },
-    OidDef { id: OidId::AaSigningCertificateV2, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 47] },
-    OidDef { id: OidId::AaEtsSigPolicy, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 15] },
-    OidDef { id: OidId::SpqEtsUri, components: &[1, 2, 840, 113549, 1, 9, 16, 5, 1] },
-    OidDef { id: OidId::SpqEtsUnitice, components: &[1, 2, 840, 113549, 1, 9, 16, 5, 2] },
-    OidDef { id: OidId::AaEtsContentTimeStamp, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 20] },
-    OidDef { id: OidId::AaSignatureTimeStampToken, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 14] },
-    OidDef { id: OidId::CtTstInfo, components: &[1, 2, 840, 113549, 1, 9, 16, 1, 4] },
-    OidDef { id: OidId::AaEtsCertificateRefs, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 21] },
-    OidDef { id: OidId::AaEtsRevocationRefs, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 22] },
-    OidDef { id: OidId::AaEtsCertValues, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 23] },
-    OidDef { id: OidId::AaEtsRevocationValues, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 24] },
-    OidDef { id: OidId::AaEtsArchiveTimeStamp, components: &[1, 2, 840, 113549, 1, 9, 16, 2, 27] },
-    OidDef { id: OidId::SubjectDirectoryAttributesExtension, components: &[2, 5, 29, 9] },
-    OidDef { id: OidId::SubjectKeyIdentifierExtension, components: &[2, 5, 29, 14] },
-    OidDef { id: OidId::KeyUsageExtension, components: &[2, 5, 29, 15] },
-    OidDef { id: OidId::PrivateKeyUsagePeriodExtension, components: &[2, 5, 29, 16] },
-    OidDef { id: OidId::SubjectAltNameExtension, components: &[2, 5, 29, 17] },
-    OidDef { id: OidId::IssuerAltNameExtension, components: &[2, 5, 29, 18] },
-    OidDef { id: OidId::BasicConstraintsExtension, components: &[2, 5, 29, 19] },
-    OidDef { id: OidId::AuthorityKeyIdentifierExtension, components: &[2, 5, 29, 35] },
-    OidDef { id: OidId::CrlNumberExtension, components: &[2, 5, 29, 20] },
-    OidDef { id: OidId::CrlReasonExtension, components: &[2, 5, 29, 21] },
-    OidDef { id: OidId::HoldInstructionCodeExtension, components: &[2, 5, 29, 23] },
-    OidDef { id: OidId::InvalidityDateExtension, components: &[2, 5, 29, 24] },
-    OidDef { id: OidId::DeltaCrlIndicatorExtension, components: &[2, 5, 29, 27] },
-    OidDef { id: OidId::CertificateIssuerExtension, components: &[2, 5, 29, 29] },
-    OidDef { id: OidId::CrlDistributionPointsExtension, components: &[2, 5, 29, 31] },
-    OidDef { id: OidId::CertificatePoliciesExtension, components: &[2, 5, 29, 32] },
-    OidDef { id: OidId::ExtKeyUsageExtension, components: &[2, 5, 29, 37] },
-    OidDef { id: OidId::FreshestCrlExtension, components: &[2, 5, 29, 46] },
-    OidDef { id: OidId::AuthorityInfoAccessExtension, components: &[1, 3, 6, 1, 5, 5, 7, 1, 1] },
-    OidDef { id: OidId::QcStatementsExtension, components: &[1, 3, 6, 1, 5, 5, 7, 1, 3] },
-    OidDef { id: OidId::SubjectInfoAccessExtension, components: &[1, 3, 6, 1, 5, 5, 7, 1, 11] },
-    OidDef { id: OidId::OcspOid, components: &[1, 3, 6, 1, 5, 5, 7, 48, 1] },
-    OidDef { id: OidId::CaissuersOid, components: &[1, 3, 6, 1, 5, 5, 7, 48, 2] },
-    OidDef { id: OidId::TspOid, components: &[1, 3, 6, 1, 5, 5, 7, 48, 3] },
-    OidDef { id: OidId::BasicResponse, components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 1] },
-    OidDef { id: OidId::NonceExtension, components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 2] },
-    OidDef { id: OidId::AcceptableResponsesExtension, components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 4] },
-    OidDef { id: OidId::ArchiveCutoffExtension, components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 6] },
-    OidDef { id: OidId::ServiceLocatorExtension, components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 7] },
-    OidDef { id: OidId::KnowledgeInformation, components: &[2, 5, 4, 2] },
-    OidDef { id: OidId::CommonName, components: &[2, 5, 4, 3] },
-    OidDef { id: OidId::Surname, components: &[2, 5, 4, 4] },
-    OidDef { id: OidId::SerialNumber, components: &[2, 5, 4, 5] },
-    OidDef { id: OidId::CountryName, components: &[2, 5, 4, 6] },
-    OidDef { id: OidId::LocalityName, components: &[2, 5, 4, 7] },
-    OidDef { id: OidId::StateName, components: &[2, 5, 4, 8] },
-    OidDef { id: OidId::StreetName, components: &[2, 5, 4, 9] },
-    OidDef { id: OidId::OrganizationName, components: &[2, 5, 4, 10] },
-    OidDef { id: OidId::OrganizationUnit, components: &[2, 5, 4, 11] },
-    OidDef { id: OidId::Title, components: &[2, 5, 4, 12] },
-    OidDef { id: OidId::Description, components: &[2, 5, 4, 13] },
-    OidDef { id: OidId::BusinessCategory, components: &[2, 5, 4, 15] },
-    OidDef { id: OidId::PostalCode, components: &[2, 5, 4, 17] },
-    OidDef { id: OidId::PostOfficeBox, components: &[2, 5, 4, 18] },
-    OidDef { id: OidId::DeliveryName, components: &[2, 5, 4, 19] },
-    OidDef { id: OidId::GivenName, components: &[2, 5, 4, 42] },
-    OidDef { id: OidId::OcspKeyPurpose, components: &[1, 3, 6, 1, 5, 5, 7, 3, 9] },
-    OidDef { id: OidId::Pbes2, components: &[1, 2, 840, 113549, 1, 5, 13] },
-    OidDef { id: OidId::PbeWithSha1TdesCbc, components: &[1, 2, 840, 113549, 1, 12, 1, 3] },
-    OidDef { id: OidId::DesEde3Cbc, components: &[1, 2, 840, 113549, 3, 7] },
-    OidDef { id: OidId::Kdf, components: &[1, 2, 840, 113549, 1, 5, 12] },
-    OidDef { id: OidId::EcPublicKeyType, components: &[1, 2, 840, 10045, 2, 1] },
-    OidDef { id: OidId::EcdsaSecp192R1, components: &[1, 2, 840, 10045, 3, 1, 1] },
-    OidDef { id: OidId::EcdsaSecp256R1, components: &[1, 2, 840, 10045, 3, 1, 7] },
-    OidDef { id: OidId::EcdsaSecp224R1, components: &[1, 3, 132, 0, 33] },
-    OidDef { id: OidId::EcdsaSecp384R1, components: &[1, 3, 132, 0, 34] },
-    OidDef { id: OidId::EcdsaSecp521R1, components: &[1, 3, 132, 0, 35] },
-    OidDef { id: OidId::EcdsaSecp256K1, components: &[1, 3, 132, 0, 10] },
-    OidDef { id: OidId::EcdsaWithSha1, components: &[1, 2, 840, 10045, 4, 1] },
-    OidDef { id: OidId::EcdsaWithSha224, components: &[1, 2, 840, 10045, 4, 3, 1] },
-    OidDef { id: OidId::EcdsaWithSha256, components: &[1, 2, 840, 10045, 4, 3, 2] },
-    OidDef { id: OidId::EcdsaWithSha384, components: &[1, 2, 840, 10045, 4, 3, 3] },
-    OidDef { id: OidId::EcdsaWithSha512, components: &[1, 2, 840, 10045, 4, 3, 4] },
-    OidDef { id: OidId::Aes256Cbc, components: &[2, 16, 840, 1, 101, 3, 4, 1, 42] },
-    OidDef { id: OidId::PkiHmacSha1, components: &[1, 2, 840, 113549, 2, 7] },
-    OidDef { id: OidId::EtsiQcs, components: &[0, 4, 0, 1862, 1] },
-    OidDef { id: OidId::EtsiQcsQcLimitValue, components: &[0, 4, 0, 1862, 1, 2] },
-    OidDef { id: OidId::PkiGost3410, components: &[1, 2, 398, 3, 10, 1, 1, 1, 1] },
-    OidDef { id: OidId::Gost3410Kz, components: &[1, 2, 398, 3, 10, 1, 1, 1, 2] },
+    OidDef {
+        id: OidId::Pki,
+        components: &[1, 2, 804, 2, 1, 1, 1],
+    },
+    OidDef {
+        id: OidId::PkiAlg,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1],
+    },
+    OidDef {
+        id: OidId::PkiHash,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 2],
+    },
+    OidDef {
+        id: OidId::PkiGost3411,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 2, 1],
+    },
+    OidDef {
+        id: OidId::PkiHmacGost3411,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 2],
+    },
+    OidDef {
+        id: OidId::PkiAsym,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3],
+    },
+    OidDef {
+        id: OidId::PkiDstu4145WithGost3411,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1],
+    },
+    OidDef {
+        id: OidId::PkiDstu4145PbLe,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1],
+    },
+    OidDef {
+        id: OidId::PkiSpecialCurvesPb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 1],
+    },
+    OidDef {
+        id: OidId::PkiDstu4145PbBe,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 1, 1],
+    },
+    OidDef {
+        id: OidId::PkiNamedCurvesPb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2],
+    },
+    OidDef {
+        id: OidId::PkiM163Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 0],
+    },
+    OidDef {
+        id: OidId::PkiM167Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 1],
+    },
+    OidDef {
+        id: OidId::PkiM173Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 2],
+    },
+    OidDef {
+        id: OidId::PkiM179Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 3],
+    },
+    OidDef {
+        id: OidId::PkiM191Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 4],
+    },
+    OidDef {
+        id: OidId::PkiM233Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 5],
+    },
+    OidDef {
+        id: OidId::PkiM257Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 6],
+    },
+    OidDef {
+        id: OidId::PkiM307Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 7],
+    },
+    OidDef {
+        id: OidId::PkiM367Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 8],
+    },
+    OidDef {
+        id: OidId::PkiM431Pb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 1, 2, 9],
+    },
+    OidDef {
+        id: OidId::PkiDstu4145OnbLe,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2],
+    },
+    OidDef {
+        id: OidId::PkiSpecialCurvesOnb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 1],
+    },
+    OidDef {
+        id: OidId::PkiDstu4145OnbBe,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 1, 1],
+    },
+    OidDef {
+        id: OidId::PkiNamedCurvesOnb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2],
+    },
+    OidDef {
+        id: OidId::PkiM173Onb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 0],
+    },
+    OidDef {
+        id: OidId::PkiM179Onb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 1],
+    },
+    OidDef {
+        id: OidId::PkiM191Onb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 2],
+    },
+    OidDef {
+        id: OidId::PkiM233Onb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 3],
+    },
+    OidDef {
+        id: OidId::PkiM431Onb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 1, 2, 2, 4],
+    },
+    OidDef {
+        id: OidId::PkiSha1,
+        components: &[1, 3, 14, 3, 2, 26],
+    },
+    OidDef {
+        id: OidId::PkiSha224,
+        components: &[2, 16, 840, 1, 101, 3, 4, 2, 4],
+    },
+    OidDef {
+        id: OidId::PkiSha256,
+        components: &[2, 16, 840, 1, 101, 3, 4, 2, 1],
+    },
+    OidDef {
+        id: OidId::PkiSha384,
+        components: &[2, 16, 840, 1, 101, 3, 4, 2, 2],
+    },
+    OidDef {
+        id: OidId::PkiSha512,
+        components: &[2, 16, 840, 1, 101, 3, 4, 2, 3],
+    },
+    OidDef {
+        id: OidId::Gost34310WithGost34311,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 2],
+    },
+    OidDef {
+        id: OidId::Gost28147Dstu,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 1],
+    },
+    OidDef {
+        id: OidId::Gost28147Gost,
+        components: &[1, 2, 643, 2, 2, 21],
+    },
+    OidDef {
+        id: OidId::Gost28147Ofb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 1, 2],
+    },
+    OidDef {
+        id: OidId::Gost28147Cfb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 1, 3],
+    },
+    OidDef {
+        id: OidId::Gost28147Wrap,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 1, 5],
+    },
+    OidDef {
+        id: OidId::DhSinglePassCofactorDhGost34311kdfScheme,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 3, 4],
+    },
+    OidDef {
+        id: OidId::PkiCp,
+        components: &[1, 2, 804, 2, 1, 1, 1, 2],
+    },
+    OidDef {
+        id: OidId::PkiUkrEdsCp,
+        components: &[1, 2, 804, 2, 1, 1, 1, 2, 1],
+    },
+    OidDef {
+        id: OidId::PkiTspPolicy,
+        components: &[1, 2, 804, 2, 1, 1, 1, 2, 3],
+    },
+    OidDef {
+        id: OidId::PkiTspPolicyDstuPb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 2, 3, 1],
+    },
+    OidDef {
+        id: OidId::PkiTspPolicyGost,
+        components: &[1, 2, 804, 2, 1, 1, 1, 2, 3, 2],
+    },
+    OidDef {
+        id: OidId::PkiTspPolicyDstuOnb,
+        components: &[1, 2, 804, 2, 1, 1, 1, 2, 3, 3],
+    },
+    OidDef {
+        id: OidId::PkiEku,
+        components: &[1, 2, 804, 2, 1, 1, 1, 3],
+    },
+    OidDef {
+        id: OidId::PkiEkuStamp,
+        components: &[1, 2, 804, 2, 1, 1, 1, 3, 9],
+    },
+    OidDef {
+        id: OidId::PkiDev,
+        components: &[1, 2, 804, 2, 1, 1, 1, 11],
+    },
+    OidDef {
+        id: OidId::CeCrlReason,
+        components: &[2, 5, 29, 21],
+    },
+    OidDef {
+        id: OidId::Data,
+        components: &[1, 2, 840, 113549, 1, 7, 1],
+    },
+    OidDef {
+        id: OidId::SignedData,
+        components: &[1, 2, 840, 113549, 1, 7, 2],
+    },
+    OidDef {
+        id: OidId::EnvelopedData,
+        components: &[1, 2, 840, 113549, 1, 7, 3],
+    },
+    OidDef {
+        id: OidId::DigOid,
+        components: &[1, 2, 840, 113549, 1, 7, 5],
+    },
+    OidDef {
+        id: OidId::EncOid,
+        components: &[1, 2, 840, 113549, 1, 7, 6],
+    },
+    OidDef {
+        id: OidId::Email,
+        components: &[1, 2, 840, 113549, 1, 9, 1],
+    },
+    OidDef {
+        id: OidId::UnstructuredName,
+        components: &[1, 2, 840, 113549, 1, 9, 2],
+    },
+    OidDef {
+        id: OidId::ContentType,
+        components: &[1, 2, 840, 113549, 1, 9, 3],
+    },
+    OidDef {
+        id: OidId::MessageDigest,
+        components: &[1, 2, 840, 113549, 1, 9, 4],
+    },
+    OidDef {
+        id: OidId::SigningTime,
+        components: &[1, 2, 840, 113549, 1, 9, 5],
+    },
+    OidDef {
+        id: OidId::CounterSignature,
+        components: &[1, 2, 840, 113549, 1, 9, 6],
+    },
+    OidDef {
+        id: OidId::ChallengePassword,
+        components: &[1, 2, 840, 113549, 1, 9, 7],
+    },
+    OidDef {
+        id: OidId::UnstructuredAddress,
+        components: &[1, 2, 840, 113549, 1, 9, 8],
+    },
+    OidDef {
+        id: OidId::ExtendedCertAttr,
+        components: &[1, 2, 840, 113549, 1, 9, 9],
+    },
+    OidDef {
+        id: OidId::SigningDescription,
+        components: &[1, 2, 840, 113549, 1, 9, 13],
+    },
+    OidDef {
+        id: OidId::ExtensionRequest,
+        components: &[1, 2, 840, 113549, 1, 9, 14],
+    },
+    OidDef {
+        id: OidId::Capabilities,
+        components: &[1, 2, 840, 113549, 1, 9, 15],
+    },
+    OidDef {
+        id: OidId::OidRegistry,
+        components: &[1, 2, 840, 113549, 1, 9, 16],
+    },
+    OidDef {
+        id: OidId::Friendlyname,
+        components: &[1, 2, 840, 113549, 1, 9, 20],
+    },
+    OidDef {
+        id: OidId::Localkey,
+        components: &[1, 2, 840, 113549, 1, 9, 21],
+    },
+    OidDef {
+        id: OidId::CertTypes,
+        components: &[1, 2, 840, 113549, 1, 9, 22],
+    },
+    OidDef {
+        id: OidId::CrlTypes,
+        components: &[1, 2, 840, 113549, 1, 9, 22],
+    },
+    OidDef {
+        id: OidId::AaSigningCertificate,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 12],
+    },
+    OidDef {
+        id: OidId::AaSigningCertificateV2,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 47],
+    },
+    OidDef {
+        id: OidId::AaEtsSigPolicy,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 15],
+    },
+    OidDef {
+        id: OidId::SpqEtsUri,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 5, 1],
+    },
+    OidDef {
+        id: OidId::SpqEtsUnitice,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 5, 2],
+    },
+    OidDef {
+        id: OidId::AaEtsContentTimeStamp,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 20],
+    },
+    OidDef {
+        id: OidId::AaSignatureTimeStampToken,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 14],
+    },
+    OidDef {
+        id: OidId::CtTstInfo,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 1, 4],
+    },
+    OidDef {
+        id: OidId::AaEtsCertificateRefs,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 21],
+    },
+    OidDef {
+        id: OidId::AaEtsRevocationRefs,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 22],
+    },
+    OidDef {
+        id: OidId::AaEtsCertValues,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 23],
+    },
+    OidDef {
+        id: OidId::AaEtsRevocationValues,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 24],
+    },
+    OidDef {
+        id: OidId::AaEtsArchiveTimeStamp,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 27],
+    },
+    OidDef {
+        id: OidId::SubjectDirectoryAttributesExtension,
+        components: &[2, 5, 29, 9],
+    },
+    OidDef {
+        id: OidId::SubjectKeyIdentifierExtension,
+        components: &[2, 5, 29, 14],
+    },
+    OidDef {
+        id: OidId::KeyUsageExtension,
+        components: &[2, 5, 29, 15],
+    },
+    OidDef {
+        id: OidId::PrivateKeyUsagePeriodExtension,
+        components: &[2, 5, 29, 16],
+    },
+    OidDef {
+        id: OidId::SubjectAltNameExtension,
+        components: &[2, 5, 29, 17],
+    },
+    OidDef {
+        id: OidId::IssuerAltNameExtension,
+        components: &[2, 5, 29, 18],
+    },
+    OidDef {
+        id: OidId::BasicConstraintsExtension,
+        components: &[2, 5, 29, 19],
+    },
+    OidDef {
+        id: OidId::AuthorityKeyIdentifierExtension,
+        components: &[2, 5, 29, 35],
+    },
+    OidDef {
+        id: OidId::CrlNumberExtension,
+        components: &[2, 5, 29, 20],
+    },
+    OidDef {
+        id: OidId::CrlReasonExtension,
+        components: &[2, 5, 29, 21],
+    },
+    OidDef {
+        id: OidId::HoldInstructionCodeExtension,
+        components: &[2, 5, 29, 23],
+    },
+    OidDef {
+        id: OidId::InvalidityDateExtension,
+        components: &[2, 5, 29, 24],
+    },
+    OidDef {
+        id: OidId::DeltaCrlIndicatorExtension,
+        components: &[2, 5, 29, 27],
+    },
+    OidDef {
+        id: OidId::CertificateIssuerExtension,
+        components: &[2, 5, 29, 29],
+    },
+    OidDef {
+        id: OidId::CrlDistributionPointsExtension,
+        components: &[2, 5, 29, 31],
+    },
+    OidDef {
+        id: OidId::CertificatePoliciesExtension,
+        components: &[2, 5, 29, 32],
+    },
+    OidDef {
+        id: OidId::ExtKeyUsageExtension,
+        components: &[2, 5, 29, 37],
+    },
+    OidDef {
+        id: OidId::FreshestCrlExtension,
+        components: &[2, 5, 29, 46],
+    },
+    OidDef {
+        id: OidId::AuthorityInfoAccessExtension,
+        components: &[1, 3, 6, 1, 5, 5, 7, 1, 1],
+    },
+    OidDef {
+        id: OidId::QcStatementsExtension,
+        components: &[1, 3, 6, 1, 5, 5, 7, 1, 3],
+    },
+    OidDef {
+        id: OidId::SubjectInfoAccessExtension,
+        components: &[1, 3, 6, 1, 5, 5, 7, 1, 11],
+    },
+    OidDef {
+        id: OidId::OcspOid,
+        components: &[1, 3, 6, 1, 5, 5, 7, 48, 1],
+    },
+    OidDef {
+        id: OidId::CaissuersOid,
+        components: &[1, 3, 6, 1, 5, 5, 7, 48, 2],
+    },
+    OidDef {
+        id: OidId::TspOid,
+        components: &[1, 3, 6, 1, 5, 5, 7, 48, 3],
+    },
+    OidDef {
+        id: OidId::BasicResponse,
+        components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 1],
+    },
+    OidDef {
+        id: OidId::NonceExtension,
+        components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 2],
+    },
+    OidDef {
+        id: OidId::AcceptableResponsesExtension,
+        components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 4],
+    },
+    OidDef {
+        id: OidId::ArchiveCutoffExtension,
+        components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 6],
+    },
+    OidDef {
+        id: OidId::ServiceLocatorExtension,
+        components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 7],
+    },
+    OidDef {
+        id: OidId::KnowledgeInformation,
+        components: &[2, 5, 4, 2],
+    },
+    OidDef {
+        id: OidId::CommonName,
+        components: &[2, 5, 4, 3],
+    },
+    OidDef {
+        id: OidId::Surname,
+        components: &[2, 5, 4, 4],
+    },
+    OidDef {
+        id: OidId::SerialNumber,
+        components: &[2, 5, 4, 5],
+    },
+    OidDef {
+        id: OidId::CountryName,
+        components: &[2, 5, 4, 6],
+    },
+    OidDef {
+        id: OidId::LocalityName,
+        components: &[2, 5, 4, 7],
+    },
+    OidDef {
+        id: OidId::StateName,
+        components: &[2, 5, 4, 8],
+    },
+    OidDef {
+        id: OidId::StreetName,
+        components: &[2, 5, 4, 9],
+    },
+    OidDef {
+        id: OidId::OrganizationName,
+        components: &[2, 5, 4, 10],
+    },
+    OidDef {
+        id: OidId::OrganizationUnit,
+        components: &[2, 5, 4, 11],
+    },
+    OidDef {
+        id: OidId::Title,
+        components: &[2, 5, 4, 12],
+    },
+    OidDef {
+        id: OidId::Description,
+        components: &[2, 5, 4, 13],
+    },
+    OidDef {
+        id: OidId::BusinessCategory,
+        components: &[2, 5, 4, 15],
+    },
+    OidDef {
+        id: OidId::PostalCode,
+        components: &[2, 5, 4, 17],
+    },
+    OidDef {
+        id: OidId::PostOfficeBox,
+        components: &[2, 5, 4, 18],
+    },
+    OidDef {
+        id: OidId::DeliveryName,
+        components: &[2, 5, 4, 19],
+    },
+    OidDef {
+        id: OidId::GivenName,
+        components: &[2, 5, 4, 42],
+    },
+    OidDef {
+        id: OidId::OcspKeyPurpose,
+        components: &[1, 3, 6, 1, 5, 5, 7, 3, 9],
+    },
+    OidDef {
+        id: OidId::Pbes2,
+        components: &[1, 2, 840, 113549, 1, 5, 13],
+    },
+    OidDef {
+        id: OidId::PbeWithSha1TdesCbc,
+        components: &[1, 2, 840, 113549, 1, 12, 1, 3],
+    },
+    OidDef {
+        id: OidId::DesEde3Cbc,
+        components: &[1, 2, 840, 113549, 3, 7],
+    },
+    OidDef {
+        id: OidId::Kdf,
+        components: &[1, 2, 840, 113549, 1, 5, 12],
+    },
+    OidDef {
+        id: OidId::EcPublicKeyType,
+        components: &[1, 2, 840, 10045, 2, 1],
+    },
+    OidDef {
+        id: OidId::EcdsaSecp192R1,
+        components: &[1, 2, 840, 10045, 3, 1, 1],
+    },
+    OidDef {
+        id: OidId::EcdsaSecp256R1,
+        components: &[1, 2, 840, 10045, 3, 1, 7],
+    },
+    OidDef {
+        id: OidId::EcdsaSecp224R1,
+        components: &[1, 3, 132, 0, 33],
+    },
+    OidDef {
+        id: OidId::EcdsaSecp384R1,
+        components: &[1, 3, 132, 0, 34],
+    },
+    OidDef {
+        id: OidId::EcdsaSecp521R1,
+        components: &[1, 3, 132, 0, 35],
+    },
+    OidDef {
+        id: OidId::EcdsaSecp256K1,
+        components: &[1, 3, 132, 0, 10],
+    },
+    OidDef {
+        id: OidId::EcdsaWithSha1,
+        components: &[1, 2, 840, 10045, 4, 1],
+    },
+    OidDef {
+        id: OidId::EcdsaWithSha224,
+        components: &[1, 2, 840, 10045, 4, 3, 1],
+    },
+    OidDef {
+        id: OidId::EcdsaWithSha256,
+        components: &[1, 2, 840, 10045, 4, 3, 2],
+    },
+    OidDef {
+        id: OidId::EcdsaWithSha384,
+        components: &[1, 2, 840, 10045, 4, 3, 3],
+    },
+    OidDef {
+        id: OidId::EcdsaWithSha512,
+        components: &[1, 2, 840, 10045, 4, 3, 4],
+    },
+    OidDef {
+        id: OidId::Aes256Cbc,
+        components: &[2, 16, 840, 1, 101, 3, 4, 1, 42],
+    },
+    OidDef {
+        id: OidId::PkiHmacSha1,
+        components: &[1, 2, 840, 113549, 2, 7],
+    },
+    OidDef {
+        id: OidId::EtsiQcs,
+        components: &[0, 4, 0, 1862, 1],
+    },
+    OidDef {
+        id: OidId::EtsiQcsQcLimitValue,
+        components: &[0, 4, 0, 1862, 1, 2],
+    },
+    OidDef {
+        id: OidId::PkiGost3410,
+        components: &[1, 2, 398, 3, 10, 1, 1, 1, 1],
+    },
+    OidDef {
+        id: OidId::Gost3410Kz,
+        components: &[1, 2, 398, 3, 10, 1, 1, 1, 2],
+    },
 ];
 
 const SUPPORTED_EXTENSIONS: &[OidId] = &[
@@ -626,7 +1094,10 @@ mod tests {
 
     #[test]
     fn dstu4145_m163_pb_oid() {
-        assert!(oid_matches_str(OidId::PkiM163Pb, "1.2.804.2.1.1.1.1.3.1.1.2.0"));
+        assert!(oid_matches_str(
+            OidId::PkiM163Pb,
+            "1.2.804.2.1.1.1.1.3.1.1.2.0"
+        ));
     }
 
     #[test]
@@ -660,4 +1131,3 @@ mod tests {
         assert!(oid_matches_str(id, "2.5.4.3"));
     }
 }
-

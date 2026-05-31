@@ -29,7 +29,9 @@ pub struct TspAdapterMap {
 impl TspAdapterMap {
     /// `adapters_map_alloc`.
     pub fn new() -> Self {
-        Self { entries: Vec::new() }
+        Self {
+            entries: Vec::new(),
+        }
     }
 
     /// `adapters_map_add`.
@@ -81,9 +83,8 @@ pub fn etspresp_generate(
 
     let signed_data = sd_engine.generate()?;
     let token_der = signed_data.encode_content_info()?;
-    let token = ContentInfo::from_der(&token_der).map_err(|e| {
-        Error::Internal(format!("timestamp token decode: {e}"))
-    })?;
+    let token = ContentInfo::from_der(&token_der)
+        .map_err(|e| Error::Internal(format!("timestamp token decode: {e}")))?;
 
     let status = PkiStatusInfo {
         status: if granted_with_mods {
@@ -191,7 +192,8 @@ fn unix_to_generalized_time(secs: i64) -> Result<GeneralizedTime> {
 
 /// Convenience for engine tests: default supported digest list (GOST 34.311).
 pub fn default_tsp_digest_aids() -> Result<DigestAlgorithmIdentifiers> {
-    Ok(vec![AlgorithmIdentifier::from_der(gost3411_algorithm_der()).map_err(
-        |e| Error::Internal(format!("gost3411 aid decode: {e}")),
-    )?])
+    Ok(vec![
+        AlgorithmIdentifier::from_der(gost3411_algorithm_der())
+            .map_err(|e| Error::Internal(format!("gost3411 aid decode: {e}")))?,
+    ])
 }

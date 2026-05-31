@@ -99,10 +99,7 @@ pub fn decompress_pubkey(
     validate_affine_pubkey(params, &x, &y)?;
 
     let byte_len = (int_bit_len(&gfp.p) + 7) / 8;
-    Ok((
-        x.to_le_bytes_len(byte_len),
-        y.to_le_bytes_len(byte_len),
-    ))
+    Ok((x.to_le_bytes_len(byte_len), y.to_le_bytes_len(byte_len)))
 }
 
 /// Decode SPKI bit string (OctetString DER wrapping `qx||qy` LE octets).

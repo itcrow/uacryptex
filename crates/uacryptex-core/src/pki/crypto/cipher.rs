@@ -119,7 +119,9 @@ struct Gost28147Params {
     dke: Option<der::asn1::OctetString>,
 }
 
-fn gost28147_params_from_aid(aid: &AlgorithmIdentifier<Any>) -> Result<(Vec<u8>, [u8; GOST28147_SBOX_LEN])> {
+fn gost28147_params_from_aid(
+    aid: &AlgorithmIdentifier<Any>,
+) -> Result<(Vec<u8>, [u8; GOST28147_SBOX_LEN])> {
     let params = aid
         .parameters
         .as_ref()
@@ -171,7 +173,7 @@ pub fn get_gost28147_aid(
 pub fn create_gost28147_wrap_aid() -> Result<Vec<u8>> {
     use der::asn1::Null;
     let null = Null;
-    let params_any = Any::encode_from(&null)
-        .map_err(|e| Error::Internal(format!("NULL encode: {e}")))?;
+    let params_any =
+        Any::encode_from(&null).map_err(|e| Error::Internal(format!("NULL encode: {e}")))?;
     crate::pki::crypto::aid::algorithm_identifier_der(OidId::Gost28147Wrap, Some(&params_any))
 }

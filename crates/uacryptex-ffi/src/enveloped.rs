@@ -1,7 +1,9 @@
 //! CMS EnvelopedData encrypt/decrypt (`uacryptex_cms_envelop_*`).
 
 use uacryptex_core::pki::cert::Cert;
-use uacryptex_core::pki::cms::{encode_enveloped_content_info, EnvelopedDataContainer, EnvelopedDataEngine};
+use uacryptex_core::pki::cms::{
+    encode_enveloped_content_info, EnvelopedDataContainer, EnvelopedDataEngine,
+};
 use uacryptex_core::pki::crypto::MasterPrng;
 use uacryptex_core::pki::oid::OidId;
 use uacryptex_core::{Error, RET_OK};
@@ -25,9 +27,8 @@ pub extern "C" fn uacryptex_cms_envelop_encrypt(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let payload = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
         let recipient_der = bytes_from_ptr(recipient_cert, recipient_cert_len)
@@ -56,7 +57,9 @@ pub extern "C" fn uacryptex_cms_envelop_encrypt(
                 "unexpected external ciphertext with save_data=true".into(),
             ));
         }
-        Ok(UacryptexBuf::from_vec(encode_enveloped_content_info(&container)?))
+        Ok(UacryptexBuf::from_vec(encode_enveloped_content_info(
+            &container,
+        )?))
     };
 
     match run() {
@@ -89,9 +92,8 @@ pub extern "C" fn uacryptex_cms_envelop_decrypt(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let cms_der = bytes_from_ptr(cms, cms_len)
             .map_err(|code| Error::InvalidParam(format!("invalid cms: code {code}")))?;
         let external_ct = if external.is_null() || external_len == 0 {
@@ -104,9 +106,11 @@ pub extern "C" fn uacryptex_cms_envelop_decrypt(
         let originator = if originator_cert.is_null() || originator_cert_len == 0 {
             None
         } else {
-            Some(Cert::decode(bytes_from_ptr(originator_cert, originator_cert_len).map_err(
-                |code| Error::InvalidParam(format!("invalid originator cert: code {code}")),
-            )?)?)
+            Some(Cert::decode(
+                bytes_from_ptr(originator_cert, originator_cert_len).map_err(|code| {
+                    Error::InvalidParam(format!("invalid originator cert: code {code}"))
+                })?,
+            )?)
         };
         let recipient_der = bytes_from_ptr(recipient_cert, recipient_cert_len)
             .map_err(|code| Error::InvalidParam(format!("invalid recipient cert: code {code}")))?;
@@ -123,7 +127,8 @@ pub extern "C" fn uacryptex_cms_envelop_decrypt(
             None if container.has_originator_cert() => Some(container.originator_cert()?),
             None => None,
         };
-        let plaintext = container.decrypt_data(external_ct, originator.as_ref(), &recipient_dh, &recipient)?;
+        let plaintext =
+            container.decrypt_data(external_ct, originator.as_ref(), &recipient_dh, &recipient)?;
         Ok(UacryptexBuf::from_vec(plaintext))
     };
 
@@ -151,8 +156,7 @@ mod tests {
         include_bytes!("../../../testdata/pki/pki_example/userfiz_private_key_ba.dat");
     const USERUR_CERT: &[u8] =
         include_bytes!("../../../testdata/pki/pki_example/userur_certificate.cer");
-    const USERUR_KEY: &[u8] =
-        include_bytes!("../../../testdata/pki/userur_private_key.dat");
+    const USERUR_KEY: &[u8] = include_bytes!("../../../testdata/pki/userur_private_key.dat");
 
     #[test]
     fn cms_envelop_roundtrip_via_ffi() {
@@ -212,7 +216,10 @@ mod tests {
             &mut err,
         );
         assert_eq!(rc, RET_OK, "decrypt err={err:?}");
-        assert_eq!(unsafe { std::slice::from_raw_parts(out.ptr, out.len) }, plaintext);
+        assert_eq!(
+            unsafe { std::slice::from_raw_parts(out.ptr, out.len) },
+            plaintext
+        );
 
         uacryptex_buf_free(out);
         uacryptex_buf_free(cms);

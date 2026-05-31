@@ -123,7 +123,10 @@ pub fn crl_validated_id(crl: &Crl, da: &DigestAdapter) -> Result<CrlValidatedId>
     let crl_der = crl.encode()?;
     let crl_hash = hash_alg_and_value(da, &crl_der)?;
 
-    let crl_number = crl.crl_number().ok().and_then(|bytes| Int::new(&bytes).ok());
+    let crl_number = crl
+        .crl_number()
+        .ok()
+        .and_then(|bytes| Int::new(&bytes).ok());
     let crl_identifier = Some(CrlIdentifier {
         crlissuer: crl.tbs().issuer.clone(),
         crl_issued_time: crl_issued_time(crl)?,
@@ -137,7 +140,10 @@ pub fn crl_validated_id(crl: &Crl, da: &DigestAdapter) -> Result<CrlValidatedId>
 }
 
 /// Build `CompleteCertificateRefs` for one certificate.
-pub fn complete_certificate_refs(cert: &Cert, da: &DigestAdapter) -> Result<CompleteCertificateRefs> {
+pub fn complete_certificate_refs(
+    cert: &Cert,
+    da: &DigestAdapter,
+) -> Result<CompleteCertificateRefs> {
     Ok(vec![other_cert_id(cert, da)?])
 }
 
@@ -174,9 +180,8 @@ pub fn revocation_values_from_crls(crls: &[Crl]) -> Result<RevocationValues> {
     let crl_vals = crls
         .iter()
         .map(|crl| {
-            CertificateList::from_der(&crl.encode()?).map_err(|e| {
-                Error::Internal(format!("crl list decode: {e}"))
-            })
+            CertificateList::from_der(&crl.encode()?)
+                .map_err(|e| Error::Internal(format!("crl list decode: {e}")))
         })
         .collect::<Result<Vec<_>>>()?;
     Ok(RevocationValues {
@@ -196,9 +201,9 @@ pub fn archive_timestamp_imprint(
     };
 
     let inner = container.inner();
-    let sinfo = inner.signer_info(signer_index).ok_or_else(|| {
-        Error::InvalidParam("signer info index out of bounds".into())
-    })?;
+    let sinfo = inner
+        .signer_info(signer_index)
+        .ok_or_else(|| Error::InvalidParam("signer info index out of bounds".into()))?;
 
     let mut imprint = inner.encap_content_info.content_bytes()?;
 

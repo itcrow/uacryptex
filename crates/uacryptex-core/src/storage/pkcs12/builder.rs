@@ -9,18 +9,18 @@ use crate::pki::cms::ContentInfo;
 use crate::pki::crypto::{algorithm_identifier_der, DhAdapter};
 use crate::pki::ext::pkix_key_id_from_spki_der;
 use crate::pki::oid::{oid_matches_str, OidId};
+use crate::storage::pkcs12::content::{
+    encode_authenticated_safe, encode_content_info_data, encode_content_info_encrypted, CertBag,
+    ContentsEntry,
+};
+use crate::storage::pkcs12::mac::pfx_calc_mac_with_data;
+use crate::storage::pkcs12::types::{DigestInfo, MacData, Pfx, SafeBag, SafeContents};
+use crate::storage::pkcs12::{Pkcs12, Pkcs12MacType};
 use crate::storage::pkcs5::{
     aes256_cbc_encryption_aid, gost28147_cfb_encryption_aid, pkcs12_random_salt,
     pkcs5_encrypt_dstu, pkcs5_reencrypt_pbes2, random_aes_iv, random_gost28147_iv,
 };
 use crate::storage::pkcs8::{pkcs8_encode, pkcs8_generate, pkcs8_get_spki_der, PrivateKeyInfo};
-use crate::storage::pkcs12::content::{
-    encode_authenticated_safe, encode_content_info_data, encode_content_info_encrypted,
-    CertBag, ContentsEntry,
-};
-use crate::storage::pkcs12::mac::pfx_calc_mac_with_data;
-use crate::storage::pkcs12::types::{DigestInfo, MacData, Pfx, SafeBag, SafeContents};
-use crate::storage::pkcs12::{Pkcs12, Pkcs12MacType};
 use crate::{Error, Result};
 
 const KEY_BAG_OID: &str = "1.2.840.113549.1.12.10.1.1";
@@ -51,9 +51,8 @@ pub(crate) fn create_empty_mac_data(mac_type: Pkcs12MacType, rounds: u32) -> Res
     };
     let salt = pkcs12_random_salt(salt_len)?;
     let digest_alg = algorithm_identifier_der(digest_oid, Some(&Any::null()))?;
-    let digest_algorithm: AlgorithmIdentifier<Any> =
-        AlgorithmIdentifier::from_der(&digest_alg)
-            .map_err(|e| Error::Internal(format!("digest aid decode: {e}")))?;
+    let digest_algorithm: AlgorithmIdentifier<Any> = AlgorithmIdentifier::from_der(&digest_alg)
+        .map_err(|e| Error::Internal(format!("digest aid decode: {e}")))?;
     Ok(MacData {
         mac: DigestInfo {
             digest_algorithm,
@@ -66,11 +65,7 @@ pub(crate) fn create_empty_mac_data(mac_type: Pkcs12MacType, rounds: u32) -> Res
 }
 
 /// `pkcs12_create`.
-pub fn pkcs12_create(
-    mac_type: Pkcs12MacType,
-    password: &str,
-    rounds: u32,
-) -> Result<Pkcs12> {
+pub fn pkcs12_create(mac_type: Pkcs12MacType, password: &str, rounds: u32) -> Result<Pkcs12> {
     Ok(Pkcs12 {
         name: None,
         password: password.to_owned(),
@@ -137,8 +132,7 @@ fn build_key_safebag(
         let epki = pkcs5_encrypt_dstu(&encoded, pass, &salt, rounds, &encrypt_aid)?;
         (
             bag_oid_from_str(PKCS8_SHROUDED_KEY_BAG_OID)?,
-            Any::encode_from(&epki)
-                .map_err(|e| Error::Internal(format!("EPKI encode: {e}")))?,
+            Any::encode_from(&epki).map_err(|e| Error::Internal(format!("EPKI encode: {e}")))?,
         )
     } else {
         (
@@ -163,10 +157,8 @@ fn build_key_safebag(
             .map_err(|e| Error::Internal(format!("friendlyName: {e}")))?;
         attr_vec.push(Attribute {
             oid: bag_oid_from_str(FRIENDLY_NAME_OID)?,
-            values: SetOfVec::try_from(vec![
-                Any::encode_from(&bmp)
-                    .map_err(|e| Error::Internal(format!("friendlyName attr: {e}")))?,
-            ])
+            values: SetOfVec::try_from(vec![Any::encode_from(&bmp)
+                .map_err(|e| Error::Internal(format!("friendlyName attr: {e}")))?])
             .map_err(|e| Error::Internal(format!("friendlyName set: {e}")))?,
         });
     }
@@ -201,7 +193,8 @@ pub fn pkcs12_store_key(
 }
 
 fn cert_safebag(cert_der: &[u8]) -> Result<SafeBag> {
-    let cert_value = OctetString::new(cert_der).map_err(|e| Error::Internal(format!("cert: {e}")))?;
+    let cert_value =
+        OctetString::new(cert_der).map_err(|e| Error::Internal(format!("cert: {e}")))?;
     let cert_bag = CertBag {
         cert_id: bag_oid_from_str(X509_CERTIFICATE_OID)?,
         cert_value: Any::encode_from(&cert_value)
@@ -279,8 +272,8 @@ pub fn pkcs12_encode(store: &Pkcs12) -> Result<Vec<u8>> {
             .map(|os| os.as_bytes().to_vec())
             .ok_or_else(|| Error::Internal("authSafe encode".into()))?;
         let mac = pfx_calc_mac_with_data(&mac_data, &store.password, &auth_octets)?;
-        mac_data.mac.digest = OctetString::new(mac)
-            .map_err(|e| Error::Internal(format!("mac digest: {e}")))?;
+        mac_data.mac.digest =
+            OctetString::new(mac).map_err(|e| Error::Internal(format!("mac digest: {e}")))?;
     }
 
     let pfx = Pfx {

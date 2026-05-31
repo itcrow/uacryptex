@@ -57,7 +57,11 @@ fn tsreq_set_policy_from_oid() {
     let mut req = load_tsp_request();
     let policy = ObjectIdentifier::new("1.2.804.2.1.1.1.2.2").unwrap();
     req.set_policy(&policy).unwrap();
-    let actual = req.policy().unwrap().decode_as::<ObjectIdentifier>().unwrap();
+    let actual = req
+        .policy()
+        .unwrap()
+        .decode_as::<ObjectIdentifier>()
+        .unwrap();
     assert_eq!(actual, policy);
 }
 

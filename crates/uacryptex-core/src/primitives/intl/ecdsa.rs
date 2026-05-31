@@ -99,7 +99,10 @@ pub fn ecdsa_public_key_from_spki(raw: &[u8]) -> Result<(EcdsaCurve, Vec<u8>, Ve
     Ok((curve, qx, qy))
 }
 
-pub fn ecdsa_public_key_from_private(curve: EcdsaCurve, private_key: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
+pub fn ecdsa_public_key_from_private(
+    curve: EcdsaCurve,
+    private_key: &[u8],
+) -> Result<(Vec<u8>, Vec<u8>)> {
     validate_private_key(curve, private_key)?;
     match curve {
         EcdsaCurve::P192 | EcdsaCurve::P224 | EcdsaCurve::P521 => Err(Error::Unsupported(
@@ -253,7 +256,6 @@ impl_ecdsa_sign!(sign_p256k1, k256, k256::Secp256k1, 32);
 impl_ecdsa_public_key!(public_key_p256, p256, p256::NistP256, 32);
 impl_ecdsa_public_key!(public_key_p384, p384, p384::NistP384, 48);
 impl_ecdsa_public_key!(public_key_p256k1, k256, k256::Secp256k1, 32);
-
 
 fn be_coord_to_cryptonite_le(coord: &[u8]) -> Vec<u8> {
     let mut le = coord.to_vec();

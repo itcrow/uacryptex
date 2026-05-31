@@ -19,7 +19,11 @@ fn kat_etspreq_generate_from_gost34311() {
     let policy = "1.2.804.2.1.1.1.2.2";
     let req = etspreq_generate_from_gost34311(&hash, policy, true).unwrap();
     let expected_policy = ObjectIdentifier::new(policy).unwrap();
-    let actual_policy = req.policy().unwrap().decode_as::<ObjectIdentifier>().unwrap();
+    let actual_policy = req
+        .policy()
+        .unwrap()
+        .decode_as::<ObjectIdentifier>()
+        .unwrap();
     assert_eq!(actual_policy, expected_policy);
     assert!(req.cert_req());
 }
@@ -32,7 +36,13 @@ fn kat_etspreq_generate() {
     let da = DigestAdapter::init_default().unwrap();
 
     let req = etspreq_generate(&da, &msg, Some(&rnd), &policy, false).unwrap();
-    assert_eq!(req.policy().unwrap().decode_as::<ObjectIdentifier>().unwrap(), policy);
+    assert_eq!(
+        req.policy()
+            .unwrap()
+            .decode_as::<ObjectIdentifier>()
+            .unwrap(),
+        policy
+    );
     assert!(!req.cert_req());
 
     let expected_imprint = hex(
@@ -48,7 +58,8 @@ fn etspresp_generate_and_verify() {
         "../../../testdata/pki/pki_example/userfiz_certificate.cer"
     ))
     .unwrap();
-    let private_key = include_bytes!("../../../testdata/pki/pki_example/userfiz_private_key_ba.dat");
+    let private_key =
+        include_bytes!("../../../testdata/pki/pki_example/userfiz_private_key_ba.dat");
     let tsp_req = include_bytes!("../../../testdata/pki/pki_example/tsp_request.der");
 
     let da = DigestAdapter::init_default().unwrap();

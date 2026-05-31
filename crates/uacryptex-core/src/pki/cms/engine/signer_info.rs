@@ -40,7 +40,11 @@ impl<'a> SignerInfoEngine<'a> {
         ess_da: Option<DigestAdapter>,
     ) -> Result<Self> {
         let signer_cert = sa.cert()?.clone();
-        let issuer = signer_cert.inner_certificate().tbs_certificate.issuer.clone();
+        let issuer = signer_cert
+            .inner_certificate()
+            .tbs_certificate
+            .issuer
+            .clone();
         let serial_number = signer_cert
             .inner_certificate()
             .tbs_certificate
@@ -143,16 +147,14 @@ impl<'a> SignerInfoEngine<'a> {
             .map_err(|e| Error::Internal(format!("signed attributes encode: {e}")))?;
 
         let signature = self.sa.sign_data(&signed_attrs_der)?;
-        let signature_os = OctetString::new(signature).map_err(|e| {
-            Error::Internal(format!("signature octet string: {e}"))
-        })?;
+        let signature_os = OctetString::new(signature)
+            .map_err(|e| Error::Internal(format!("signature octet string: {e}")))?;
 
         let digest_alg = AlgorithmIdentifier::<Any>::from_der(self.data_da.algorithm_der())
             .map_err(|e| Error::Internal(format!("digest aid decode: {e}")))?;
         let signature_algorithm =
-            AlgorithmIdentifier::<Any>::from_der(self.sa.signature_algorithm_der()).map_err(|e| {
-                Error::Internal(format!("signature aid decode: {e}"))
-            })?;
+            AlgorithmIdentifier::<Any>::from_der(self.sa.signature_algorithm_der())
+                .map_err(|e| Error::Internal(format!("signature aid decode: {e}")))?;
 
         Ok(SignerInfo {
             version: SIGNER_INFO_VERSION,

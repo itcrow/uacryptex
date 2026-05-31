@@ -23,9 +23,8 @@ pub extern "C" fn uacryptex_pkcs12_open(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<*mut UacryptexHandle, Error> {
-        check_out(store as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid store pointer: code {code}"))
-        })?;
+        check_out(store as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid store pointer: code {code}")))?;
         unsafe {
             if !(*store).is_null() {
                 return Err(Error::InvalidParam("store output must be null".into()));
@@ -91,9 +90,8 @@ pub extern "C" fn uacryptex_pkcs12_certificate_count(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<usize, Error> {
-        check_out(count as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid count pointer: code {code}"))
-        })?;
+        check_out(count as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid count pointer: code {code}")))?;
         if store.is_null() {
             return Err(Error::InvalidParam("store handle is null".into()));
         }
@@ -122,18 +120,17 @@ pub extern "C" fn uacryptex_pkcs12_get_certificate(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         if store.is_null() {
             return Err(Error::InvalidParam("store handle is null".into()));
         }
         let handle = unsafe { &*store };
         let pkcs12 = handle.pkcs12_ref()?;
         let certs = pkcs12_get_certificates(pkcs12)?;
-        let cert = certs
-            .get(index)
-            .ok_or_else(|| Error::InvalidParam(format!("certificate index {index} out of range")))?;
+        let cert = certs.get(index).ok_or_else(|| {
+            Error::InvalidParam(format!("certificate index {index} out of range"))
+        })?;
         Ok(UacryptexBuf::from_vec(cert.clone()))
     };
 

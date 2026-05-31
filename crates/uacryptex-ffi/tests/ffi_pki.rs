@@ -1,10 +1,10 @@
 //! End-to-end FFI: PKCS#12 / sign open → CMS sign → CMS verify.
 
+use uacryptex_core::RET_OK;
 use uacryptex_ffi::{
     uacryptex_buf_free, uacryptex_cms_sign, uacryptex_cms_verify, uacryptex_handle_free,
     uacryptex_pkcs12_open, uacryptex_sign_open, UacryptexBuf, UacryptexError, UacryptexHandle,
 };
-use uacryptex_core::RET_OK;
 
 const IIT_PFX: &[u8] = include_bytes!("../../../testdata/storage/pkcs12_by_iit.pfx");
 const USERFIZ_CERT: &[u8] =
@@ -44,22 +44,10 @@ fn ffi_cms_sign_verify_roundtrip() {
 
     let data = vec![0xf0; 100];
     let mut cms = UacryptexBuf::empty();
-    let rc = uacryptex_cms_sign(
-        data.as_ptr(),
-        data.len(),
-        key,
-        &mut cms,
-        &mut err,
-    );
+    let rc = uacryptex_cms_sign(data.as_ptr(), data.len(), key, &mut cms, &mut err);
     assert_eq!(rc, RET_OK, "sign err={err:?}");
 
-    let rc = uacryptex_cms_verify(
-        data.as_ptr(),
-        data.len(),
-        cms.ptr,
-        cms.len,
-        &mut err,
-    );
+    let rc = uacryptex_cms_verify(data.as_ptr(), data.len(), cms.ptr, cms.len, &mut err);
     assert_eq!(rc, RET_OK, "verify err={err:?}");
 
     uacryptex_buf_free(cms);
@@ -69,8 +57,8 @@ fn ffi_cms_sign_verify_roundtrip() {
 #[test]
 fn ffi_cms_sign_cades_t_verify() {
     use uacryptex_ffi::{
-        uacryptex_buf_free, uacryptex_cms_sign_cades_t, uacryptex_cms_verify, uacryptex_handle_free,
-        uacryptex_sign_open,
+        uacryptex_buf_free, uacryptex_cms_sign_cades_t, uacryptex_cms_verify,
+        uacryptex_handle_free, uacryptex_sign_open,
     };
 
     let mut key: *mut UacryptexHandle = std::ptr::null_mut();
@@ -103,13 +91,7 @@ fn ffi_cms_sign_cades_t_verify() {
     );
     assert_eq!(rc, RET_OK, "cms_sign_cades_t err={err:?}");
 
-    let rc = uacryptex_cms_verify(
-        data.as_ptr(),
-        data.len(),
-        cms.ptr,
-        cms.len,
-        &mut err,
-    );
+    let rc = uacryptex_cms_verify(data.as_ptr(), data.len(), cms.ptr, cms.len, &mut err);
     assert_eq!(rc, RET_OK, "cms_verify err={err:?}");
 
     uacryptex_buf_free(cms);
@@ -119,8 +101,8 @@ fn ffi_cms_sign_cades_t_verify() {
 #[test]
 fn ffi_cms_sign_cades_c_verify() {
     use uacryptex_ffi::{
-        uacryptex_buf_free, uacryptex_cms_sign_cades_c, uacryptex_cms_verify, uacryptex_handle_free,
-        uacryptex_sign_open,
+        uacryptex_buf_free, uacryptex_cms_sign_cades_c, uacryptex_cms_verify,
+        uacryptex_handle_free, uacryptex_sign_open,
     };
 
     const ROOT_CERT: &[u8] =
@@ -154,13 +136,7 @@ fn ffi_cms_sign_cades_c_verify() {
     );
     assert_eq!(rc, RET_OK, "cms_sign_cades_c err={err:?}");
 
-    let rc = uacryptex_cms_verify(
-        data.as_ptr(),
-        data.len(),
-        cms.ptr,
-        cms.len,
-        &mut err,
-    );
+    let rc = uacryptex_cms_verify(data.as_ptr(), data.len(), cms.ptr, cms.len, &mut err);
     assert_eq!(rc, RET_OK, "verify err={err:?}");
 
     uacryptex_buf_free(cms);
@@ -170,8 +146,9 @@ fn ffi_cms_sign_cades_c_verify() {
 #[test]
 fn ffi_cms_sign_cades_x_verify() {
     use uacryptex_ffi::{
-        uacryptex_buf_free, uacryptex_cms_sign_cades_x, uacryptex_cms_verify, uacryptex_handle_free,
-        uacryptex_ocsp_request_from_cert, uacryptex_ocsp_response_generate, uacryptex_sign_open,
+        uacryptex_buf_free, uacryptex_cms_sign_cades_x, uacryptex_cms_verify,
+        uacryptex_handle_free, uacryptex_ocsp_request_from_cert, uacryptex_ocsp_response_generate,
+        uacryptex_sign_open,
     };
 
     const ROOT_CERT: &[u8] =
@@ -252,13 +229,7 @@ fn ffi_cms_sign_cades_x_verify() {
     );
     assert_eq!(rc, RET_OK, "cms_sign_cades_x err={err:?}");
 
-    let rc = uacryptex_cms_verify(
-        data.as_ptr(),
-        data.len(),
-        cms.ptr,
-        cms.len,
-        &mut err,
-    );
+    let rc = uacryptex_cms_verify(data.as_ptr(), data.len(), cms.ptr, cms.len, &mut err);
     assert_eq!(rc, RET_OK, "verify err={err:?}");
 
     uacryptex_buf_free(cms);
@@ -271,8 +242,9 @@ fn ffi_cms_sign_cades_x_verify() {
 #[test]
 fn ffi_cms_sign_cades_a_verify() {
     use uacryptex_ffi::{
-        uacryptex_buf_free, uacryptex_cms_sign_cades_a, uacryptex_cms_verify, uacryptex_handle_free,
-        uacryptex_ocsp_request_from_cert, uacryptex_ocsp_response_generate, uacryptex_sign_open,
+        uacryptex_buf_free, uacryptex_cms_sign_cades_a, uacryptex_cms_verify,
+        uacryptex_handle_free, uacryptex_ocsp_request_from_cert, uacryptex_ocsp_response_generate,
+        uacryptex_sign_open,
     };
 
     const ROOT_CERT: &[u8] =
@@ -363,13 +335,7 @@ fn ffi_cms_sign_cades_a_verify() {
     );
     assert_eq!(rc, RET_OK, "cms_sign_cades_a err={err:?}");
 
-    let rc = uacryptex_cms_verify(
-        data.as_ptr(),
-        data.len(),
-        cms.ptr,
-        cms.len,
-        &mut err,
-    );
+    let rc = uacryptex_cms_verify(data.as_ptr(), data.len(), cms.ptr, cms.len, &mut err);
     assert_eq!(rc, RET_OK, "verify err={err:?}");
 
     uacryptex_buf_free(cms);
@@ -387,8 +353,7 @@ fn ffi_cms_envelop_roundtrip() {
 
     const USERUR_CERT: &[u8] =
         include_bytes!("../../../testdata/pki/pki_example/userur_certificate.cer");
-    const USERUR_KEY: &[u8] =
-        include_bytes!("../../../testdata/pki/userur_private_key.dat");
+    const USERUR_KEY: &[u8] = include_bytes!("../../../testdata/pki/userur_private_key.dat");
 
     let mut originator: *mut UacryptexHandle = std::ptr::null_mut();
     let mut recipient: *mut UacryptexHandle = std::ptr::null_mut();
@@ -464,13 +429,7 @@ fn ffi_cms_verify_pki_example_vector() {
     .unwrap();
 
     let mut err = UacryptexError::default();
-    let rc = uacryptex_cms_verify(
-        data.as_ptr(),
-        data.len(),
-        cms.as_ptr(),
-        cms.len(),
-        &mut err,
-    );
+    let rc = uacryptex_cms_verify(data.as_ptr(), data.len(), cms.as_ptr(), cms.len(), &mut err);
     assert_eq!(rc, RET_OK, "verify err={err:?}");
 }
 
@@ -494,13 +453,7 @@ fn ffi_sign_data_verify_data_roundtrip() {
 
     let data = b"detached signature payload";
     let mut sig = UacryptexBuf::empty();
-    let rc = uacryptex_sign_data(
-        data.as_ptr(),
-        data.len(),
-        key,
-        &mut sig,
-        &mut err,
-    );
+    let rc = uacryptex_sign_data(data.as_ptr(), data.len(), key, &mut sig, &mut err);
     assert_eq!(rc, RET_OK, "sign_data err={err:?}");
 
     let rc = uacryptex_verify_data(
@@ -545,8 +498,8 @@ fn ffi_digest_default_gost3411() {
 #[test]
 fn ffi_cert_and_crl_helpers() {
     use uacryptex_ffi::{
-        uacryptex_buf_free, uacryptex_cert_spki, uacryptex_cert_verify,
-        uacryptex_crl_check_cert, uacryptex_crl_verify,
+        uacryptex_buf_free, uacryptex_cert_spki, uacryptex_cert_verify, uacryptex_crl_check_cert,
+        uacryptex_crl_verify,
     };
 
     const ROOT_CERT: &[u8] =
@@ -942,7 +895,13 @@ fn ffi_crl_generate_full_merge() {
     );
     assert_eq!(rc, RET_OK, "crl_generate err={err:?}");
 
-    let rc = uacryptex_crl_verify(crl.ptr, crl.len, ROOT_CERT.as_ptr(), ROOT_CERT.len(), &mut err);
+    let rc = uacryptex_crl_verify(
+        crl.ptr,
+        crl.len,
+        ROOT_CERT.as_ptr(),
+        ROOT_CERT.len(),
+        &mut err,
+    );
     assert_eq!(rc, RET_OK, "crl_verify err={err:?}");
 
     uacryptex_buf_free(crl);

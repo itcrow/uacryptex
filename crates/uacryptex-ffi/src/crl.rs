@@ -12,16 +12,15 @@ use uacryptex_core::pki::engine::{
 use uacryptex_core::{Error, RET_OK};
 
 use crate::buf::UacryptexBuf;
-use crate::error::{bytes_from_ptr, cstr_to_str, check_out, write_error, UacryptexError};
+use crate::error::{bytes_from_ptr, check_out, cstr_to_str, write_error, UacryptexError};
 use crate::UacryptexHandle;
 
 fn optional_cstr(ptr: *const c_char) -> Result<String, Error> {
     if ptr.is_null() {
         return Ok(String::new());
     }
-    let s = cstr_to_str(ptr).map_err(|code| {
-        Error::InvalidParam(format!("invalid string pointer: code {code}"))
-    })?;
+    let s = cstr_to_str(ptr)
+        .map_err(|code| Error::InvalidParam(format!("invalid string pointer: code {code}")))?;
     Ok(s.to_string())
 }
 
@@ -47,9 +46,8 @@ pub extern "C" fn uacryptex_crl_verify(
     let run = || -> Result<(), Error> {
         let crl_der = bytes_from_ptr(crl, crl_len)
             .map_err(|code| Error::InvalidParam(format!("invalid crl: code {code}")))?;
-        let issuer_der = bytes_from_ptr(issuer_cert, issuer_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid issuer_cert: code {code}"))
-        })?;
+        let issuer_der = bytes_from_ptr(issuer_cert, issuer_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid issuer_cert: code {code}")))?;
         let crl = Crl::decode(crl_der)?;
         let issuer = Cert::decode(issuer_der)?;
         let adapter = VerifyAdapter::init_by_cert(&issuer)?;
@@ -75,14 +73,12 @@ pub extern "C" fn uacryptex_crl_check_cert(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<i32, Error> {
-        check_out(revoked as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid revoked pointer: code {code}"))
-        })?;
+        check_out(revoked as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid revoked pointer: code {code}")))?;
         let crl_der = bytes_from_ptr(crl, crl_len)
             .map_err(|code| Error::InvalidParam(format!("invalid crl: code {code}")))?;
-        let issuer_der = bytes_from_ptr(issuer_cert, issuer_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid issuer_cert: code {code}"))
-        })?;
+        let issuer_der = bytes_from_ptr(issuer_cert, issuer_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid issuer_cert: code {code}")))?;
         let cert_der = bytes_from_ptr(cert, cert_len)
             .map_err(|code| Error::InvalidParam(format!("invalid cert: code {code}")))?;
         let crl = Crl::decode(crl_der)?;
@@ -127,15 +123,13 @@ pub extern "C" fn uacryptex_crl_generate(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         if ca_key.is_null() {
             return Err(Error::InvalidParam("ca_key handle is null".into()));
         }
-        let previous_der = bytes_from_ptr(previous_crl, previous_crl_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid previous_crl: code {code}"))
-        })?;
+        let previous_der = bytes_from_ptr(previous_crl, previous_crl_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid previous_crl: code {code}")))?;
         let crl_type = crl_type_from_i32(crl_type)?;
         let template_name = optional_cstr(template_name)?;
         let description = optional_cstr(description)?;
@@ -157,9 +151,10 @@ pub extern "C" fn uacryptex_crl_generate(
         )?;
 
         if merge_delta_crl_len > 0 {
-            let delta_der = bytes_from_ptr(merge_delta_crl, merge_delta_crl_len).map_err(
-                |code| Error::InvalidParam(format!("invalid merge_delta_crl: code {code}")),
-            )?;
+            let delta_der =
+                bytes_from_ptr(merge_delta_crl, merge_delta_crl_len).map_err(|code| {
+                    Error::InvalidParam(format!("invalid merge_delta_crl: code {code}"))
+                })?;
             let delta = Crl::decode(delta_der)?;
             ecrl_merge_delta(&mut engine, &delta)?;
         }

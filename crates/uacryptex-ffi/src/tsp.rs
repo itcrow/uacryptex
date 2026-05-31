@@ -11,7 +11,7 @@ use uacryptex_core::pki::tsp::TspResp;
 use uacryptex_core::{Error, RET_OK};
 
 use crate::buf::UacryptexBuf;
-use crate::error::{bytes_from_ptr, cstr_to_str, check_out, write_error, UacryptexError};
+use crate::error::{bytes_from_ptr, check_out, cstr_to_str, write_error, UacryptexError};
 use crate::UacryptexHandle;
 
 const DEFAULT_POLICY_OID: &str = "1.2.804.2.1.1.1.2.3.1";
@@ -20,9 +20,8 @@ fn parse_policy_oid(policy: *const std::os::raw::c_char) -> Result<String, Error
     if policy.is_null() {
         return Ok(DEFAULT_POLICY_OID.to_string());
     }
-    let s = cstr_to_str(policy).map_err(|code| {
-        Error::InvalidParam(format!("invalid policy oid: code {code}"))
-    })?;
+    let s = cstr_to_str(policy)
+        .map_err(|code| Error::InvalidParam(format!("invalid policy oid: code {code}")))?;
     if s.is_empty() {
         Ok(DEFAULT_POLICY_OID.to_string())
     } else {
@@ -41,9 +40,8 @@ pub extern "C" fn uacryptex_tsp_request_from_data(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let data = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
         let policy = parse_policy_oid(policy_oid)?;
@@ -76,9 +74,8 @@ pub extern "C" fn uacryptex_tsp_request_from_hash(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let hash = bytes_from_ptr(hash, hash_len)
             .map_err(|code| Error::InvalidParam(format!("invalid hash: code {code}")))?;
         let policy = parse_policy_oid(policy_oid)?;
@@ -137,9 +134,8 @@ pub extern "C" fn uacryptex_tsp_response_generate(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         if key.is_null() {
             return Err(Error::InvalidParam("key handle is null".into()));
         }

@@ -47,14 +47,20 @@ impl OcspResponseEngine {
         id_type: ResponderIdType,
     ) -> Result<Self> {
         if !root_va.has_cert() {
-            return Err(Error::InvalidParam("root adapter has no certificate".into()));
+            return Err(Error::InvalidParam(
+                "root adapter has no certificate".into(),
+            ));
         }
         if !ocsp_sign.has_cert() {
-            return Err(Error::InvalidParam("sign adapter has no certificate".into()));
+            return Err(Error::InvalidParam(
+                "sign adapter has no certificate".into(),
+            ));
         }
         let ocsp_cert = ocsp_sign.cert()?;
         if !ocsp_cert.is_ocsp_responder()? {
-            return Err(Error::InvalidParam("sign adapter is not OCSP certificate".into()));
+            return Err(Error::InvalidParam(
+                "sign adapter is not OCSP certificate".into(),
+            ));
         }
         ocsp_cert.verify(root_va)?;
         for crl in crls {

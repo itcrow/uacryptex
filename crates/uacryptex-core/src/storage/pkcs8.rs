@@ -6,13 +6,13 @@ use x509_cert::attr::Attributes;
 use x509_cert::spki::AlgorithmIdentifier;
 
 use crate::pki::cert::Cert;
+#[cfg(feature = "legacy-gost3410")]
+use crate::pki::crypto::build_gost3410_spki_der;
 use crate::pki::crypto::{
     algorithm_identifier_der, build_dstu_spki_der, curve_params_from_spki_algorithm,
     ecdsa_curve_from_spki_algorithm, oid_str_under, spki_algorithm_der, DhAdapter, SignAdapter,
     VerifyAdapter,
 };
-#[cfg(feature = "legacy-gost3410")]
-use crate::pki::crypto::build_gost3410_spki_der;
 use crate::pki::oid::{oid_matches_str, OidId};
 use crate::primitives::dstu4145::{
     compress_public_key, generate_private_key, public_key_from_private_key, RandomBytes,
@@ -46,7 +46,8 @@ pub enum Pkcs8PrivateKeyType {
 
 /// `pkcs8_decode`.
 pub fn pkcs8_decode(der: &[u8]) -> Result<PrivateKeyInfo> {
-    PrivateKeyInfo::from_der(der).map_err(|e| Error::Internal(format!("PrivateKeyInfo decode: {e}")))
+    PrivateKeyInfo::from_der(der)
+        .map_err(|e| Error::Internal(format!("PrivateKeyInfo decode: {e}")))
 }
 
 /// `pkcs8_encode`.
@@ -89,12 +90,14 @@ pub fn pkcs8_get_privatekey(key: &PrivateKeyInfo) -> Result<Vec<u8>> {
 }
 
 fn extract_ecdsa_private_key(key: &PrivateKeyInfo) -> Result<Vec<u8>> {
-    key.private_key_algorithm.parameters.as_ref().ok_or_else(|| {
-        Error::InvalidParam("ECDSA PrivateKeyInfo parameters missing".into())
-    })?;
-    let spki_aid = key.private_key_algorithm.to_der().map_err(|e| {
-        Error::Internal(format!("private key algorithm encode: {e}"))
-    })?;
+    key.private_key_algorithm
+        .parameters
+        .as_ref()
+        .ok_or_else(|| Error::InvalidParam("ECDSA PrivateKeyInfo parameters missing".into()))?;
+    let spki_aid = key
+        .private_key_algorithm
+        .to_der()
+        .map_err(|e| Error::Internal(format!("private key algorithm encode: {e}")))?;
     let curve = ecdsa_curve_from_spki_algorithm(&spki_aid)?;
     let len = curve.field_len();
     let raw = key.private_key.as_bytes();
@@ -120,9 +123,10 @@ pub fn pkcs8_get_spki_der(key: &PrivateKeyInfo) -> Result<Vec<u8>> {
     match pkcs8_type(key) {
         Pkcs8PrivateKeyType::Dstu => {
             let private_key = pkcs8_get_privatekey(key)?;
-            let spki_aid = key.private_key_algorithm.to_der().map_err(|e| {
-                Error::Internal(format!("private key algorithm encode: {e}"))
-            })?;
+            let spki_aid = key
+                .private_key_algorithm
+                .to_der()
+                .map_err(|e| Error::Internal(format!("private key algorithm encode: {e}")))?;
             let params = curve_params_from_spki_algorithm(&spki_aid)?;
             let public_key = public_key_from_private_key(&params, &private_key)?;
             let compressed = compress_public_key(&params, &public_key)?;
@@ -130,23 +134,26 @@ pub fn pkcs8_get_spki_der(key: &PrivateKeyInfo) -> Result<Vec<u8>> {
         }
         Pkcs8PrivateKeyType::Ecdsa => {
             let private_key = pkcs8_get_privatekey(key)?;
-            let spki_aid = key.private_key_algorithm.to_der().map_err(|e| {
-                Error::Internal(format!("private key algorithm encode: {e}"))
-            })?;
+            let spki_aid = key
+                .private_key_algorithm
+                .to_der()
+                .map_err(|e| Error::Internal(format!("private key algorithm encode: {e}")))?;
             let curve = ecdsa_curve_from_spki_algorithm(&spki_aid)?;
-            let (qx, qy) = crate::primitives::intl::ecdsa_public_key_from_private(curve, &private_key)?;
+            let (qx, qy) =
+                crate::primitives::intl::ecdsa_public_key_from_private(curve, &private_key)?;
             crate::primitives::intl::build_ecdsa_spki_der(&spki_aid, &qx, &qy)
         }
         #[cfg(feature = "legacy-gost3410")]
         Pkcs8PrivateKeyType::Gost3410 => {
             use crate::primitives::gost3410::{get_pubkey, ParamsId};
             let private_key = pkcs8_get_privatekey(key)?;
-            let spki_aid = key.private_key_algorithm.to_der().map_err(|e| {
-                Error::Internal(format!("private key algorithm encode: {e}"))
-            })?;
-            let params = ParamsId::Id1.curve_params().ok_or_else(|| {
-                Error::Internal("GOST3410 params ID 1 unavailable".into())
-            })?;
+            let spki_aid = key
+                .private_key_algorithm
+                .to_der()
+                .map_err(|e| Error::Internal(format!("private key algorithm encode: {e}")))?;
+            let params = ParamsId::Id1
+                .curve_params()
+                .ok_or_else(|| Error::Internal("GOST3410 params ID 1 unavailable".into()))?;
             let (qx, qy) = get_pubkey(&params, &private_key)?;
             build_gost3410_spki_der(&spki_aid, &qx, &qy)
         }
@@ -157,19 +164,17 @@ pub fn pkcs8_get_spki_der(key: &PrivateKeyInfo) -> Result<Vec<u8>> {
 }
 
 /// `pkcs8_get_sign_adapter`.
-pub fn pkcs8_get_sign_adapter(
-    key: &PrivateKeyInfo,
-    cert: Option<&Cert>,
-) -> Result<SignAdapter> {
+pub fn pkcs8_get_sign_adapter(key: &PrivateKeyInfo, cert: Option<&Cert>) -> Result<SignAdapter> {
     let private_key = pkcs8_get_privatekey(key)?;
     match pkcs8_type(key) {
         Pkcs8PrivateKeyType::Dstu => {
             if let Some(cert) = cert {
                 SignAdapter::init_by_cert(&private_key, cert)
             } else {
-                let sign_aid = key.private_key_algorithm.to_der().map_err(|e| {
-                    Error::Internal(format!("private key algorithm encode: {e}"))
-                })?;
+                let sign_aid = key
+                    .private_key_algorithm
+                    .to_der()
+                    .map_err(|e| Error::Internal(format!("private key algorithm encode: {e}")))?;
                 SignAdapter::init_by_aid(&private_key, &sign_aid, &sign_aid)
             }
         }
@@ -177,21 +182,20 @@ pub fn pkcs8_get_sign_adapter(
             if let Some(cert) = cert {
                 SignAdapter::init_by_cert(&private_key, cert)
             } else {
-                let sign_aid = algorithm_identifier_der(
-                    OidId::EcdsaWithSha256,
-                    None,
-                )?;
-                let spki_aid = key.private_key_algorithm.to_der().map_err(|e| {
-                    Error::Internal(format!("private key algorithm encode: {e}"))
-                })?;
+                let sign_aid = algorithm_identifier_der(OidId::EcdsaWithSha256, None)?;
+                let spki_aid = key
+                    .private_key_algorithm
+                    .to_der()
+                    .map_err(|e| Error::Internal(format!("private key algorithm encode: {e}")))?;
                 SignAdapter::init_by_aid(&private_key, &sign_aid, &spki_aid)
             }
         }
         #[cfg(feature = "legacy-gost3410")]
         Pkcs8PrivateKeyType::Gost3410 => {
-            let sign_aid = key.private_key_algorithm.to_der().map_err(|e| {
-                Error::Internal(format!("private key algorithm encode: {e}"))
-            })?;
+            let sign_aid = key
+                .private_key_algorithm
+                .to_der()
+                .map_err(|e| Error::Internal(format!("private key algorithm encode: {e}")))?;
             if let Some(cert) = cert {
                 SignAdapter::init_by_cert(&private_key, cert)
             } else {
@@ -209,25 +213,24 @@ pub fn pkcs8_get_verify_adapter(key: &PrivateKeyInfo) -> Result<VerifyAdapter> {
     let spki = pkcs8_get_spki_der(key)?;
     match pkcs8_type(key) {
         Pkcs8PrivateKeyType::Dstu => {
-            let sign_aid = key.private_key_algorithm.to_der().map_err(|e| {
-                Error::Internal(format!("private key algorithm encode: {e}"))
-            })?;
+            let sign_aid = key
+                .private_key_algorithm
+                .to_der()
+                .map_err(|e| Error::Internal(format!("private key algorithm encode: {e}")))?;
             let spki_aid = spki_algorithm_der(&spki)?;
             VerifyAdapter::init_by_spki(&sign_aid, &spki, &spki_aid)
         }
         Pkcs8PrivateKeyType::Ecdsa => {
-            let sign_aid = algorithm_identifier_der(
-                OidId::EcdsaWithSha256,
-                None,
-            )?;
+            let sign_aid = algorithm_identifier_der(OidId::EcdsaWithSha256, None)?;
             let spki_aid = spki_algorithm_der(&spki)?;
             VerifyAdapter::init_by_spki(&sign_aid, &spki, &spki_aid)
         }
         #[cfg(feature = "legacy-gost3410")]
         Pkcs8PrivateKeyType::Gost3410 => {
-            let sign_aid = key.private_key_algorithm.to_der().map_err(|e| {
-                Error::Internal(format!("private key algorithm encode: {e}"))
-            })?;
+            let sign_aid = key
+                .private_key_algorithm
+                .to_der()
+                .map_err(|e| Error::Internal(format!("private key algorithm encode: {e}")))?;
             let spki_aid = spki_algorithm_der(&spki)?;
             VerifyAdapter::init_by_spki(&sign_aid, &spki, &spki_aid)
         }
@@ -244,8 +247,10 @@ struct EcPrivateKey {
 }
 
 fn default_dstu_algorithm() -> Result<AlgorithmIdentifier<Any>> {
-    let cert = Cert::decode(include_bytes!("../../../../testdata/pki/certificate257.der"))
-        .map_err(|e| Error::Internal(format!("default cert: {e}")))?;
+    let cert = Cert::decode(include_bytes!(
+        "../../../../testdata/pki/certificate257.der"
+    ))
+    .map_err(|e| Error::Internal(format!("default cert: {e}")))?;
     let spki = cert.spki_der()?;
     let der = spki_algorithm_der(&spki)?;
     AlgorithmIdentifier::from_der(&der)

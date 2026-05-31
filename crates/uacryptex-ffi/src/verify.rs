@@ -75,5 +75,13 @@ pub extern "C" fn uacryptex_dstu4145_verify(
     cert_len: usize,
     err: *mut UacryptexError,
 ) -> i32 {
-    uacryptex_verify_hash(digest, digest_len, signature, signature_len, cert, cert_len, err)
+    uacryptex_verify_hash(
+        digest,
+        digest_len,
+        signature,
+        signature_len,
+        cert,
+        cert_len,
+        err,
+    )
 }

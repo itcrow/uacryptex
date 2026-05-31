@@ -24,9 +24,8 @@ pub extern "C" fn uacryptex_cms_sign(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let payload = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
         if key.is_null() {
@@ -66,14 +65,12 @@ pub extern "C" fn uacryptex_cms_sign_cades_t(
     let run = || -> Result<UacryptexBuf, Error> {
         use der::asn1::Int;
 
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let payload = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
-        let serial_bytes = bytes_from_ptr(serial, serial_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid serial: code {code}"))
-        })?;
+        let serial_bytes = bytes_from_ptr(serial, serial_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid serial: code {code}")))?;
         if sign_key.is_null() {
             return Err(Error::InvalidParam("sign_key handle is null".into()));
         }
@@ -83,9 +80,8 @@ pub extern "C" fn uacryptex_cms_sign_cades_t(
         let policy = if policy_oid.is_null() {
             None
         } else {
-            let s = crate::error::cstr_to_str(policy_oid).map_err(|code| {
-                Error::InvalidParam(format!("invalid policy_oid: code {code}"))
-            })?;
+            let s = crate::error::cstr_to_str(policy_oid)
+                .map_err(|code| Error::InvalidParam(format!("invalid policy_oid: code {code}")))?;
             if s.is_empty() {
                 None
             } else {
@@ -96,8 +92,8 @@ pub extern "C" fn uacryptex_cms_sign_cades_t(
         let tsa_handle = unsafe { &mut *tsa_key };
         let sa = sign_handle.sign_adapter()?;
         let tsp_sa = tsa_handle.sign_adapter()?;
-        let serial = Int::new(serial_bytes)
-            .map_err(|e| Error::Internal(format!("serial integer: {e}")))?;
+        let serial =
+            Int::new(serial_bytes).map_err(|e| Error::Internal(format!("serial integer: {e}")))?;
         let cms = build_content_info_cades_t(
             &sa,
             payload,
@@ -135,17 +131,14 @@ pub extern "C" fn uacryptex_cms_sign_cades_c(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let payload = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
-        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid ref_cert: code {code}"))
-        })?;
-        let crl_der = bytes_from_ptr(ref_crl, ref_crl_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid ref_crl: code {code}"))
-        })?;
+        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ref_cert: code {code}")))?;
+        let crl_der = bytes_from_ptr(ref_crl, ref_crl_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ref_crl: code {code}")))?;
         if sign_key.is_null() {
             return Err(Error::InvalidParam("sign_key handle is null".into()));
         }
@@ -188,17 +181,14 @@ pub extern "C" fn uacryptex_cms_sign_cades_x(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let payload = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
-        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid ref_cert: code {code}"))
-        })?;
-        let ocsp_der = bytes_from_ptr(ocsp_response, ocsp_response_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid ocsp_response: code {code}"))
-        })?;
+        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ref_cert: code {code}")))?;
+        let ocsp_der = bytes_from_ptr(ocsp_response, ocsp_response_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ocsp_response: code {code}")))?;
         if sign_key.is_null() {
             return Err(Error::InvalidParam("sign_key handle is null".into()));
         }
@@ -244,20 +234,16 @@ pub extern "C" fn uacryptex_cms_sign_cades_lt(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let payload = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
-        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid ref_cert: code {code}"))
-        })?;
-        let full_der = bytes_from_ptr(full_crl, full_crl_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid full_crl: code {code}"))
-        })?;
-        let ocsp_der = bytes_from_ptr(ocsp_response, ocsp_response_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid ocsp_response: code {code}"))
-        })?;
+        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ref_cert: code {code}")))?;
+        let full_der = bytes_from_ptr(full_crl, full_crl_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid full_crl: code {code}")))?;
+        let ocsp_der = bytes_from_ptr(ocsp_response, ocsp_response_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ocsp_response: code {code}")))?;
         if sign_key.is_null() {
             return Err(Error::InvalidParam("sign_key handle is null".into()));
         }
@@ -267,9 +253,8 @@ pub extern "C" fn uacryptex_cms_sign_cades_lt(
         let full_crl = uacryptex_core::pki::crl::Crl::decode(full_der)?;
         let mut validation_crls = vec![full_crl];
         if delta_crl_len > 0 {
-            let delta_der = bytes_from_ptr(delta_crl, delta_crl_len).map_err(|code| {
-                Error::InvalidParam(format!("invalid delta_crl: code {code}"))
-            })?;
+            let delta_der = bytes_from_ptr(delta_crl, delta_crl_len)
+                .map_err(|code| Error::InvalidParam(format!("invalid delta_crl: code {code}")))?;
             validation_crls.push(uacryptex_core::pki::crl::Crl::decode(delta_der)?);
         }
         let cms = uacryptex_core::pki::cms::build_content_info_cades_lt(
@@ -319,23 +304,18 @@ pub extern "C" fn uacryptex_cms_sign_cades_a(
     let run = || -> Result<UacryptexBuf, Error> {
         use der::asn1::Int;
 
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let payload = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
-        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid ref_cert: code {code}"))
-        })?;
-        let full_der = bytes_from_ptr(full_crl, full_crl_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid full_crl: code {code}"))
-        })?;
-        let ocsp_der = bytes_from_ptr(ocsp_response, ocsp_response_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid ocsp_response: code {code}"))
-        })?;
-        let serial_bytes = bytes_from_ptr(serial, serial_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid serial: code {code}"))
-        })?;
+        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ref_cert: code {code}")))?;
+        let full_der = bytes_from_ptr(full_crl, full_crl_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid full_crl: code {code}")))?;
+        let ocsp_der = bytes_from_ptr(ocsp_response, ocsp_response_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ocsp_response: code {code}")))?;
+        let serial_bytes = bytes_from_ptr(serial, serial_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid serial: code {code}")))?;
         if sign_key.is_null() {
             return Err(Error::InvalidParam("sign_key handle is null".into()));
         }
@@ -345,9 +325,8 @@ pub extern "C" fn uacryptex_cms_sign_cades_a(
         let policy = if policy_oid.is_null() {
             None
         } else {
-            let s = crate::error::cstr_to_str(policy_oid).map_err(|code| {
-                Error::InvalidParam(format!("invalid policy_oid: code {code}"))
-            })?;
+            let s = crate::error::cstr_to_str(policy_oid)
+                .map_err(|code| Error::InvalidParam(format!("invalid policy_oid: code {code}")))?;
             if s.is_empty() {
                 None
             } else {
@@ -362,13 +341,12 @@ pub extern "C" fn uacryptex_cms_sign_cades_a(
         let full_crl = uacryptex_core::pki::crl::Crl::decode(full_der)?;
         let mut validation_crls = vec![full_crl];
         if delta_crl_len > 0 {
-            let delta_der = bytes_from_ptr(delta_crl, delta_crl_len).map_err(|code| {
-                Error::InvalidParam(format!("invalid delta_crl: code {code}"))
-            })?;
+            let delta_der = bytes_from_ptr(delta_crl, delta_crl_len)
+                .map_err(|code| Error::InvalidParam(format!("invalid delta_crl: code {code}")))?;
             validation_crls.push(uacryptex_core::pki::crl::Crl::decode(delta_der)?);
         }
-        let serial = Int::new(serial_bytes)
-            .map_err(|e| Error::Internal(format!("serial integer: {e}")))?;
+        let serial =
+            Int::new(serial_bytes).map_err(|e| Error::Internal(format!("serial integer: {e}")))?;
         let cms = uacryptex_core::pki::cms::build_content_info_cades_a(
             &sa,
             payload,
@@ -453,9 +431,10 @@ fn cms_verify_impl(data: &[u8], cms_der: &[u8]) -> Result<(), Error> {
     }
 
     for i in 0..signer_count {
-        let sinfo = sdata.inner().signer_info(i).ok_or_else(|| {
-            Error::InvalidParam("signer info index out of bounds".into())
-        })?;
+        let sinfo = sdata
+            .inner()
+            .signer_info(i)
+            .ok_or_else(|| Error::InvalidParam("signer info index out of bounds".into()))?;
         let cert = certs
             .iter()
             .find_map(|choice| {
@@ -469,9 +448,7 @@ fn cms_verify_impl(data: &[u8], cms_der: &[u8]) -> Result<(), Error> {
                     .map(|_| cert)
             })
             .ok_or_else(|| {
-                Error::InvalidParam(
-                    "no embedded certificate matches signer identifier".into(),
-                )
+                Error::InvalidParam("no embedded certificate matches signer identifier".into())
             })?;
         let da = DigestAdapter::init_by_cert(&cert)?;
         let va = VerifyAdapter::init_by_cert(&cert)?;
@@ -494,14 +471,10 @@ mod tests {
 
     #[test]
     fn cms_verify_internal_via_ffi() {
-        let cert = Cert::decode(include_bytes!(
-            "../../../testdata/pki/certificate257.der"
-        ))
-        .unwrap();
-        let key = hex::decode(
-            "7B66B62C23673C1299B84AE4AACFBBCA1C50FC134A846EF2E24A37407D01D32A",
-        )
-        .unwrap();
+        let cert =
+            Cert::decode(include_bytes!("../../../testdata/pki/certificate257.der")).unwrap();
+        let key = hex::decode("7B66B62C23673C1299B84AE4AACFBBCA1C50FC134A846EF2E24A37407D01D32A")
+            .unwrap();
         let sa = SignAdapter::init_by_cert(&key, &cert).unwrap();
         let data = b"Status message test";
         let cms = build_signed_data(&sa, data, OidId::Data)
@@ -510,26 +483,16 @@ mod tests {
             .unwrap();
 
         let mut err = UacryptexError::default();
-        let rc = uacryptex_cms_verify(
-            data.as_ptr(),
-            data.len(),
-            cms.as_ptr(),
-            cms.len(),
-            &mut err,
-        );
+        let rc = uacryptex_cms_verify(data.as_ptr(), data.len(), cms.as_ptr(), cms.len(), &mut err);
         assert_eq!(rc, RET_OK, "err={err:?}");
     }
 
     #[test]
     fn cms_verify_rejects_tampered_data() {
-        let cert = Cert::decode(include_bytes!(
-            "../../../testdata/pki/certificate257.der"
-        ))
-        .unwrap();
-        let key = hex::decode(
-            "7B66B62C23673C1299B84AE4AACFBBCA1C50FC134A846EF2E24A37407D01D32A",
-        )
-        .unwrap();
+        let cert =
+            Cert::decode(include_bytes!("../../../testdata/pki/certificate257.der")).unwrap();
+        let key = hex::decode("7B66B62C23673C1299B84AE4AACFBBCA1C50FC134A846EF2E24A37407D01D32A")
+            .unwrap();
         let sa = SignAdapter::init_by_cert(&key, &cert).unwrap();
         let cms = build_signed_data(&sa, b"original", OidId::Data)
             .unwrap()
@@ -538,13 +501,7 @@ mod tests {
         let bad = b"tampered";
 
         let mut err = UacryptexError::default();
-        let rc = uacryptex_cms_verify(
-            bad.as_ptr(),
-            bad.len(),
-            cms.as_ptr(),
-            cms.len(),
-            &mut err,
-        );
+        let rc = uacryptex_cms_verify(bad.as_ptr(), bad.len(), cms.as_ptr(), cms.len(), &mut err);
         assert_eq!(rc, RET_VERIFY_FAILED);
     }
 }

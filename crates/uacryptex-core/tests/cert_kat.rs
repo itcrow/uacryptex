@@ -108,10 +108,7 @@ fn cert_spki_and_signature_algorithm_present() {
     let spki = cert.spki_der().unwrap();
     assert!(spki.starts_with(&[0x30]));
     let sig_alg = cert.signature_algorithm_der().unwrap();
-    assert_eq!(
-        sig_alg,
-        hex("300D060B2A86240201010101030101")
-    );
+    assert_eq!(sig_alg, hex("300D060B2A86240201010101030101"));
     assert!(!cert.signature_der().unwrap().is_empty());
     assert!(!cert.tbs_der().unwrap().is_empty());
 }

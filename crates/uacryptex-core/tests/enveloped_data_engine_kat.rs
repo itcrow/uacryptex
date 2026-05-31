@@ -111,16 +111,19 @@ fn enveloped_data_engine_external_ciphertext_path() {
 
     let (container, external) = engine.generate().unwrap();
     let external = external.expect("external ciphertext");
-    assert!(
-        container
-            .inner()
-            .encrypted_content_info
-            .encrypted_content
-            .is_none()
-    );
+    assert!(container
+        .inner()
+        .encrypted_content_info
+        .encrypted_content
+        .is_none());
 
     let decrypted = container
-        .decrypt_data(Some(&external), Some(&originator), &recipient_dh, &recipient)
+        .decrypt_data(
+            Some(&external),
+            Some(&originator),
+            &recipient_dh,
+            &recipient,
+        )
         .unwrap();
     assert_eq!(decrypted, PLAINTEXT);
 }

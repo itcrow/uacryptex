@@ -2,9 +2,9 @@
 //!
 //! Port target: `cryptonite/src/cryptonite/c/dstu4145*.c`
 
-mod dh;
 mod context;
 mod curves;
+mod dh;
 mod onb;
 #[path = "onb_data.rs"]
 mod onb_data;

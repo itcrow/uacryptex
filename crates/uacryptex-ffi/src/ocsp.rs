@@ -1,8 +1,8 @@
 //! OCSP request/response FFI.
 
 use uacryptex_core::pki::cert::Cert;
-use uacryptex_core::pki::crypto::{DigestAdapter, VerifyAdapter};
 use uacryptex_core::pki::crl::Crl;
+use uacryptex_core::pki::crypto::{DigestAdapter, VerifyAdapter};
 use uacryptex_core::pki::engine::{
     eocspreq_generate_from_cert, OcspRequestEngine, OcspResponseEngine, ResponderIdType,
 };
@@ -24,15 +24,12 @@ pub extern "C" fn uacryptex_ocsp_request_from_cert(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
-        let root_der = bytes_from_ptr(root_cert, root_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid root_cert: code {code}"))
-        })?;
-        let user_der = bytes_from_ptr(user_cert, user_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid user_cert: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
+        let root_der = bytes_from_ptr(root_cert, root_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid root_cert: code {code}")))?;
+        let user_der = bytes_from_ptr(user_cert, user_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid user_cert: code {code}")))?;
         let root = Cert::decode(root_der)?;
         let user = Cert::decode(user_der)?;
         let req = eocspreq_generate_from_cert(&root, &user)?;
@@ -72,23 +69,20 @@ pub extern "C" fn uacryptex_ocsp_request_generate(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
-        let root_der = bytes_from_ptr(root_cert, root_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid root_cert: code {code}"))
-        })?;
-        let user_der = bytes_from_ptr(user_cert, user_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid user_cert: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
+        let root_der = bytes_from_ptr(root_cert, root_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid root_cert: code {code}")))?;
+        let user_der = bytes_from_ptr(user_cert, user_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid user_cert: code {code}")))?;
         let root = Cert::decode(root_der)?;
         let user = Cert::decode(user_der)?;
         let da = DigestAdapter::init_default()?;
         let root_va = VerifyAdapter::init_by_cert(&root)?;
 
         let ocsp_va = if ocsp_responder_cert_len > 0 {
-            let ocsp_der = bytes_from_ptr(ocsp_responder_cert, ocsp_responder_cert_len)
-                .map_err(|code| {
+            let ocsp_der =
+                bytes_from_ptr(ocsp_responder_cert, ocsp_responder_cert_len).map_err(|code| {
                     Error::InvalidParam(format!("invalid ocsp_responder_cert: code {code}"))
                 })?;
             Some(VerifyAdapter::init_by_cert(&Cert::decode(ocsp_der)?)?)
@@ -114,10 +108,9 @@ pub extern "C" fn uacryptex_ocsp_request_generate(
 
         let req = if include_nonce != 0 {
             let nonce_bytes = if nonce_len > 0 {
-                bytes_from_ptr(nonce, nonce_len).map_err(|code| {
-                    Error::InvalidParam(format!("invalid nonce: code {code}"))
-                })?
-                .to_vec()
+                bytes_from_ptr(nonce, nonce_len)
+                    .map_err(|code| Error::InvalidParam(format!("invalid nonce: code {code}")))?
+                    .to_vec()
             } else {
                 vec![0u8; 20]
             };
@@ -152,9 +145,8 @@ pub extern "C" fn uacryptex_ocsp_request_verify(
     let run = || -> Result<(), Error> {
         let der = bytes_from_ptr(request, request_len)
             .map_err(|code| Error::InvalidParam(format!("invalid request: code {code}")))?;
-        let cert_der = bytes_from_ptr(requestor_cert, requestor_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid requestor_cert: code {code}"))
-        })?;
+        let cert_der = bytes_from_ptr(requestor_cert, requestor_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid requestor_cert: code {code}")))?;
         let req = OcspReq::decode(der)?;
         let cert = Cert::decode(cert_der)?;
         let adapter = VerifyAdapter::init_by_cert(&cert)?;
@@ -179,9 +171,10 @@ pub extern "C" fn uacryptex_ocsp_response_verify(
     let run = || -> Result<(), Error> {
         let der = bytes_from_ptr(response, response_len)
             .map_err(|code| Error::InvalidParam(format!("invalid response: code {code}")))?;
-        let cert_der = bytes_from_ptr(ocsp_responder_cert, ocsp_responder_cert_len).map_err(
-            |code| Error::InvalidParam(format!("invalid ocsp_responder_cert: code {code}")),
-        )?;
+        let cert_der =
+            bytes_from_ptr(ocsp_responder_cert, ocsp_responder_cert_len).map_err(|code| {
+                Error::InvalidParam(format!("invalid ocsp_responder_cert: code {code}"))
+            })?;
         let resp = OcspResp::decode(der)?;
         let cert = Cert::decode(cert_der)?;
         let adapter = VerifyAdapter::init_by_cert(&cert)?;
@@ -212,9 +205,8 @@ pub extern "C" fn uacryptex_ocsp_response_validate(
             .map_err(|code| Error::InvalidParam(format!("invalid request: code {code}")))?;
         let resp_der = bytes_from_ptr(response, response_len)
             .map_err(|code| Error::InvalidParam(format!("invalid response: code {code}")))?;
-        let root_der = bytes_from_ptr(root_cert, root_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid root_cert: code {code}"))
-        })?;
+        let root_der = bytes_from_ptr(root_cert, root_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid root_cert: code {code}")))?;
         let _request = OcspReq::decode(req_der)?;
         let response = OcspResp::decode(resp_der)?;
         let root = Cert::decode(root_der)?;
@@ -249,20 +241,17 @@ pub extern "C" fn uacryptex_ocsp_response_generate(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         if ocsp_key.is_null() {
             return Err(Error::InvalidParam("ocsp_key handle is null".into()));
         }
         let req_der = bytes_from_ptr(request, request_len)
             .map_err(|code| Error::InvalidParam(format!("invalid request: code {code}")))?;
-        let root_der = bytes_from_ptr(root_cert, root_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid root_cert: code {code}"))
-        })?;
-        let user_der = bytes_from_ptr(user_cert, user_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid user_cert: code {code}"))
-        })?;
+        let root_der = bytes_from_ptr(root_cert, root_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid root_cert: code {code}")))?;
+        let user_der = bytes_from_ptr(user_cert, user_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid user_cert: code {code}")))?;
         let full_der = bytes_from_ptr(full_crl, full_crl_len)
             .map_err(|code| Error::InvalidParam(format!("invalid full_crl: code {code}")))?;
         let request = OcspReq::decode(req_der)?;
@@ -271,9 +260,8 @@ pub extern "C" fn uacryptex_ocsp_response_generate(
         let full = Crl::decode(full_der)?;
         let mut crls = vec![full];
         if delta_crl_len > 0 {
-            let delta_der = bytes_from_ptr(delta_crl, delta_crl_len).map_err(|code| {
-                Error::InvalidParam(format!("invalid delta_crl: code {code}"))
-            })?;
+            let delta_der = bytes_from_ptr(delta_crl, delta_crl_len)
+                .map_err(|code| Error::InvalidParam(format!("invalid delta_crl: code {code}")))?;
             crls.push(Crl::decode(delta_der)?);
         }
         let da = DigestAdapter::init_default()?;

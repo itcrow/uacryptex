@@ -19,9 +19,8 @@ pub extern "C" fn uacryptex_pkcs8_open(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<*mut UacryptexHandle, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         unsafe {
             if !(*out).is_null() {
                 return Err(Error::InvalidParam("out handle must be null".into()));

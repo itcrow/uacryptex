@@ -658,7 +658,5 @@ fn rsa_oaep_rejects_message_too_long() {
     let n = vec![0x01u8; 32];
     let e = decode_le_hex("010001");
     let msg = vec![0u8; 64];
-    assert!(
-        rsa_oaep_encrypt(RsaOaepHash::Sha256, &n, &e, &msg, None, &[0u8; 32]).is_err()
-    );
+    assert!(rsa_oaep_encrypt(RsaOaepHash::Sha256, &n, &e, &msg, None, &[0u8; 32]).is_err());
 }

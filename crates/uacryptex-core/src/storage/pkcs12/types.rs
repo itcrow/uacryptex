@@ -35,7 +35,8 @@ pub struct DigestInfo {
 
 /// `AuthenticatedSafe ::= SEQUENCE OF ContentInfo`
 pub fn decode_authenticated_safe(der: &[u8]) -> Result<Vec<ContentInfo>> {
-    Vec::<ContentInfo>::from_der(der).map_err(|e| Error::Internal(format!("AuthenticatedSafe decode: {e}")))
+    Vec::<ContentInfo>::from_der(der)
+        .map_err(|e| Error::Internal(format!("AuthenticatedSafe decode: {e}")))
 }
 
 /// `SafeContents ::= SEQUENCE OF SafeBag`

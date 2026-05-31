@@ -10,16 +10,15 @@ use uacryptex_core::pki::engine::{
 use uacryptex_core::{Error, RET_OK};
 
 use crate::buf::UacryptexBuf;
-use crate::error::{bytes_from_ptr, cstr_to_str, check_out, write_error, UacryptexError};
+use crate::error::{bytes_from_ptr, check_out, cstr_to_str, write_error, UacryptexError};
 use crate::UacryptexHandle;
 
 fn optional_cstr(ptr: *const std::os::raw::c_char) -> Result<Option<String>, Error> {
     if ptr.is_null() {
         return Ok(None);
     }
-    let s = cstr_to_str(ptr).map_err(|code| {
-        Error::InvalidParam(format!("invalid string pointer: code {code}"))
-    })?;
+    let s = cstr_to_str(ptr)
+        .map_err(|code| Error::InvalidParam(format!("invalid string pointer: code {code}")))?;
     if s.is_empty() {
         Ok(None)
     } else {
@@ -39,9 +38,8 @@ pub extern "C" fn uacryptex_csr_generate(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         if key.is_null() {
             return Err(Error::InvalidParam("key handle is null".into()));
         }
@@ -53,11 +51,7 @@ pub extern "C" fn uacryptex_csr_generate(
         let email = optional_cstr(email)?;
         let subject_dir_attr = optional_cstr(subject_dir_attr)?;
         ecert_request_set_subj_name(&mut engine, subject.as_deref())?;
-        ecert_request_set_subj_alt_name(
-            &mut engine,
-            dns.as_deref(),
-            email.as_deref(),
-        )?;
+        ecert_request_set_subj_alt_name(&mut engine, dns.as_deref(), email.as_deref())?;
         ecert_request_set_subj_dir_attr(&mut engine, subject_dir_attr.as_deref())?;
         let mut req = None;
         ecert_request_generate(&engine, &mut req)?;

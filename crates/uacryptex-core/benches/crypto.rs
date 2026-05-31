@@ -6,7 +6,9 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use uacryptex_core::pki::cert::Cert;
 use uacryptex_core::pki::cms::SignedDataContainer;
 use uacryptex_core::pki::crypto::{DigestAdapter, VerifyAdapter};
-use uacryptex_core::primitives::dstu4145::{sign, verify, ParamsId, PublicKey, Signature, SliceRandom};
+use uacryptex_core::primitives::dstu4145::{
+    sign, verify, ParamsId, PublicKey, Signature, SliceRandom,
+};
 use uacryptex_core::primitives::dstu7564::hash;
 
 fn hex_le(s: &str) -> Vec<u8> {
@@ -48,14 +50,28 @@ fn m257_sign_fixture() -> (
 fn bench_dstu4145_verify(c: &mut Criterion) {
     let (params, pk, digest, sig) = m257_verify_fixture();
     c.bench_function("dstu4145_verify_m257", |b| {
-        b.iter(|| verify(black_box(&params), black_box(&pk), black_box(&digest), black_box(&sig)))
+        b.iter(|| {
+            verify(
+                black_box(&params),
+                black_box(&pk),
+                black_box(&digest),
+                black_box(&sig),
+            )
+        })
     });
 }
 
 fn bench_dstu4145_sign(c: &mut Criterion) {
     let (params, d, digest, mut rng) = m257_sign_fixture();
     c.bench_function("dstu4145_sign_m257", |b| {
-        b.iter(|| sign(black_box(&params), black_box(&d), black_box(&digest), black_box(&mut rng)))
+        b.iter(|| {
+            sign(
+                black_box(&params),
+                black_box(&d),
+                black_box(&digest),
+                black_box(&mut rng),
+            )
+        })
     });
 }
 
@@ -67,8 +83,7 @@ fn bench_kupyna_hash(c: &mut Criterion) {
 }
 
 fn bench_cms_verify(c: &mut Criterion) {
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../testdata/pki/signed_data.dat");
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../testdata/pki/signed_data.dat");
     let der = std::fs::read(&path).unwrap_or_else(|e| panic!("read {}: {e}", path.display()));
     let sdata = SignedDataContainer::decode(&der).expect("decode signed_data.dat");
     let cert = Cert::decode(include_bytes!("../../../testdata/pki/certificate257.der")).unwrap();

@@ -73,10 +73,7 @@ impl TspReq {
 
     /// `tsreq_get_policy`.
     pub fn policy(&self) -> Result<Any> {
-        self.inner
-            .req_policy
-            .clone()
-            .ok_or(Error::TspReqNoPolicy)
+        self.inner.req_policy.clone().ok_or(Error::TspReqNoPolicy)
     }
 
     /// `tsreq_set_policy`.
@@ -84,9 +81,9 @@ impl TspReq {
         let policy_der = policy
             .to_der()
             .map_err(|e| Error::Internal(format!("policy encode: {e}")))?;
-        self.inner.req_policy = Some(Any::from_der(&policy_der).map_err(|e| {
-            Error::Internal(format!("policy any: {e}"))
-        })?);
+        self.inner.req_policy = Some(
+            Any::from_der(&policy_der).map_err(|e| Error::Internal(format!("policy any: {e}")))?,
+        );
         Ok(())
     }
 
@@ -117,9 +114,8 @@ impl TspReq {
         let mut bytes = Vec::with_capacity(16);
         bytes.extend_from_slice(&now.as_secs().to_le_bytes());
         bytes.extend_from_slice(&(now.subsec_nanos() as u64).to_le_bytes());
-        self.inner.nonce = Some(
-            Int::new(&bytes).map_err(|e| Error::Internal(format!("nonce integer: {e}")))?,
-        );
+        self.inner.nonce =
+            Some(Int::new(&bytes).map_err(|e| Error::Internal(format!("nonce integer: {e}")))?);
         Ok(())
     }
 

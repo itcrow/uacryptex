@@ -53,28 +53,37 @@ pub fn digest_algorithm_from_signature_oid(sign_oid: &str) -> Result<OidId> {
     if oid_str_under(OidId::EcdsaWithSha1, sign_oid) || oid_matches_str(OidId::PkiSha1, sign_oid) {
         return Ok(OidId::PkiSha1);
     }
-    if oid_str_under(OidId::EcdsaWithSha224, sign_oid) || oid_matches_str(OidId::PkiSha224, sign_oid) {
+    if oid_str_under(OidId::EcdsaWithSha224, sign_oid)
+        || oid_matches_str(OidId::PkiSha224, sign_oid)
+    {
         return Ok(OidId::PkiSha224);
     }
-    if oid_str_under(OidId::EcdsaWithSha256, sign_oid) || oid_matches_str(OidId::PkiSha256, sign_oid) {
+    if oid_str_under(OidId::EcdsaWithSha256, sign_oid)
+        || oid_matches_str(OidId::PkiSha256, sign_oid)
+    {
         return Ok(OidId::PkiSha256);
     }
-    if oid_str_under(OidId::EcdsaWithSha384, sign_oid) || oid_matches_str(OidId::PkiSha384, sign_oid) {
+    if oid_str_under(OidId::EcdsaWithSha384, sign_oid)
+        || oid_matches_str(OidId::PkiSha384, sign_oid)
+    {
         return Ok(OidId::PkiSha384);
     }
-    if oid_str_under(OidId::EcdsaWithSha512, sign_oid) || oid_matches_str(OidId::PkiSha512, sign_oid) {
+    if oid_str_under(OidId::EcdsaWithSha512, sign_oid)
+        || oid_matches_str(OidId::PkiSha512, sign_oid)
+    {
         return Ok(OidId::PkiSha512);
     }
-    Err(Error::Unsupported(format!("unsupported signature OID: {sign_oid}")))
+    Err(Error::Unsupported(format!(
+        "unsupported signature OID: {sign_oid}"
+    )))
 }
 
 pub fn digest_algorithm_from_certificate(
     signature_algorithm_der: &[u8],
     spki_algorithm_der: &[u8],
 ) -> Result<Vec<u8>> {
-    let sign_aid: AlgorithmIdentifier<Any> =
-        AlgorithmIdentifier::from_der(signature_algorithm_der)
-            .map_err(|e| Error::Internal(format!("signature algorithm decode: {e}")))?;
+    let sign_aid: AlgorithmIdentifier<Any> = AlgorithmIdentifier::from_der(signature_algorithm_der)
+        .map_err(|e| Error::Internal(format!("signature algorithm decode: {e}")))?;
     let sign_oid = sign_aid.oid.to_string();
     if oid_str_under(OidId::PkiDstu4145WithGost3411, &sign_oid) {
         let spki_aid: AlgorithmIdentifier<Any> = AlgorithmIdentifier::from_der(spki_algorithm_der)
@@ -108,7 +117,9 @@ pub fn spki_algorithm_der(spki_der: &[u8]) -> Result<Vec<u8>> {
         .map_err(|e| Error::Internal(format!("spki algorithm encode: {e}")))
 }
 
-pub fn curve_params_from_spki_algorithm(spki_algorithm_der: &[u8]) -> Result<crate::primitives::dstu4145::CurveParams> {
+pub fn curve_params_from_spki_algorithm(
+    spki_algorithm_der: &[u8],
+) -> Result<crate::primitives::dstu4145::CurveParams> {
     use crate::primitives::dstu4145::ParamsId;
 
     let aid: AlgorithmIdentifier<Any> = AlgorithmIdentifier::from_der(spki_algorithm_der)
@@ -152,7 +163,9 @@ pub fn is_ecdsa_signature_oid(oid: &str) -> bool {
     crate::primitives::intl::is_ecdsa_signature_oid(oid)
 }
 
-pub fn ecdsa_curve_from_spki_algorithm(spki_algorithm_der: &[u8]) -> Result<crate::primitives::intl::EcdsaCurve> {
+pub fn ecdsa_curve_from_spki_algorithm(
+    spki_algorithm_der: &[u8],
+) -> Result<crate::primitives::intl::EcdsaCurve> {
     use crate::primitives::intl::ecdsa_curve_from_oid_str;
     use der::asn1::ObjectIdentifier;
 
@@ -274,6 +287,9 @@ mod tests {
 
     #[test]
     fn gost3411_aid_matches_utest() {
-        assert_eq!(gost3411_algorithm_der(), hex_literal::hex!("300c060a2a862402010101010201"));
+        assert_eq!(
+            gost3411_algorithm_der(),
+            hex_literal::hex!("300c060a2a862402010101010201")
+        );
     }
 }

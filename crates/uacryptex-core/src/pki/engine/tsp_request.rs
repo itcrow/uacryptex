@@ -51,9 +51,8 @@ pub fn etspreq_generate(
     cert_req: bool,
 ) -> Result<TspReq> {
     let digest_aid: AlgorithmIdentifier<der::Any> =
-        AlgorithmIdentifier::from_der(da.algorithm_der()).map_err(|e| {
-            Error::Internal(format!("digest aid decode: {e}"))
-        })?;
+        AlgorithmIdentifier::from_der(da.algorithm_der())
+            .map_err(|e| Error::Internal(format!("digest aid decode: {e}")))?;
     let mut adapter = da.clone_state()?;
     adapter.update(msg)?;
     let hash = adapter.finalize()?;
@@ -67,10 +66,9 @@ pub fn etspreq_generate_from_gost34311(
     cert_req: bool,
 ) -> Result<TspReq> {
     let digest_aid: AlgorithmIdentifier<der::Any> =
-        AlgorithmIdentifier::from_der(gost3411_algorithm_der()).map_err(|e| {
-            Error::Internal(format!("gost3411 aid decode: {e}"))
-        })?;
-    let policy_oid = ObjectIdentifier::new(policy)
-        .map_err(|e| Error::Internal(format!("policy oid: {e}")))?;
+        AlgorithmIdentifier::from_der(gost3411_algorithm_der())
+            .map_err(|e| Error::Internal(format!("gost3411 aid decode: {e}")))?;
+    let policy_oid =
+        ObjectIdentifier::new(policy).map_err(|e| Error::Internal(format!("policy oid: {e}")))?;
     etspreq_generate_from_hash(&digest_aid, hash, None, &policy_oid, cert_req)
 }

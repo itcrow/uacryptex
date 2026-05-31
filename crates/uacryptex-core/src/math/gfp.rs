@@ -1,10 +1,10 @@
 //! Prime field GF(p) arithmetic (Cryptonite `math_gfp_internal.c`).
 
+use super::int::int_lshift;
 use super::int::{
     int_bit_len, int_cmp, int_equals, int_get_bit, int_is_one, int_is_zero, int_word_len,
 };
 use super::int_arith::{int_add, int_div, int_mul, int_rshift, int_sqr, int_sub};
-use super::int::int_lshift;
 use super::word::{WordArray, WORD_BIT_LENGTH};
 
 #[derive(Clone, Debug)]
@@ -466,14 +466,17 @@ mod tests {
     #[test]
     fn gfp_mod_inv_matches_cryptonite() {
         let p = WordArray::from_be_bytes(
-            &hex::decode("8000000000000000000000000000000000000000000000000000000000000431").unwrap(),
+            &hex::decode("8000000000000000000000000000000000000000000000000000000000000431")
+                .unwrap(),
         );
         let gfp = GfpCtx::new(&p);
         let a = WordArray::from_be_bytes(
-            &hex::decode("f8811c92b8e561e8ad129635c42bbab41529b0b2b6ff41fe61834e85d7ed3139").unwrap(),
+            &hex::decode("f8811c92b8e561e8ad129635c42bbab41529b0b2b6ff41fe61834e85d7ed3139")
+                .unwrap(),
         );
         let exp = WordArray::from_le_bytes(
-            &hex::decode("c8d4263cafe677ec48ca08d33b78371c90d30385c59a296a75cc59c1d0fc505c").unwrap(),
+            &hex::decode("c8d4263cafe677ec48ca08d33b78371c90d30385c59a296a75cc59c1d0fc505c")
+                .unwrap(),
         );
         let act = gfp_mod_inv(&gfp, &a).expect("inverse");
         assert_eq!(act.buf, exp.buf);

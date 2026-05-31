@@ -6,11 +6,11 @@ use x509_cert::attr::{Attribute, Attributes};
 
 use crate::pki::cms::ContentInfo;
 use crate::pki::oid::{oid_matches_str, oid_to_str, OidId};
-use crate::storage::pkcs5::{pkcs5_decrypt_dstu, EncryptedPrivateKeyInfo};
 use crate::storage::pkcs12::types::{
     decode_authenticated_safe, decode_safe_contents, EncryptedContentInfo, EncryptedData, Pfx,
     SafeBag, SafeContents,
 };
+use crate::storage::pkcs5::{pkcs5_decrypt_dstu, EncryptedPrivateKeyInfo};
 use crate::{Error, Result};
 
 const FRIENDLY_NAME_OID: &str = "1.2.840.113549.1.9.20";
@@ -78,7 +78,9 @@ pub fn cinfo_get_data(cinfo: &ContentInfo) -> Result<Vec<u8>> {
 
 pub fn cinfo_get_encrypted_data(cinfo: &ContentInfo) -> Result<EncryptedData> {
     if cinfo_type(cinfo) != CinfoType::Encrypted {
-        return Err(Error::Unsupported("ContentInfo is not encryptedData".into()));
+        return Err(Error::Unsupported(
+            "ContentInfo is not encryptedData".into(),
+        ));
     }
     let content = cinfo
         .content
@@ -117,9 +119,7 @@ pub fn safebag_alias(bag: &SafeBag, index: usize) -> Result<String> {
 }
 
 fn find_attribute<'a>(attrs: &'a Attributes, oid: &str) -> Option<&'a Attribute> {
-    attrs
-        .iter()
-        .find(|attr| attr.oid.to_string() == oid)
+    attrs.iter().find(|attr| attr.oid.to_string() == oid)
 }
 
 fn encrypted_content_to_epki(info: &EncryptedContentInfo) -> Result<EncryptedPrivateKeyInfo> {
@@ -212,8 +212,7 @@ pub fn encode_content_info_data(data: &[u8]) -> Result<ContentInfo> {
         )
         .map_err(|e| Error::Internal(format!("data OID: {e}")))?,
         content: Some(
-            Any::encode_from(&octets)
-                .map_err(|e| Error::Internal(format!("content any: {e}")))?,
+            Any::encode_from(&octets).map_err(|e| Error::Internal(format!("content any: {e}")))?,
         ),
     })
 }

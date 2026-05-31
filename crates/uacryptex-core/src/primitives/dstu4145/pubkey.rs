@@ -1,19 +1,16 @@
 //! DSTU 4145 public key compression (`dstu4145_compress_pubkey` / `decompress_pubkey`).
 
-use der::Decode;
 use super::params::{CurveParams, PublicKey};
 use super::verify::{build_ec2m_with_onb, field_point_from_ba, onb_tables};
 use crate::math::{
-    gf2m_mod_add_assign, gf2m_mod_inv, gf2m_mod_mul, gf2m_mod_solve_quad, gf2m_mod_sqrt, gf2m_mod_sqr,
-    gf2m_mod_trace, int_get_bit, int_is_zero, WordArray,
+    gf2m_mod_add_assign, gf2m_mod_inv, gf2m_mod_mul, gf2m_mod_solve_quad, gf2m_mod_sqr,
+    gf2m_mod_sqrt, gf2m_mod_trace, int_get_bit, int_is_zero, WordArray,
 };
 use crate::{Error, Result};
+use der::Decode;
 
 /// `dstu4145_get_pubkey`.
-pub fn public_key_from_private_key(
-    params: &CurveParams,
-    private_key: &[u8],
-) -> Result<PublicKey> {
+pub fn public_key_from_private_key(params: &CurveParams, private_key: &[u8]) -> Result<PublicKey> {
     super::sign::public_key_from_private(params, private_key)
 }
 

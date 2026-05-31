@@ -24,5 +24,9 @@ pub use ocsp_response::{
     eocspresp_form_internal_error, eocspresp_form_malformed_req, eocspresp_form_try_later,
     eocspresp_form_unauthorized, OcspResponseEngine, ResponderIdType,
 };
-pub use tsp_request::{etspreq_generate, etspreq_generate_from_gost34311, etspreq_generate_from_hash};
-pub use tsp_response::{default_tsp_digest_aids, etspresp_generate, TspAdapterEntry, TspAdapterMap};
+pub use tsp_request::{
+    etspreq_generate, etspreq_generate_from_gost34311, etspreq_generate_from_hash,
+};
+pub use tsp_response::{
+    default_tsp_digest_aids, etspresp_generate, TspAdapterEntry, TspAdapterMap,
+};

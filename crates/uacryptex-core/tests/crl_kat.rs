@@ -137,10 +137,7 @@ fn crl_check_cert_not_revoked() {
 fn crl_get_cert_info_not_found() {
     let crl = load_crl_dat();
     let cert = load_acsk_cert();
-    assert_eq!(
-        crl.revoked_cert_for_cert(&cert),
-        Err(Error::NotFound)
-    );
+    assert_eq!(crl.revoked_cert_for_cert(&cert), Err(Error::NotFound));
 }
 
 #[test]

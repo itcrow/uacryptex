@@ -50,7 +50,8 @@ impl EnvelopedDataContainer {
     pub fn decode(der: &[u8]) -> Result<Self> {
         let normalized = crate::pki::utils::ber_to_der(der).unwrap_or_else(|_| der.to_vec());
         if let Ok(ci) = super::types::ContentInfo::from_der(&normalized) {
-            let enveloped_oid = crate::pki::ext::object_identifier(crate::pki::oid::OidId::EnvelopedData)?;
+            let enveloped_oid =
+                crate::pki::ext::object_identifier(crate::pki::oid::OidId::EnvelopedData)?;
             if ci.content_type != enveloped_oid {
                 return Err(Error::Unsupported(format!(
                     "unsupported CMS content type: {}",
@@ -60,9 +61,9 @@ impl EnvelopedDataContainer {
             let content = ci.content.ok_or_else(|| {
                 Error::InvalidParam("ContentInfo missing EnvelopedData content".into())
             })?;
-            let inner = content.decode_as::<EnvelopedData>().map_err(|e| {
-                Error::Internal(format!("EnvelopedData decode: {e}"))
-            })?;
+            let inner = content
+                .decode_as::<EnvelopedData>()
+                .map_err(|e| Error::Internal(format!("EnvelopedData decode: {e}")))?;
             return Ok(Self { inner });
         }
 
@@ -96,17 +97,13 @@ impl EnvelopedDataContainer {
             .as_ref()
             .and_then(|oi| oi.certs.as_ref())
             .ok_or(Error::NoCertificate)?;
-        let last = certs
-            .0
-            .as_slice()
-            .last()
-            .ok_or(Error::NoCertificate)?;
+        let last = certs.0.as_slice().last().ok_or(Error::NoCertificate)?;
         match last {
-            super::types::CertificateChoices::Certificate(cert) => {
-                Cert::decode(&cert.to_der().map_err(|e| {
-                    Error::Internal(format!("originator cert encode: {e}"))
-                })?)
-            }
+            super::types::CertificateChoices::Certificate(cert) => Cert::decode(
+                &cert
+                    .to_der()
+                    .map_err(|e| Error::Internal(format!("originator cert encode: {e}")))?,
+            ),
         }
     }
 

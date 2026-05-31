@@ -107,7 +107,10 @@ fn sa_init_by_aid_certificate257_metadata() {
     assert!(!sa.has_cert());
     assert!(sa.cert().is_err());
     assert_eq!(sa.digest_algorithm_der(), gost3411_algorithm_der());
-    assert_eq!(sa.signature_algorithm_der(), hex("300D060B2A86240201010101030101"));
+    assert_eq!(
+        sa.signature_algorithm_der(),
+        hex("300D060B2A86240201010101030101")
+    );
     assert_eq!(
         sa.spki_der().unwrap(),
         hex(
@@ -203,13 +206,17 @@ fn va_init_by_cert_ecdsa_metadata() {
         va.digest_algorithm_der(),
         algorithm_identifier_der(OidId::PkiSha256, None).unwrap()
     );
-    assert_eq!(va.signature_algorithm_der(), cert.signature_algorithm_der().unwrap());
+    assert_eq!(
+        va.signature_algorithm_der(),
+        cert.signature_algorithm_der().unwrap()
+    );
 }
 
 #[test]
 fn sa_ecdsa_wrong_private_key_by_cert() {
     let cert = load_ecdsa_cert();
-    let wrong = hex("66B62C23673C1299B84AE4AACFBBCA1C50FC134A846EF2E24A37407D01D32AE24A37407D01D32AFFFF");
+    let wrong =
+        hex("66B62C23673C1299B84AE4AACFBBCA1C50FC134A846EF2E24A37407D01D32AE24A37407D01D32AFFFF");
     assert!(matches!(
         SignAdapter::init_by_cert(&wrong, &cert),
         Err(Error::InvalidParam(_))
@@ -219,7 +226,8 @@ fn sa_ecdsa_wrong_private_key_by_cert() {
 #[test]
 fn sa_ecdsa_wrong_private_key_by_aid_succeeds() {
     let cert = load_ecdsa_cert();
-    let wrong = hex("66B62C23673C1299B84AE4AACFBBCA1C50FC134A846EF2E24A37407D01D32AE24A37407D01D32AFFFF");
+    let wrong =
+        hex("66B62C23673C1299B84AE4AACFBBCA1C50FC134A846EF2E24A37407D01D32AE24A37407D01D32AFFFF");
     let sign_aid = cert.signature_algorithm_der().unwrap();
     let spki = cert.spki_der().unwrap();
     let spki_aid = spki_algorithm_der(&spki).unwrap();

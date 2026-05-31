@@ -5,7 +5,9 @@ use der::asn1::Uint;
 use crate::pki::oid::{oid_matches_str, OidId};
 use crate::primitives::gost34_311::{hmac_gost3411, Gost34311};
 use crate::primitives::intl::{hmac_sha1, hmac_sha224, hmac_sha256, hmac_sha384, hmac_sha512};
-use crate::primitives::intl::{sha1_digest, sha224_digest, sha256_digest, sha384_digest, sha512_digest};
+use crate::primitives::intl::{
+    sha1_digest, sha224_digest, sha256_digest, sha384_digest, sha512_digest,
+};
 use crate::storage::pkcs12::types::{DigestInfo, MacData, Pfx};
 use crate::{Error, Result};
 
@@ -83,7 +85,9 @@ fn hash_iteration(digest: &DigestInfo, msg: &[u8]) -> Result<Vec<u8>> {
     } else if oid_matches_str(OidId::PkiSha512, &oid) {
         Ok(sha512_digest(msg).to_vec())
     } else {
-        Err(Error::Unsupported(format!("unsupported PKCS#12 MAC digest OID: {oid}")))
+        Err(Error::Unsupported(format!(
+            "unsupported PKCS#12 MAC digest OID: {oid}"
+        )))
     }
 }
 
@@ -138,7 +142,9 @@ fn hmac_with_digest(digest: &DigestInfo, key: &[u8], data: &[u8]) -> Result<Vec<
     } else if oid_matches_str(OidId::PkiSha512, &oid) {
         Ok(hmac_sha512(key, data).to_vec())
     } else {
-        Err(Error::Unsupported(format!("unsupported PKCS#12 MAC digest OID: {oid}")))
+        Err(Error::Unsupported(format!(
+            "unsupported PKCS#12 MAC digest OID: {oid}"
+        )))
     }
 }
 
@@ -151,12 +157,12 @@ pub fn pfx_calc_mac(pfx: &Pfx, password: &str, auth_safe_data: &[u8]) -> Result<
     pfx_calc_mac_with_data(mac_data, password, auth_safe_data)
 }
 
-pub fn pfx_calc_mac_with_data(mac_data: &MacData, password: &str, auth_safe_data: &[u8]) -> Result<Vec<u8>> {
-    let iterations = mac_data
-        .iterations
-        .as_ref()
-        .map(uint_to_u32)
-        .unwrap_or(1);
+pub fn pfx_calc_mac_with_data(
+    mac_data: &MacData,
+    password: &str,
+    auth_safe_data: &[u8],
+) -> Result<Vec<u8>> {
+    let iterations = mac_data.iterations.as_ref().map(uint_to_u32).unwrap_or(1);
     let pass_utf16 = utf8_to_utf16be_null(password);
     let dk = pkcs12_key_gen_for_hmac(
         &mac_data.mac,

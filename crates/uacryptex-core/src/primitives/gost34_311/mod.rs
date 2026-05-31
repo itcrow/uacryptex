@@ -403,7 +403,11 @@ impl Gost34311 {
 const HMAC_BLOCK_LEN: usize = 32;
 
 /// GOST 34.311 HMAC (`hmac_alloc_gost34_311`, block size 32).
-pub fn hmac_gost3411(sync: &[u8; BLOCK_LEN], key: &[u8], data: &[&[u8]]) -> Result<[u8; BLOCK_LEN]> {
+pub fn hmac_gost3411(
+    sync: &[u8; BLOCK_LEN],
+    key: &[u8],
+    data: &[&[u8]],
+) -> Result<[u8; BLOCK_LEN]> {
     let key_block = if key.len() > HMAC_BLOCK_LEN {
         let mut hasher = Gost34311::new(sync)?;
         hasher.update(key)?;

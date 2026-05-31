@@ -34,7 +34,10 @@ fn load_full_crl() -> Crl {
 }
 
 fn load_delta_crl() -> Crl {
-    Crl::decode(include_bytes!("../../../testdata/pki/pki_example/delta.crl")).unwrap()
+    Crl::decode(include_bytes!(
+        "../../../testdata/pki/pki_example/delta.crl"
+    ))
+    .unwrap()
 }
 
 #[test]
@@ -43,9 +46,8 @@ fn ecrl_generate_full_with_merge() {
     let prev = load_full_crl();
     let delta = load_delta_crl();
 
-    let extensions = vec![
-        ext_create_crl_distr_points(true, &["http://ca.ua/crls/full.crl"]).unwrap(),
-    ];
+    let extensions =
+        vec![ext_create_crl_distr_points(true, &["http://ca.ua/crls/full.crl"]).unwrap()];
 
     let mut engine = ecrl_alloc(
         Some(&prev),
@@ -84,9 +86,10 @@ fn ecrl_generate_delta_add_revoked() {
     )
     .unwrap();
 
-    let revoked_cert =
-        Cert::decode(include_bytes!("../../../testdata/pki/pki_example/userur_certificate.cer"))
-            .unwrap();
+    let revoked_cert = Cert::decode(include_bytes!(
+        "../../../testdata/pki/pki_example/userur_certificate.cer"
+    ))
+    .unwrap();
     let revoke_time = 1_359_158_400i64;
     ecrl_add_revoked_cert(
         &mut engine,

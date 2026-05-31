@@ -36,7 +36,10 @@ impl Cert {
     }
 
     /// `cert_init_by_adapter`.
-    pub fn init_by_adapter(tbs: TbsCertificate, adapter: &crate::pki::crypto::SignAdapter) -> Result<Self> {
+    pub fn init_by_adapter(
+        tbs: TbsCertificate,
+        adapter: &crate::pki::crypto::SignAdapter,
+    ) -> Result<Self> {
         let tbs_der = tbs
             .to_der()
             .map_err(|e| Error::Internal(format!("tbs certificate encode: {e}")))?;
@@ -78,9 +81,8 @@ impl Cert {
     pub fn with_serial_number(&self, serial: &[u8]) -> Result<Self> {
         let mut clone = self.clone();
         clone.inner.tbs_certificate.serial_number =
-            x509_cert::serial_number::SerialNumber::new(serial).map_err(|e| {
-                Error::Internal(format!("serial number: {e}"))
-            })?;
+            x509_cert::serial_number::SerialNumber::new(serial)
+                .map_err(|e| Error::Internal(format!("serial number: {e}")))?;
         Ok(clone)
     }
 
@@ -162,13 +164,15 @@ impl Cert {
 
     /// Compressed DSTU public key from SPKI (`spki_get_pub_key`).
     pub fn spki_public_key_bytes(&self) -> Result<Vec<u8>> {
-        Ok(crate::primitives::dstu4145::compressed_key_from_spki_bitstring(
-            self.inner
-                .tbs_certificate
-                .subject_public_key_info
-                .subject_public_key
-                .raw_bytes(),
-        )?)
+        Ok(
+            crate::primitives::dstu4145::compressed_key_from_spki_bitstring(
+                self.inner
+                    .tbs_certificate
+                    .subject_public_key_info
+                    .subject_public_key
+                    .raw_bytes(),
+            )?,
+        )
     }
 
     /// Compare issuer + serial to this certificate.
@@ -252,10 +256,7 @@ impl Cert {
             return Ok(-1);
         };
 
-        Ok(bc
-            .path_len_constraint
-            .map(i32::from)
-            .unwrap_or(-1))
+        Ok(bc.path_len_constraint.map(i32::from).unwrap_or(-1))
     }
 
     /// `cert_is_ocsp_cert`.
@@ -296,7 +297,9 @@ impl Cert {
                 }
             }
         }
-        Err(Error::Unsupported("TSP URL not found in certificate".into()))
+        Err(Error::Unsupported(
+            "TSP URL not found in certificate".into(),
+        ))
     }
 }
 

@@ -167,18 +167,15 @@ pub fn ecrl_merge_delta(engine: &mut CrlEngine<'_>, delta: &Crl) -> Result<()> {
     Ok(())
 }
 
-fn ecrl_generate_core(
-    engine: &CrlEngine<'_>,
-    this_update: i64,
-    next_update: i64,
-) -> Result<Crl> {
+fn ecrl_generate_core(engine: &CrlEngine<'_>, this_update: i64, next_update: i64) -> Result<Crl> {
     use der::asn1::UtcTime;
     use std::time::Duration;
     use x509_cert::time::Time;
 
     let issuer_cert = engine.sign_adapter.cert()?;
-    let signature = AlgorithmIdentifierOwned::from_der(engine.sign_adapter.signature_algorithm_der())
-        .map_err(|e| Error::Internal(format!("signature aid decode: {e}")))?;
+    let signature =
+        AlgorithmIdentifierOwned::from_der(engine.sign_adapter.signature_algorithm_der())
+            .map_err(|e| Error::Internal(format!("signature aid decode: {e}")))?;
 
     let this = Time::UtcTime(
         UtcTime::from_unix_duration(Duration::from_secs(this_update as u64))

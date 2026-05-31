@@ -20,17 +20,18 @@ pub extern "C" fn uacryptex_digest(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let data = bytes_from_ptr(data, data_len)
             .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
         let aid = if algorithm_aid_len == 0 {
             None
         } else {
-            Some(bytes_from_ptr(algorithm_aid, algorithm_aid_len).map_err(|code| {
-                Error::InvalidParam(format!("invalid algorithm_aid: code {code}"))
-            })?)
+            Some(
+                bytes_from_ptr(algorithm_aid, algorithm_aid_len).map_err(|code| {
+                    Error::InvalidParam(format!("invalid algorithm_aid: code {code}"))
+                })?,
+            )
         };
         let cert = if cert_len == 0 {
             None

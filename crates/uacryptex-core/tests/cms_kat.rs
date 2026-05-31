@@ -146,9 +146,7 @@ fn cms_engine_multi_signer_with_crl() {
     signer1.add_signed_attr(&attr).unwrap();
 
     let mut engine = SignedDataEngine::new(signer1);
-    engine
-        .set_data(OidId::Data, STATUS_MESSAGE, true)
-        .unwrap();
+    engine.set_data(OidId::Data, STATUS_MESSAGE, true).unwrap();
     engine.add_cert(cert1.clone()).unwrap();
 
     let crl = CertificateList::from_der(include_bytes!("../../../testdata/pki/example_full.crl"))

@@ -1,8 +1,9 @@
 //! Digest adapter (`digest_adapter_init_*`, `cryptonite_manager.c`).
 
-use der::Decode;
 use crate::pki::cert::Cert;
-use crate::pki::crypto::aid::{gost3411_algorithm_der, sbox_from_algorithm_der, spki_algorithm_der};
+use crate::pki::crypto::aid::{
+    gost3411_algorithm_der, sbox_from_algorithm_der, spki_algorithm_der,
+};
 use crate::pki::oid::OidId;
 use crate::primitives::gost34_311::Gost34311;
 use crate::primitives::intl::{
@@ -10,6 +11,7 @@ use crate::primitives::intl::{
     sha512_digest_chunks,
 };
 use crate::{Error, Result};
+use der::Decode;
 
 /// Cryptonite `DigestAdapter`.
 #[derive(Clone)]
@@ -96,9 +98,8 @@ enum DigestKind {
 
 fn digest_kind(algorithm_der: &[u8]) -> Result<DigestKind> {
     use x509_cert::spki::AlgorithmIdentifier;
-    let aid: AlgorithmIdentifier<der::Any> =
-        AlgorithmIdentifier::from_der(algorithm_der)
-            .map_err(|e| Error::Internal(format!("algorithm decode: {e}")))?;
+    let aid: AlgorithmIdentifier<der::Any> = AlgorithmIdentifier::from_der(algorithm_der)
+        .map_err(|e| Error::Internal(format!("algorithm decode: {e}")))?;
     let oid = aid.oid.to_string();
     if crate::pki::crypto::aid::oid_str_under(OidId::PkiDstu4145WithGost3411, &oid)
         || crate::pki::crypto::aid::oid_str_under(OidId::PkiGost3411, &oid)

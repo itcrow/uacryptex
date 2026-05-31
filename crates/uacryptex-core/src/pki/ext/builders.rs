@@ -2,6 +2,7 @@
 
 use der::asn1::{GeneralizedTime, Ia5String, Ia5StringRef, OctetString, PrintableStringRef, Uint};
 use der::{Any, Decode, Encode, Sequence};
+use x509_cert::attr::AttributeTypeAndValue;
 use x509_cert::ext::pkix::certpolicy::{CertificatePolicies, PolicyInformation};
 use x509_cert::ext::pkix::constraints::BasicConstraints;
 use x509_cert::ext::pkix::crl::dp::DistributionPoint;
@@ -12,7 +13,6 @@ use x509_cert::ext::pkix::{
     PrivateKeyUsagePeriod, SubjectAltName, SubjectDirectoryAttributes, SubjectInfoAccessSyntax,
     SubjectKeyIdentifier,
 };
-use x509_cert::attr::AttributeTypeAndValue;
 use x509_cert::ext::Extension;
 use x509_cert::spki::SubjectPublicKeyInfo;
 
@@ -132,12 +132,16 @@ pub fn ext_create_cert_policies(critical: bool, policy_oids: &[OidId]) -> Result
 
 fn distribution_points_from_uris(uris: &[&str]) -> Result<CrlDistributionPoints> {
     if uris.is_empty() {
-        return Err(Error::InvalidParam("distribution point URIs are empty".into()));
+        return Err(Error::InvalidParam(
+            "distribution point URIs are empty".into(),
+        ));
     }
     let mut points = CrlDistributionPoints::default();
     for uri in uris {
         if uri.is_empty() {
-            return Err(Error::InvalidParam("distribution point URI is empty".into()));
+            return Err(Error::InvalidParam(
+                "distribution point URI is empty".into(),
+            ));
         }
         let gn = GeneralName::UniformResourceIdentifier(
             Ia5StringRef::new(uri)
@@ -216,9 +220,8 @@ pub fn ext_create_crl_number(critical: bool, crl_sn: &[u8]) -> Result<Extension>
     if crl_sn.is_empty() {
         return Err(Error::InvalidParam("CRL number is empty".into()));
     }
-    let number = CrlNumber(
-        Uint::new(crl_sn).map_err(|e| Error::InvalidParam(format!("CRL number: {e}")))?,
-    );
+    let number =
+        CrlNumber(Uint::new(crl_sn).map_err(|e| Error::InvalidParam(format!("CRL number: {e}")))?);
     let value = encode_as_ext_value(&number)?;
     build_extension(OidId::CrlNumberExtension, critical, value)
 }
@@ -244,7 +247,9 @@ pub fn ext_create_delta_crl_indicator(critical: bool, crl_number: &[u8]) -> Resu
 /// `ext_create_ext_key_usage`.
 pub fn ext_create_ext_key_usage(critical: bool, purpose_oids: &[OidId]) -> Result<Extension> {
     if purpose_oids.is_empty() {
-        return Err(Error::InvalidParam("extended key usage list is empty".into()));
+        return Err(Error::InvalidParam(
+            "extended key usage list is empty".into(),
+        ));
     }
     let mut oids = ExtendedKeyUsage(Vec::new());
     for id in purpose_oids {
@@ -380,7 +385,8 @@ pub fn ext_create_subj_dir_attr_directly(critical: bool, subject_attr: &str) -> 
 pub fn ext_create_subj_key_id(critical: bool, spki_der: &[u8]) -> Result<Extension> {
     let key_id = pkix_key_id_from_spki_der(spki_der)?;
     let ski = SubjectKeyIdentifier(
-        OctetString::new(key_id.as_slice()).map_err(|e| Error::Internal(format!("subject key id: {e}")))?,
+        OctetString::new(key_id.as_slice())
+            .map_err(|e| Error::Internal(format!("subject key id: {e}")))?,
     );
     let value = encode_as_ext_value(&ski)?;
     build_extension(OidId::SubjectKeyIdentifierExtension, critical, value)
@@ -425,7 +431,10 @@ fn int_to_uint(value: i64, name: &str) -> Result<Uint> {
         return Err(Error::InvalidParam(format!("{name} must be non-negative")));
     }
     let bytes = value.to_be_bytes();
-    let start = bytes.iter().position(|&b| b != 0).unwrap_or(bytes.len() - 1);
+    let start = bytes
+        .iter()
+        .position(|&b| b != 0)
+        .unwrap_or(bytes.len() - 1);
     Uint::new(&bytes[start..]).map_err(|e| Error::InvalidParam(format!("{name}: {e}")))
 }
 
@@ -565,7 +574,10 @@ mod tests {
     #[test]
     fn basic_constraints_ca_path_zero() {
         let ext = ext_create_basic_constraints(true, None, true, 0).unwrap();
-        assert_eq!(ext_get_value(&ext), hex::decode("30060101FF020100").unwrap());
+        assert_eq!(
+            ext_get_value(&ext),
+            hex::decode("30060101FF020100").unwrap()
+        );
     }
 
     #[test]

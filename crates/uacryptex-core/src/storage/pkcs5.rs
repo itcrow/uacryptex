@@ -6,9 +6,9 @@ use x509_cert::spki::AlgorithmIdentifier;
 
 use crate::pki::crypto::{algorithm_identifier_der, oid_str_under};
 use crate::pki::oid::{oid_matches_str, oid_to_str, OidId};
+use crate::primitives::dstu4145::{RandomBytes, SystemRandom};
 use crate::primitives::gost28147::{expand_dke, Gost28147, GOST28147_SBOX_LEN};
 use crate::primitives::gost34_311::hmac_gost3411;
-use crate::primitives::dstu4145::{RandomBytes, SystemRandom};
 use crate::primitives::intl::{aes_cbc_decrypt, aes_cbc_encrypt, hmac_sha1};
 use crate::{Error, Result};
 
@@ -81,7 +81,9 @@ pub fn pbkdf2(
     hmac_id: Pbkdf2HmacId,
 ) -> Result<Vec<u8>> {
     if iterations == 0 {
-        return Err(Error::InvalidParam("PBKDF2 iteration count must be > 0".into()));
+        return Err(Error::InvalidParam(
+            "PBKDF2 iteration count must be > 0".into(),
+        ));
     }
     if key_len == 0 {
         return Err(Error::InvalidParam("PBKDF2 key length must be > 0".into()));
@@ -159,7 +161,9 @@ fn uint_to_u32(value: &Uint) -> u32 {
     out
 }
 
-fn gost28147_sbox_from_cipher_aid(aid: &AlgorithmIdentifier<Any>) -> Result<[u8; GOST28147_SBOX_LEN]> {
+fn gost28147_sbox_from_cipher_aid(
+    aid: &AlgorithmIdentifier<Any>,
+) -> Result<[u8; GOST28147_SBOX_LEN]> {
     let Some(params) = &aid.parameters else {
         return Ok(crate::primitives::gost28147::default_sbox());
     };
@@ -251,7 +255,8 @@ fn pkcs7_pad(data: &[u8], block_len: usize) -> Vec<u8> {
 fn pkcs7_unpad(data: &[u8]) -> Result<Vec<u8>> {
     let pad_len = *data
         .last()
-        .ok_or_else(|| Error::InvalidParam("PKCS#7 padding missing".into()))? as usize;
+        .ok_or_else(|| Error::InvalidParam("PKCS#7 padding missing".into()))?
+        as usize;
     if pad_len == 0 || pad_len > data.len() {
         return Err(Error::InvalidParam("invalid PKCS#7 padding".into()));
     }
@@ -392,14 +397,11 @@ pub fn gost28147_cfb_encryption_aid(iv: &[u8; 8]) -> Result<AlgorithmIdentifier<
 
 /// Build AES-256-CBC encryption `AlgorithmIdentifier` with IV.
 pub fn aes256_cbc_encryption_aid(iv: &[u8; 16]) -> Result<AlgorithmIdentifier<Any>> {
-    let params_any = Any::encode_from(
-        &OctetString::new(iv)
-            .map_err(|e| Error::Internal(format!("IV: {e}")))?,
-    )
-    .map_err(|e| Error::Internal(format!("AES IV any: {e}")))?;
+    let params_any =
+        Any::encode_from(&OctetString::new(iv).map_err(|e| Error::Internal(format!("IV: {e}")))?)
+            .map_err(|e| Error::Internal(format!("AES IV any: {e}")))?;
     let der = algorithm_identifier_der(OidId::Aes256Cbc, Some(&params_any))?;
-    AlgorithmIdentifier::from_der(&der)
-        .map_err(|e| Error::Internal(format!("AES aid decode: {e}")))
+    AlgorithmIdentifier::from_der(&der).map_err(|e| Error::Internal(format!("AES aid decode: {e}")))
 }
 
 fn u32_to_uint(value: u32) -> Result<Uint> {
@@ -429,14 +431,12 @@ fn build_pbes2_params(
     Ok(Pbes2Params {
         key_derivation_func: Pbes2Kdfs {
             algorithm: ObjectIdentifier::new(
-                &oid_to_str(OidId::Kdf).ok_or_else(|| {
-                    Error::Internal("PBKDF2 OID missing from registry".into())
-                })?,
+                &oid_to_str(OidId::Kdf)
+                    .ok_or_else(|| Error::Internal("PBKDF2 OID missing from registry".into()))?,
             )
             .map_err(|e| Error::Internal(format!("PBKDF2 OID: {e}")))?,
             parameters: Pbkdf2Params {
-                salt: OctetString::new(salt)
-                    .map_err(|e| Error::Internal(format!("salt: {e}")))?,
+                salt: OctetString::new(salt).map_err(|e| Error::Internal(format!("salt: {e}")))?,
                 iteration_count: u32_to_uint(iterations)?,
                 key_length: None,
                 prf,

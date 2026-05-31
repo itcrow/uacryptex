@@ -23,9 +23,8 @@ pub extern "C" fn uacryptex_cert_verify(
     let run = || -> Result<(), Error> {
         let cert_der = bytes_from_ptr(cert, cert_len)
             .map_err(|code| Error::InvalidParam(format!("invalid cert: code {code}")))?;
-        let issuer_der = bytes_from_ptr(issuer_cert, issuer_cert_len).map_err(|code| {
-            Error::InvalidParam(format!("invalid issuer_cert: code {code}"))
-        })?;
+        let issuer_der = bytes_from_ptr(issuer_cert, issuer_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid issuer_cert: code {code}")))?;
         let cert = Cert::decode(cert_der)?;
         let issuer = Cert::decode(issuer_der)?;
         let adapter = VerifyAdapter::init_by_cert(&issuer)?;
@@ -76,9 +75,8 @@ pub extern "C" fn uacryptex_cert_spki(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         let cert_der = bytes_from_ptr(cert, cert_len)
             .map_err(|code| Error::InvalidParam(format!("invalid cert: code {code}")))?;
         let cert = Cert::decode(cert_der)?;
@@ -112,9 +110,8 @@ pub extern "C" fn uacryptex_cert_generate(
     err: *mut UacryptexError,
 ) -> i32 {
     let run = || -> Result<UacryptexBuf, Error> {
-        check_out(out as *mut _).map_err(|code| {
-            Error::InvalidParam(format!("invalid out pointer: code {code}"))
-        })?;
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
         if ca_key.is_null() {
             return Err(Error::InvalidParam("ca_key handle is null".into()));
         }
@@ -130,14 +127,7 @@ pub extern "C" fn uacryptex_cert_generate(
         let engine = ecert_alloc(&sa, da, self_signed != 0)?;
         let mut cert = None;
         ecert_generate(
-            &engine,
-            &request,
-            version,
-            serial,
-            not_before,
-            not_after,
-            None,
-            &mut cert,
+            &engine, &request, version, serial, not_before, not_after, None, &mut cert,
         )?;
         let cert = cert.ok_or_else(|| Error::Internal("cert generate returned none".into()))?;
         Ok(UacryptexBuf::from_vec(cert.encode()?))

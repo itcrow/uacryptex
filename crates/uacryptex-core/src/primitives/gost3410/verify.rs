@@ -2,8 +2,8 @@
 
 use crate::error::{Error, Result};
 use crate::math::{
-    ecp_dual_mul, ecp_is_on_curve, gfp_mod, gfp_mod_inv, gfp_mod_mul, gfp_mod_sub, int_ct_equals,
-    int_cmp, int_is_zero, EcPoint, WordArray,
+    ecp_dual_mul, ecp_is_on_curve, gfp_mod, gfp_mod_inv, gfp_mod_mul, gfp_mod_sub, int_cmp,
+    int_ct_equals, int_is_zero, EcPoint, WordArray,
 };
 
 use super::params::CurveParams;
@@ -53,7 +53,8 @@ pub fn verify(
         e.set_one();
     }
 
-    let v = gfp_mod_inv(&params.gfq, &e).ok_or_else(|| Error::InvalidParam("hash not invertible mod q".into()))?;
+    let v = gfp_mod_inv(&params.gfq, &e)
+        .ok_or_else(|| Error::InvalidParam("hash not invertible mod q".into()))?;
 
     let mut z1 = WordArray::with_zero(v.buf.len());
     let mut z2 = WordArray::with_zero(v.buf.len());

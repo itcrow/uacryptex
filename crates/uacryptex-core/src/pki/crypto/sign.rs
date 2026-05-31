@@ -4,14 +4,14 @@ use der::{Any, Decode, Encode};
 use x509_cert::spki::SubjectPublicKeyInfo;
 
 use crate::pki::cert::Cert;
-use crate::pki::crypto::aid::{
-    curve_params_from_spki_algorithm, digest_aid_from_signature_oid,
-    ecdsa_curve_from_spki_algorithm, ecdsa_signature_oid_for_digest_oid,
-    is_dstu4145_signature_oid, is_ecdsa_signature_oid, spki_algorithm_der,
-};
-use crate::pki::crypto::dh::DhAdapter;
 #[cfg(feature = "legacy-gost3410")]
 use crate::pki::crypto::aid::is_gost3410_signature_oid;
+use crate::pki::crypto::aid::{
+    curve_params_from_spki_algorithm, digest_aid_from_signature_oid,
+    ecdsa_curve_from_spki_algorithm, ecdsa_signature_oid_for_digest_oid, is_dstu4145_signature_oid,
+    is_ecdsa_signature_oid, spki_algorithm_der,
+};
+use crate::pki::crypto::dh::DhAdapter;
 use crate::pki::crypto::digest::DigestAdapter;
 use crate::pki::crypto::prng::MasterPrng;
 use crate::primitives::dstu4145::{
@@ -97,9 +97,9 @@ impl SignAdapter {
             #[cfg(feature = "legacy-gost3410")]
             {
                 use crate::primitives::gost3410::{ParamsId, MODULE_BYTES};
-                let params = ParamsId::Id1.curve_params().ok_or_else(|| {
-                    Error::Internal("GOST3410 params ID 1 unavailable".into())
-                })?;
+                let params = ParamsId::Id1
+                    .curve_params()
+                    .ok_or_else(|| Error::Internal("GOST3410 params ID 1 unavailable".into()))?;
                 if private_key.is_empty() || private_key.len() > MODULE_BYTES {
                     return Err(Error::InvalidParam("invalid GOST3410 private key".into()));
                 }
@@ -113,7 +113,9 @@ impl SignAdapter {
             }
             #[cfg(not(feature = "legacy-gost3410"))]
             {
-                return Err(Error::Unsupported("legacy-gost3410 feature disabled".into()));
+                return Err(Error::Unsupported(
+                    "legacy-gost3410 feature disabled".into(),
+                ));
             }
         } else {
             return Err(Error::Unsupported(format!(
@@ -145,7 +147,11 @@ impl SignAdapter {
                 &SubjectPublicKeyInfo::<Any, der::asn1::BitString>::from_der(&spki)
                     .map_err(|e| Error::Internal(format!("spki decode: {e}")))?,
             )?;
-            if let SignKind::Dstu4145 { params, private_key } = &adapter.kind {
+            if let SignKind::Dstu4145 {
+                params,
+                private_key,
+            } = &adapter.kind
+            {
                 validate_dstu_private_key(params, private_key, Some(&compressed))?;
             }
         } else if is_ecdsa_signature_oid(&sign_oid) {
@@ -183,7 +189,10 @@ impl SignAdapter {
     pub fn clone_state(&self) -> Result<Self> {
         Ok(Self {
             kind: match &self.kind {
-                SignKind::Dstu4145 { params, private_key } => SignKind::Dstu4145 {
+                SignKind::Dstu4145 {
+                    params,
+                    private_key,
+                } => SignKind::Dstu4145 {
                     params: params.clone(),
                     private_key: private_key.clone(),
                 },
@@ -199,7 +208,10 @@ impl SignAdapter {
                     qy: qy.clone(),
                 },
                 #[cfg(feature = "legacy-gost3410")]
-                SignKind::Gost3410 { params, private_key } => SignKind::Gost3410 {
+                SignKind::Gost3410 {
+                    params,
+                    private_key,
+                } => SignKind::Gost3410 {
                     params: params.clone(),
                     private_key: private_key.clone(),
                 },
@@ -272,14 +284,20 @@ impl SignAdapter {
         match &self.cert {
             Some(cert) => cert.spki_der(),
             None => match &self.kind {
-                SignKind::Dstu4145 { params, private_key } => {
+                SignKind::Dstu4145 {
+                    params,
+                    private_key,
+                } => {
                     let pk = public_key_from_private_key(params, private_key)?;
                     let compressed = compress_public_key(params, &pk)?;
                     build_dstu_spki_der(&self.spki_aid, &compressed)
                 }
                 SignKind::Ecdsa { qx, qy, .. } => build_ecdsa_spki_der(&self.spki_aid, qx, qy),
                 #[cfg(feature = "legacy-gost3410")]
-                SignKind::Gost3410 { params, private_key } => {
+                SignKind::Gost3410 {
+                    params,
+                    private_key,
+                } => {
                     use crate::primitives::gost3410::get_pubkey;
                     let (qx, qy) = get_pubkey(params, private_key)?;
                     build_gost3410_spki_der(&self.spki_aid, &qx, &qy)
@@ -297,7 +315,10 @@ impl SignAdapter {
     /// `sa->sign_hash`.
     pub fn sign_hash(&self, hash: &[u8]) -> Result<Vec<u8>> {
         match &self.kind {
-            SignKind::Dstu4145 { params, private_key } => {
+            SignKind::Dstu4145 {
+                params,
+                private_key,
+            } => {
                 if hash.len() != 32 {
                     return Err(Error::InvalidParam(format!(
                         "DSTU4145 hash must be 32 bytes, got {}",
@@ -308,9 +329,14 @@ impl SignAdapter {
                 let sig = sign(params, private_key, hash, &mut rng)?;
                 Ok(join_signature(&sig))
             }
-            SignKind::Ecdsa { curve, private_key, .. } => ecdsa_sign(*curve, private_key, hash),
+            SignKind::Ecdsa {
+                curve, private_key, ..
+            } => ecdsa_sign(*curve, private_key, hash),
             #[cfg(feature = "legacy-gost3410")]
-            SignKind::Gost3410 { params, private_key } => {
+            SignKind::Gost3410 {
+                params,
+                private_key,
+            } => {
                 use crate::primitives::gost3410::sign;
                 if hash.len() != 32 {
                     return Err(Error::InvalidParam(format!(
@@ -378,7 +404,9 @@ fn algorithm_oid_string(algorithm_der: &[u8]) -> Result<String> {
     Ok(aid.oid.to_string())
 }
 
-fn compressed_key_from_spki(spki: &SubjectPublicKeyInfo<Any, der::asn1::BitString>) -> Result<Vec<u8>> {
+fn compressed_key_from_spki(
+    spki: &SubjectPublicKeyInfo<Any, der::asn1::BitString>,
+) -> Result<Vec<u8>> {
     compressed_key_from_spki_bitstring(spki.subject_public_key.raw_bytes())
 }
 
@@ -387,8 +415,8 @@ pub(crate) fn build_dstu_spki_der(spki_aid: &[u8], compressed: &[u8]) -> Result<
     use x509_cert::spki::AlgorithmIdentifier;
     let aid: AlgorithmIdentifier<Any> = AlgorithmIdentifier::from_der(spki_aid)
         .map_err(|e| Error::Internal(format!("spki aid decode: {e}")))?;
-    let wrapped = OctetString::new(compressed)
-        .map_err(|e| Error::Internal(format!("octet string: {e}")))?;
+    let wrapped =
+        OctetString::new(compressed).map_err(|e| Error::Internal(format!("octet string: {e}")))?;
     let wrapped_der = wrapped
         .to_der()
         .map_err(|e| Error::Internal(format!("octet string encode: {e}")))?;
@@ -411,7 +439,8 @@ pub(crate) fn build_gost3410_spki_der(spki_aid: &[u8], qx: &[u8], qy: &[u8]) -> 
         .map_err(|e| Error::Internal(format!("spki aid decode: {e}")))?;
     let mut pubkey = qx.to_vec();
     pubkey.extend_from_slice(qy);
-    let wrapped = OctetString::new(pubkey).map_err(|e| Error::Internal(format!("octet string: {e}")))?;
+    let wrapped =
+        OctetString::new(pubkey).map_err(|e| Error::Internal(format!("octet string: {e}")))?;
     let wrapped_der = wrapped
         .to_der()
         .map_err(|e| Error::Internal(format!("octet string encode: {e}")))?;

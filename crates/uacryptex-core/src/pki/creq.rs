@@ -5,9 +5,9 @@ use x509_cert::attr::{Attribute, Attributes};
 use x509_cert::request::{CertReq, CertReqInfo, ExtensionReq};
 use x509_cert::spki::{AlgorithmIdentifierOwned, SubjectPublicKeyInfoOwned};
 
-use crate::pki::crypto::{sign_bitstring_to_raw, sign_raw_to_bitstring};
 use crate::pki::crypto::SignAdapter;
 use crate::pki::crypto::VerifyAdapter;
+use crate::pki::crypto::{sign_bitstring_to_raw, sign_raw_to_bitstring};
 use crate::{Error, Result};
 
 /// `creq_init_by_adapter`.
@@ -70,4 +70,6 @@ pub fn cert_req_public_key_from_spki(spki_der: &[u8]) -> Result<SubjectPublicKey
 }
 
 /// Re-export x509-cert request types used by callers.
-pub use x509_cert::request::{CertReq as CertificationRequest, CertReqInfo as CertificationRequestInfo};
+pub use x509_cert::request::{
+    CertReq as CertificationRequest, CertReqInfo as CertificationRequestInfo,
+};

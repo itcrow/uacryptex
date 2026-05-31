@@ -305,7 +305,9 @@ impl Gost28147 {
             )));
         }
         if iv.len() != 8 {
-            return Err(Error::InvalidParam("gost28147 CFB IV must be 8 bytes".into()));
+            return Err(Error::InvalidParam(
+                "gost28147 CFB IV must be 8 bytes".into(),
+            ));
         }
         uint8_to_uint32(key, &mut self.key);
         let mut feed = [0u8; 8];
@@ -326,7 +328,9 @@ impl Gost28147 {
             )));
         }
         if iv.len() != IV_LEN {
-            return Err(Error::InvalidParam("gost28147 CTR IV must be 8 bytes".into()));
+            return Err(Error::InvalidParam(
+                "gost28147 CTR IV must be 8 bytes".into(),
+            ));
         }
         uint8_to_uint32(key, &mut self.key);
         let mut feed = [0u32; 6];
@@ -403,13 +407,7 @@ impl Gost28147 {
         if *offset != 0 {
             let mut mac32 = [0u32; 2];
             uint8_to_uint32(mac, &mut mac32);
-            base_cycle8(
-                &mut mac32,
-                &self.key,
-                &MAC_KEY_ORDER,
-                16,
-                &self.sbox,
-            );
+            base_cycle8(&mut mac32, &self.key, &MAC_KEY_ORDER, 16, &self.sbox);
             uint32_to_uint8(&mac32, mac);
             *offset = 0;
         }
@@ -437,14 +435,7 @@ impl Gost28147 {
         };
 
         cfb_core(
-            src,
-            dst,
-            encrypt,
-            gamma,
-            feed,
-            offset,
-            &self.key,
-            &self.sbox,
+            src, dst, encrypt, gamma, feed, offset, &self.key, &self.sbox,
         );
         Ok(())
     }
@@ -563,19 +554,19 @@ fn ecb_core(ctx: &Gost28147, src: &[u8], dst: &mut [u8], is_encrypt: bool) {
     let _ = is_encrypt;
 }
 
-fn advance_gamma(
-    feed: &[u8; 8],
-    key: &[u32; 8],
-    sbox: &[u32; 1024],
-    gamma: &mut [u8; 8],
-) {
+fn advance_gamma(feed: &[u8; 8], key: &[u32; 8], sbox: &[u32; 1024], gamma: &mut [u8; 8]) {
     let mut gamma32 = [0u32; 2];
     uint8_to_uint32(feed, &mut gamma32);
     base_cycle8(&mut gamma32, key, &ENCRYPT_KEY_ORDER, 32, sbox);
     uint32_to_uint8(&gamma32, gamma);
 }
 
-fn advance_ctr_gamma(feed: &mut [u32; 6], key: &[u32; 8], sbox: &[u32; 1024], gamma: &mut [u8; 24]) {
+fn advance_ctr_gamma(
+    feed: &mut [u32; 6],
+    key: &[u32; 8],
+    sbox: &[u32; 1024],
+    gamma: &mut [u8; 24],
+) {
     ctr_next_feed(feed);
     let mut block = *feed;
     base_cycle24(&mut block, key, &ENCRYPT_KEY_ORDER, sbox);

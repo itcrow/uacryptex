@@ -36,15 +36,18 @@ pub fn build_signed_data_with_stores(
         engine.add_cert(c.clone())?;
     }
     for crl in extra_crls {
-        let list = CertificateList::from_der(&crl.encode()?).map_err(|e| {
-            crate::Error::Internal(format!("crl decode for signed data: {e}"))
-        })?;
+        let list = CertificateList::from_der(&crl.encode()?)
+            .map_err(|e| crate::Error::Internal(format!("crl decode for signed data: {e}")))?;
         engine.add_crl(list)?;
     }
     engine.generate()
 }
 
 /// Convenience: build and return PKCS#7 ContentInfo DER.
-pub fn build_content_info(sa: &SignAdapter, content: &[u8], content_type: OidId) -> Result<Vec<u8>> {
+pub fn build_content_info(
+    sa: &SignAdapter,
+    content: &[u8],
+    content_type: OidId,
+) -> Result<Vec<u8>> {
     build_signed_data(sa, content, content_type)?.encode_content_info()
 }

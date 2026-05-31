@@ -3,9 +3,9 @@
 //! Deprecated: use DSTU 4145 for new Ukrainian PKI. Enable with `--features legacy-gost3410`.
 
 mod params;
-mod util;
 mod pubkey;
 mod sign;
+mod util;
 mod verify;
 
 pub use params::{CurveParams, ParamsId, MODULE_BYTES};

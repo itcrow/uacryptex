@@ -82,8 +82,8 @@ fn ext_create_auth_info_access_ocsp() {
 
 #[test]
 fn ext_create_subj_info_access_tsp() {
-    let ext =
-        ext_create_subj_info_access(false, OidId::TspOid, &["http://ca.ua/time-stamping/"]).unwrap();
+    let ext = ext_create_subj_info_access(false, OidId::TspOid, &["http://ca.ua/time-stamping/"])
+        .unwrap();
     assert_ext_value_roundtrip(&ext);
 }
 
@@ -121,8 +121,10 @@ fn ext_create_ext_key_usage_ocsp() {
 
 #[test]
 fn private_key_usage_period_extension() {
-    let not_before = GeneralizedTime::from_unix_duration(Duration::from_secs(1_358_956_800)).unwrap();
-    let not_after = GeneralizedTime::from_unix_duration(Duration::from_secs(1_674_585_600)).unwrap();
+    let not_before =
+        GeneralizedTime::from_unix_duration(Duration::from_secs(1_358_956_800)).unwrap();
+    let not_after =
+        GeneralizedTime::from_unix_duration(Duration::from_secs(1_674_585_600)).unwrap();
     let ext = ext_create_private_key_usage(false, Some(not_before), Some(not_after)).unwrap();
     assert_ext_value_roundtrip(&ext);
 }
@@ -184,7 +186,11 @@ fn ext_create_subj_key_id_from_tov_spki() {
     let cert = Cert::decode(include_bytes!("../../../testdata/pki/tov_test.der")).unwrap();
     let spki = cert.spki_der().unwrap();
     let ext = ext_create_subj_key_id(false, &spki).unwrap();
-    assert_eq!(ext_get_value(&ext), cert.extension_value(OidId::SubjectKeyIdentifierExtension).unwrap());
+    assert_eq!(
+        ext_get_value(&ext),
+        cert.extension_value(OidId::SubjectKeyIdentifierExtension)
+            .unwrap()
+    );
     assert_ext_value_roundtrip(&ext);
 }
 

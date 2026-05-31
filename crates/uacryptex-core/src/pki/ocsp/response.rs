@@ -2,7 +2,9 @@
 
 use der::{Decode, Encode};
 use x509_cert::ext::pkix::CrlReason;
-use x509_ocsp::{BasicOcspResponse, CertStatus, OcspResponse, OcspResponseStatus, ResponderId, ResponseBytes};
+use x509_ocsp::{
+    BasicOcspResponse, CertStatus, OcspResponse, OcspResponseStatus, ResponderId, ResponseBytes,
+};
 
 use crate::pki::cert::Cert;
 use crate::pki::crypto::{sign_bitstring_to_raw, VerifyAdapter};
@@ -93,7 +95,11 @@ impl OcspResp {
 
     /// `ocspresp_get_responder_id`.
     pub fn responder_id(&self) -> Result<ResponderId> {
-        Ok(self.basic_ocsp_response()?.tbs_response_data.responder_id.clone())
+        Ok(self
+            .basic_ocsp_response()?
+            .tbs_response_data
+            .responder_id
+            .clone())
     }
 
     /// ResponderID DER encoding.

@@ -28,22 +28,20 @@ pub use cms::{
     uacryptex_cms_sign_cades_lt, uacryptex_cms_sign_cades_t, uacryptex_cms_sign_cades_x,
     uacryptex_cms_verify,
 };
-pub use crl::{
-    uacryptex_crl_check_cert, uacryptex_crl_generate, uacryptex_crl_verify,
-};
+pub use crl::{uacryptex_crl_check_cert, uacryptex_crl_generate, uacryptex_crl_verify};
 pub use csr::{uacryptex_csr_generate, uacryptex_csr_verify};
 pub use digest::uacryptex_digest;
 pub use dstu4145::uacryptex_dstu4145_verify_pb;
 pub use enveloped::{uacryptex_cms_envelop_decrypt, uacryptex_cms_envelop_encrypt};
 pub use error::{uacryptex_error_init, UacryptexError};
 pub use ocsp::{
-    uacryptex_ocsp_request_from_cert, uacryptex_ocsp_request_generate, uacryptex_ocsp_request_verify,
-    uacryptex_ocsp_response_generate, uacryptex_ocsp_response_validate,
-    uacryptex_ocsp_response_verify,
+    uacryptex_ocsp_request_from_cert, uacryptex_ocsp_request_generate,
+    uacryptex_ocsp_request_verify, uacryptex_ocsp_response_generate,
+    uacryptex_ocsp_response_validate, uacryptex_ocsp_response_verify,
 };
 pub use pkcs12::{
-    uacryptex_pkcs12_certificate_count, uacryptex_pkcs12_get_certificate,
-    uacryptex_pkcs12_open, uacryptex_pkcs12_set_certificates,
+    uacryptex_pkcs12_certificate_count, uacryptex_pkcs12_get_certificate, uacryptex_pkcs12_open,
+    uacryptex_pkcs12_set_certificates,
 };
 pub use pkcs8::uacryptex_pkcs8_open;
 pub use sign::{

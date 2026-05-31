@@ -23,8 +23,7 @@ impl EcGfpCtx {
         let len = p.buf.len();
         let mut a_minus = WordArray::with_zero(len);
         int_sub(p, a, &mut a_minus);
-        let a_equal_minus_3 =
-            int_bit_len(&a_minus) == 2 && a_minus.buf[0] == 3;
+        let a_equal_minus_3 = int_bit_len(&a_minus) == 2 && a_minus.buf[0] == 3;
         Self {
             gfp,
             a: a.clone(),
@@ -203,7 +202,13 @@ fn ecp_double_inplace(ctx: &EcGfpCtx, r: &mut EcPoint) {
     ecp_double_point(ctx, &p, r);
 }
 
-fn ecp_add_affine_inplace(ctx: &EcGfpCtx, r: &mut EcPoint, qx: &WordArray, qy: &WordArray, sign: i32) {
+fn ecp_add_affine_inplace(
+    ctx: &EcGfpCtx,
+    r: &mut EcPoint,
+    qx: &WordArray,
+    qy: &WordArray,
+    sign: i32,
+) {
     let p = r.clone();
     ecp_add_point(ctx, &p, qx, qy, sign, r);
 }

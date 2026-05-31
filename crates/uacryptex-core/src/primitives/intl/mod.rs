@@ -17,10 +17,9 @@ pub use aes::{
 pub use des::{des_ecb_decrypt, des_ecb_encrypt, tdes_ecb_decrypt, tdes_ecb_encrypt};
 pub use ecdsa::{
     build_ecdsa_spki_der, ecdsa_curve_from_oid_str, ecdsa_public_key_from_private,
-    ecdsa_public_key_from_spki, ecdsa_sign, ecdsa_verify, is_ecdsa_signature_oid,
+    ecdsa_public_key_from_spki, ecdsa_sign, ecdsa_verify, ecdsa_verify_p192, ecdsa_verify_p224,
+    ecdsa_verify_p256, ecdsa_verify_p384, ecdsa_verify_p521, is_ecdsa_signature_oid,
     validate_private_key as ecdsa_validate_private_key, EcdsaCurve,
-    ecdsa_verify_p192, ecdsa_verify_p224, ecdsa_verify_p256, ecdsa_verify_p384,
-    ecdsa_verify_p521,
 };
 pub use hmac::{hmac_md5, hmac_sha1, hmac_sha224, hmac_sha256, hmac_sha384, hmac_sha512};
 pub use md5::{md5_digest, md5_digest_chunks};

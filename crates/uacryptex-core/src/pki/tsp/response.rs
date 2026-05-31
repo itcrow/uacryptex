@@ -59,9 +59,7 @@ impl TspResp {
 
     /// `tsresp_get_ts_token`.
     pub fn time_stamp_token(&self) -> Result<ContentInfo> {
-        self.time_stamp_token
-            .clone()
-            .ok_or(Error::TspRespNoToken)
+        self.time_stamp_token.clone().ok_or(Error::TspRespNoToken)
     }
 
     /// `tsresp_set_ts_token`.
@@ -71,9 +69,10 @@ impl TspResp {
 
     /// `tsresp_verify`.
     pub fn verify(&self, da: &DigestAdapter, va: &VerifyAdapter) -> Result<()> {
-        let token_der = self.time_stamp_token()?.to_der().map_err(|e| {
-            Error::Internal(format!("timestamp token encode: {e}"))
-        })?;
+        let token_der = self
+            .time_stamp_token()?
+            .to_der()
+            .map_err(|e| Error::Internal(format!("timestamp token encode: {e}")))?;
         let sdata = SignedDataContainer::decode(&token_der)?;
         sdata.verify_internal_data(da, va, 0)
     }

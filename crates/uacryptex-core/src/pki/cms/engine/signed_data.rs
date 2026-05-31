@@ -34,17 +34,13 @@ impl<'a> SignedDataEngine<'a> {
     }
 
     /// `esigned_data_set_data`.
-    pub fn set_data(
-        &mut self,
-        content_type: OidId,
-        data: &[u8],
-        internal: bool,
-    ) -> Result<()> {
+    pub fn set_data(&mut self, content_type: OidId, data: &[u8], internal: bool) -> Result<()> {
         let econtent_type = object_identifier(content_type)?;
         let econtent = if internal {
-            Some(der::asn1::OctetString::new(data).map_err(|e| {
-                Error::Internal(format!("content octet string: {e}"))
-            })?)
+            Some(
+                der::asn1::OctetString::new(data)
+                    .map_err(|e| Error::Internal(format!("content octet string: {e}")))?,
+            )
         } else {
             None
         };
@@ -72,10 +68,7 @@ impl<'a> SignedDataEngine<'a> {
     /// `esigned_data_set_content_info`.
     pub fn set_content_info(&mut self, info: &EncapsulatedContentInfo) -> Result<()> {
         self.encap_content_info = Some(info.clone());
-        self.encap_data = info
-            .econtent
-            .as_ref()
-            .map(|os| os.as_bytes().to_vec());
+        self.encap_data = info.econtent.as_ref().map(|os| os.as_bytes().to_vec());
         self.encap_hash_data = None;
         Ok(())
     }

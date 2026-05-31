@@ -5,15 +5,15 @@ use der::asn1::{Int, ObjectIdentifier};
 use crate::pki::cert::Cert;
 use crate::pki::cms::builder::{build_signed_data, build_signed_data_with_stores};
 use crate::pki::cms::ets::{
-    archive_timestamp_imprint, cert_values, complete_certificate_refs,
-    complete_revocation_refs, revocation_values_from_ocsp,
-};
-use crate::pki::cms::signer_info::{
-    archive_time_stamp_token_attribute, cert_values_attribute,
-    complete_certificate_refs_attribute, complete_revocation_refs_attribute,
-    revocation_values_attribute, signature_time_stamp_token_attribute,
+    archive_timestamp_imprint, cert_values, complete_certificate_refs, complete_revocation_refs,
+    revocation_values_from_ocsp,
 };
 use crate::pki::cms::signed_data::SignedDataContainer;
+use crate::pki::cms::signer_info::{
+    archive_time_stamp_token_attribute, cert_values_attribute, complete_certificate_refs_attribute,
+    complete_revocation_refs_attribute, revocation_values_attribute,
+    signature_time_stamp_token_attribute,
+};
 use crate::pki::crl::Crl;
 use crate::pki::crypto::{DigestAdapter, SignAdapter};
 use crate::pki::engine::{

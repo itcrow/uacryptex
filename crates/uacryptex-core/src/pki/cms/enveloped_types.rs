@@ -127,10 +127,20 @@ pub struct OriginatorInfo {
 #[derive(Clone, Debug, Eq, PartialEq, Sequence, ValueOrd)]
 pub struct EnvelopedData {
     pub version: CmsVersion,
-    #[asn1(context_specific = "0", tag_mode = "IMPLICIT", constructed = "true", optional = "true")]
+    #[asn1(
+        context_specific = "0",
+        tag_mode = "IMPLICIT",
+        constructed = "true",
+        optional = "true"
+    )]
     pub originator_info: Option<OriginatorInfo>,
     pub recipient_infos: RecipientInfos,
     pub encrypted_content_info: EncryptedContentInfo,
-    #[asn1(context_specific = "1", tag_mode = "IMPLICIT", constructed = "true", optional = "true")]
+    #[asn1(
+        context_specific = "1",
+        tag_mode = "IMPLICIT",
+        constructed = "true",
+        optional = "true"
+    )]
     pub unprotected_attrs: Option<Attributes>,
 }

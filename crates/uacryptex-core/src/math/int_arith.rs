@@ -497,9 +497,7 @@ mod tests {
 
     #[test]
     fn int_mul_params2_a_times_one_layout() {
-        let a = wa_from_be_hex(
-            "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd94",
-        );
+        let a = wa_from_be_hex("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd94");
         let one = WordArray::with_one(a.buf.len());
         let mut ab = WordArray::with_zero(2 * a.buf.len());
         int_mul(&a, &one, &mut ab);
@@ -510,9 +508,11 @@ mod tests {
     /// Cryptonite `utest_math_int.c::int_div_test4` — dividend `< divisor`, remainder equals dividend.
     #[test]
     fn int_div_test4_matches_cryptonite() {
-        let mut a = wa_from_be_hex("800000000000000000000000000000000000000000000000000000000000042c");
+        let mut a =
+            wa_from_be_hex("800000000000000000000000000000000000000000000000000000000000042c");
         let b = wa_from_be_hex("8000000000000000000000000000000000000000000000000000000000000431");
-        let exp_r = wa_from_be_hex("800000000000000000000000000000000000000000000000000000000000042c");
+        let exp_r =
+            wa_from_be_hex("800000000000000000000000000000000000000000000000000000000000042c");
         a.change_len(2 * b.buf.len());
         let mut q = WordArray::with_zero(a.buf.len());
         let mut r = WordArray::with_zero(b.buf.len());
@@ -523,12 +523,8 @@ mod tests {
     /// `int_div` remainder when dividend is `a` zero-extended to 512 bits (i.e. `a*1`).
     #[test]
     fn int_div_params2_a_times_one() {
-        let p = wa_from_be_hex(
-            "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd97",
-        );
-        let a = wa_from_be_hex(
-            "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd94",
-        );
+        let p = wa_from_be_hex("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd97");
+        let a = wa_from_be_hex("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd94");
         let one = WordArray::with_one(a.buf.len());
         let mut ab = WordArray::with_zero(2 * a.buf.len());
         int_mul(&a, &one, &mut ab);
@@ -540,12 +536,8 @@ mod tests {
     /// Params set 2: y² mod p reduction (GOST3410 test vector base point).
     #[test]
     fn int_div_params2_py_sqr_mod_p() {
-        let p = wa_from_be_hex(
-            "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd97",
-        );
-        let y = wa_from_be_hex(
-            "8d91e471e0989cda27df505a453f2b7635294f2ddf23e3b122acc99c9e9f1e14",
-        );
+        let p = wa_from_be_hex("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd97");
+        let y = wa_from_be_hex("8d91e471e0989cda27df505a453f2b7635294f2ddf23e3b122acc99c9e9f1e14");
         let mut yy = WordArray::with_zero(2 * y.buf.len());
         int_sqr(&y, &mut yy);
         let mut r = WordArray::with_zero(p.buf.len());

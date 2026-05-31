@@ -22,9 +22,10 @@ pub(crate) fn unsigned_attr_value_bytes(
     let Some(attr) = attrs.iter().find(|attr| attr.oid == oid) else {
         return Ok(None);
     };
-    let value = attr.values.get(0).ok_or_else(|| {
-        Error::Internal(format!("unsigned attribute {:?} has no value", target))
-    })?;
+    let value = attr
+        .values
+        .get(0)
+        .ok_or_else(|| Error::Internal(format!("unsigned attribute {:?} has no value", target)))?;
     Ok(Some(value.value().to_vec()))
 }
 
@@ -48,10 +49,13 @@ pub fn cert_matches_signer_id(cert: &Cert, sid: &SignerIdentifier) -> Result<boo
             let issuer = cert
                 .issuer_der()
                 .map_err(|e| Error::Internal(e.to_string()))?;
-            let cert_issuer = x509_cert::name::Name::from_der(&issuer).map_err(|e| {
-                Error::Internal(format!("issuer decode: {e}"))
-            })?;
-            let cert_serial = cert.inner_certificate().tbs_certificate.serial_number.clone();
+            let cert_issuer = x509_cert::name::Name::from_der(&issuer)
+                .map_err(|e| Error::Internal(format!("issuer decode: {e}")))?;
+            let cert_serial = cert
+                .inner_certificate()
+                .tbs_certificate
+                .serial_number
+                .clone();
             Ok(cert_issuer == isn.issuer && cert_serial == isn.serial_number)
         }
         SignerIdentifier::SubjectKeyIdentifier(ski) => {
@@ -61,21 +65,18 @@ pub fn cert_matches_signer_id(cert: &Cert, sid: &SignerIdentifier) -> Result<boo
     }
 }
 
-fn signed_attr_by_oid(
-    attrs: &Attributes,
-    target: OidId,
-) -> Result<Option<&Attribute>> {
+fn signed_attr_by_oid(attrs: &Attributes, target: OidId) -> Result<Option<&Attribute>> {
     let oid = object_identifier(target)?;
     Ok(attrs.iter().find(|attr| attr.oid == oid))
 }
 
 fn message_digest_from_attrs(attrs: &Attributes) -> Result<Vec<u8>> {
-    let attr = signed_attr_by_oid(attrs, OidId::MessageDigest)?.ok_or_else(|| {
-        Error::Unsupported("signer info missing message-digest attribute".into())
-    })?;
-    let value = attr.values.get(0).ok_or_else(|| {
-        Error::Internal("message-digest attribute has no value".into())
-    })?;
+    let attr = signed_attr_by_oid(attrs, OidId::MessageDigest)?
+        .ok_or_else(|| Error::Unsupported("signer info missing message-digest attribute".into()))?;
+    let value = attr
+        .values
+        .get(0)
+        .ok_or_else(|| Error::Internal("message-digest attribute has no value".into()))?;
     let os = value
         .decode_as::<OctetString>()
         .map_err(|e| Error::Internal(format!("message-digest decode: {e}")))?;
@@ -147,9 +148,10 @@ pub fn verify_signer_info_without_data(sinfo: &SignerInfo, va: &VerifyAdapter) -
             "signer identifier does not match certificate".into(),
         ));
     }
-    let signed_attrs = sinfo.signed_attrs.as_ref().ok_or_else(|| {
-        Error::Unsupported("signer info has no signed attributes".into())
-    })?;
+    let signed_attrs = sinfo
+        .signed_attrs
+        .as_ref()
+        .ok_or_else(|| Error::Unsupported("signer info has no signed attributes".into()))?;
     let signed_attrs_der = encode_signed_attrs(signed_attrs)?;
     let sign = signature_bytes(
         &sinfo.signature,
@@ -164,18 +166,25 @@ pub fn verify_signer_info_without_data(sinfo: &SignerInfo, va: &VerifyAdapter) -
 /// Build `SignerIdentifier` from certificate (SKI when present, else issuer+serial).
 pub fn signer_identifier_from_cert(cert: &Cert) -> Result<SignerIdentifier> {
     if let Ok(ski_bytes) = cert.subject_key_id() {
-        let ski = SubjectKeyIdentifier(OctetString::new(ski_bytes).map_err(|e| {
-            Error::Internal(format!("subject key id octet string: {e}"))
-        })?);
+        let ski = SubjectKeyIdentifier(
+            OctetString::new(ski_bytes)
+                .map_err(|e| Error::Internal(format!("subject key id octet string: {e}")))?,
+        );
         return Ok(SignerIdentifier::SubjectKeyIdentifier(ski));
     }
 
     let issuer = cert.inner_certificate().tbs_certificate.issuer.clone();
-    let serial_number = cert.inner_certificate().tbs_certificate.serial_number.clone();
-    Ok(SignerIdentifier::IssuerAndSerialNumber(IssuerAndSerialNumber {
-        issuer,
-        serial_number,
-    }))
+    let serial_number = cert
+        .inner_certificate()
+        .tbs_certificate
+        .serial_number
+        .clone();
+    Ok(SignerIdentifier::IssuerAndSerialNumber(
+        IssuerAndSerialNumber {
+            issuer,
+            serial_number,
+        },
+    ))
 }
 
 /// Create a CMS attribute with one value.
@@ -192,9 +201,10 @@ pub fn attribute_with_value(oid: OidId, value: Any) -> Result<Attribute> {
 /// Create content-type attribute.
 pub fn content_type_attribute(content_type: OidId) -> Result<Attribute> {
     let oid = object_identifier(content_type)?;
-    let value = Any::from_der(&oid.to_der().map_err(|e| {
-        Error::Internal(format!("content type oid encode: {e}"))
-    })?)
+    let value = Any::from_der(
+        &oid.to_der()
+            .map_err(|e| Error::Internal(format!("content type oid encode: {e}")))?,
+    )
     .map_err(|e| Error::Internal(format!("content type any: {e}")))?;
     attribute_with_value(OidId::ContentType, value)
 }
@@ -202,9 +212,10 @@ pub fn content_type_attribute(content_type: OidId) -> Result<Attribute> {
 /// Create message-digest attribute.
 pub fn message_digest_attribute(digest: &[u8]) -> Result<Attribute> {
     let os = OctetString::new(digest).map_err(|e| Error::Internal(format!("digest os: {e}")))?;
-    let value = Any::from_der(&os.to_der().map_err(|e| {
-        Error::Internal(format!("digest os encode: {e}"))
-    })?)
+    let value = Any::from_der(
+        &os.to_der()
+            .map_err(|e| Error::Internal(format!("digest os encode: {e}")))?,
+    )
     .map_err(|e| Error::Internal(format!("digest any: {e}")))?;
     attribute_with_value(OidId::MessageDigest, value)
 }
@@ -214,9 +225,8 @@ pub fn signing_certificate_v2_attribute(cert: &Cert, ess_da: &DigestAdapter) -> 
     use crate::pki::cms::ess::signing_certificate_v2;
 
     let scv2 = signing_certificate_v2(cert, ess_da)?;
-    let value = Any::encode_from(&scv2).map_err(|e| {
-        Error::Internal(format!("signing certificate v2 encode: {e}"))
-    })?;
+    let value = Any::encode_from(&scv2)
+        .map_err(|e| Error::Internal(format!("signing certificate v2 encode: {e}")))?;
     attribute_with_value(OidId::AaSigningCertificateV2, value)
 }
 
@@ -224,9 +234,8 @@ pub fn signing_certificate_v2_attribute(cert: &Cert, ess_da: &DigestAdapter) -> 
 pub fn complete_certificate_refs_attribute(
     refs: &crate::pki::cms::ets::CompleteCertificateRefs,
 ) -> Result<Attribute> {
-    let value = Any::encode_from(refs).map_err(|e| {
-        Error::Internal(format!("complete certificate refs encode: {e}"))
-    })?;
+    let value = Any::encode_from(refs)
+        .map_err(|e| Error::Internal(format!("complete certificate refs encode: {e}")))?;
     attribute_with_value(OidId::AaEtsCertificateRefs, value)
 }
 
@@ -234,25 +243,24 @@ pub fn complete_certificate_refs_attribute(
 pub fn complete_revocation_refs_attribute(
     refs: &crate::pki::cms::ets::CompleteRevocationRefs,
 ) -> Result<Attribute> {
-    let value = Any::encode_from(refs).map_err(|e| {
-        Error::Internal(format!("complete revocation refs encode: {e}"))
-    })?;
+    let value = Any::encode_from(refs)
+        .map_err(|e| Error::Internal(format!("complete revocation refs encode: {e}")))?;
     attribute_with_value(OidId::AaEtsRevocationRefs, value)
 }
 
 /// Create id-aa-ets-certValues unsigned attribute (CAdES-X).
 pub fn cert_values_attribute(values: &crate::pki::cms::ets::CertValues) -> Result<Attribute> {
-    let value = Any::encode_from(values).map_err(|e| {
-        Error::Internal(format!("cert values encode: {e}"))
-    })?;
+    let value = Any::encode_from(values)
+        .map_err(|e| Error::Internal(format!("cert values encode: {e}")))?;
     attribute_with_value(OidId::AaEtsCertValues, value)
 }
 
 /// Create id-aa-ets-revocationValues unsigned attribute (CAdES-X).
-pub fn revocation_values_attribute(values: &crate::pki::cms::ets::RevocationValues) -> Result<Attribute> {
-    let value = Any::encode_from(values).map_err(|e| {
-        Error::Internal(format!("revocation values encode: {e}"))
-    })?;
+pub fn revocation_values_attribute(
+    values: &crate::pki::cms::ets::RevocationValues,
+) -> Result<Attribute> {
+    let value = Any::encode_from(values)
+        .map_err(|e| Error::Internal(format!("revocation values encode: {e}")))?;
     attribute_with_value(OidId::AaEtsRevocationValues, value)
 }
 
@@ -260,17 +268,17 @@ pub fn revocation_values_attribute(values: &crate::pki::cms::ets::RevocationValu
 pub fn archive_time_stamp_token_attribute(
     token: &crate::pki::cms::types::ContentInfo,
 ) -> Result<Attribute> {
-    let value = Any::encode_from(token).map_err(|e| {
-        Error::Internal(format!("archive timestamp token encode: {e}"))
-    })?;
+    let value = Any::encode_from(token)
+        .map_err(|e| Error::Internal(format!("archive timestamp token encode: {e}")))?;
     attribute_with_value(OidId::AaEtsArchiveTimeStamp, value)
 }
 
 /// Create id-aa-signatureTimeStampToken unsigned attribute (CAdES-T).
-pub fn signature_time_stamp_token_attribute(token: &crate::pki::cms::types::ContentInfo) -> Result<Attribute> {
-    let value = Any::encode_from(token).map_err(|e| {
-        Error::Internal(format!("timestamp token encode: {e}"))
-    })?;
+pub fn signature_time_stamp_token_attribute(
+    token: &crate::pki::cms::types::ContentInfo,
+) -> Result<Attribute> {
+    let value = Any::encode_from(token)
+        .map_err(|e| Error::Internal(format!("timestamp token encode: {e}")))?;
     attribute_with_value(OidId::AaSignatureTimeStampToken, value)
 }
 
@@ -280,13 +288,13 @@ pub fn verify_signing_cert_v2(
     ess_da: &DigestAdapter,
     cert: &Cert,
 ) -> Result<()> {
-    let signed_attrs = sinfo.signed_attrs.as_ref().ok_or_else(|| {
-        Error::Unsupported("signer info missing signed attributes".into())
-    })?;
+    let signed_attrs = sinfo
+        .signed_attrs
+        .as_ref()
+        .ok_or_else(|| Error::Unsupported("signer info missing signed attributes".into()))?;
 
-    let attr = signed_attr_by_oid(signed_attrs, OidId::AaSigningCertificateV2)?.ok_or_else(|| {
-        Error::Unsupported("signing certificate v2 attribute missing".into())
-    })?;
+    let attr = signed_attr_by_oid(signed_attrs, OidId::AaSigningCertificateV2)?
+        .ok_or_else(|| Error::Unsupported("signing certificate v2 attribute missing".into()))?;
 
     let value = attr.values.get(0).ok_or_else(|| {
         Error::Unsupported("signing certificate v2 attribute has no value".into())
@@ -296,7 +304,11 @@ pub fn verify_signing_cert_v2(
         .decode_as::<SigningCertificateV2>()
         .map_err(|e| Error::Internal(format!("signing certificate v2 decode: {e}")))?;
 
-    let cert_serial = cert.inner_certificate().tbs_certificate.serial_number.clone();
+    let cert_serial = cert
+        .inner_certificate()
+        .tbs_certificate
+        .serial_number
+        .clone();
     let ess_cert = signing_cert_v2
         .certs
         .iter()

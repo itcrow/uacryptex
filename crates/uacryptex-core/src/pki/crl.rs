@@ -9,7 +9,9 @@ use x509_cert::ext::Extension;
 use x509_cert::spki::AlgorithmIdentifierOwned;
 
 use crate::pki::cert::Cert;
-use crate::pki::crypto::{sign_bitstring_to_raw, sign_raw_to_bitstring, SignAdapter, VerifyAdapter};
+use crate::pki::crypto::{
+    sign_bitstring_to_raw, sign_raw_to_bitstring, SignAdapter, VerifyAdapter,
+};
 use crate::pki::ext::object_identifier;
 use crate::pki::oid::OidId;
 use crate::{Error, Result};
@@ -162,7 +164,10 @@ impl Crl {
 
     /// `crl_is_full` — true when Freshest CRL extension is present.
     pub fn is_full(&self) -> bool {
-        has_extension(&self.inner.tbs_cert_list.crl_extensions, OidId::FreshestCrlExtension)
+        has_extension(
+            &self.inner.tbs_cert_list.crl_extensions,
+            OidId::FreshestCrlExtension,
+        )
     }
 
     /// `crl_is_delta` — true when Delta CRL Indicator extension is present.

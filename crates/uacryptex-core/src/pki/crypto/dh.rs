@@ -75,7 +75,10 @@ impl DhAdapter {
     /// `dha->get_pub_key` — compressed DSTU public key octets.
     pub fn public_key(&self) -> Result<Vec<u8>> {
         match &self.kind {
-            DhKind::Dstu4145 { params, private_key } => {
+            DhKind::Dstu4145 {
+                params,
+                private_key,
+            } => {
                 let pk =
                     crate::primitives::dstu4145::public_key_from_private_key(params, private_key)?;
                 crate::primitives::dstu4145::compress_public_key(params, &pk)
@@ -89,9 +92,10 @@ impl DhAdapter {
     /// `dha->dh` — peer key is compressed DSTU octets or ECDSA SPKI BIT STRING bytes.
     pub fn dh(&self, peer_public_key: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
         match &self.kind {
-            DhKind::Dstu4145 { params, private_key } => {
-                dstu4145_dh(params, true, private_key, peer_public_key)
-            }
+            DhKind::Dstu4145 {
+                params,
+                private_key,
+            } => dstu4145_dh(params, true, private_key, peer_public_key),
             DhKind::Ecdsa { .. } => Err(Error::Unsupported(
                 "ECDSA DH key agreement not implemented".into(),
             )),
@@ -101,7 +105,10 @@ impl DhAdapter {
     /// Decompress peer SPKI BIT STRING wrapper for DSTU DH.
     pub fn dh_from_spki_bitstring(&self, spki_raw: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
         match &self.kind {
-            DhKind::Dstu4145 { params, private_key } => {
+            DhKind::Dstu4145 {
+                params,
+                private_key,
+            } => {
                 let compressed = compressed_key_from_spki_bitstring(spki_raw)?;
                 dstu4145_dh(params, true, private_key, &compressed)
             }
@@ -115,7 +122,10 @@ impl DhAdapter {
     pub fn clone_state(&self) -> Result<Self> {
         Ok(Self {
             kind: match &self.kind {
-                DhKind::Dstu4145 { params, private_key } => DhKind::Dstu4145 {
+                DhKind::Dstu4145 {
+                    params,
+                    private_key,
+                } => DhKind::Dstu4145 {
                     params: params.clone(),
                     private_key: private_key.clone(),
                 },

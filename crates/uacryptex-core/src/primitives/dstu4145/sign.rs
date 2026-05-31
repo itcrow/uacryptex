@@ -2,7 +2,10 @@
 
 use super::verify::{build_ec2m_with_onb, field_point_from_ba, onb_tables};
 use super::{CurveParams, PublicKey, Signature};
-use crate::math::{ec2m_mul, gf2m_mod_add, gf2m_mod_mul, int_add, int_bit_len, int_cmp, int_div, int_is_zero, int_mul, int_sub, int_truncate, EcPoint, WordArray};
+use crate::math::{
+    ec2m_mul, gf2m_mod_add, gf2m_mod_mul, int_add, int_bit_len, int_cmp, int_div, int_is_zero,
+    int_mul, int_sub, int_truncate, EcPoint, WordArray,
+};
 use crate::primitives::dstu4145::prng::RandomBytes;
 use crate::{Error, Result};
 

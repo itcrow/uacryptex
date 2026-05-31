@@ -51,10 +51,7 @@ fn validate_private_key(params: &CurveParams, d: &WordArray) -> Result<()> {
 }
 
 /// Generate a private key scalar in `[1, q)`.
-pub fn generate_private_key(
-    params: &CurveParams,
-    rng: &mut dyn RandomBytes,
-) -> Result<Vec<u8>> {
+pub fn generate_private_key(params: &CurveParams, rng: &mut dyn RandomBytes) -> Result<Vec<u8>> {
     let k = int_rand(&params.q, rng)?;
     Ok(k.to_le_bytes_len(MODULE_BYTES))
 }
@@ -105,10 +102,7 @@ pub fn sign(
         }
     }
 
-    Ok(Signature::from_be(
-        wa_to_be_module(&r),
-        wa_to_be_module(&s),
-    ))
+    Ok(Signature::from_be(wa_to_be_module(&r), wa_to_be_module(&s)))
 }
 
 pub fn split_signature_be(signature: &[u8]) -> Result<Signature> {

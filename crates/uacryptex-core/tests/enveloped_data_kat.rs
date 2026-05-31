@@ -29,10 +29,7 @@ fn enveloped_data_has_no_originator_cert() {
 #[test]
 fn enveloped_data_get_originator_cert_errors_without_originator() {
     let decoded = EnvelopedDataContainer::decode(FIXTURE).unwrap();
-    assert_eq!(
-        decoded.originator_cert().unwrap_err(),
-        Error::NoCertificate
-    );
+    assert_eq!(decoded.originator_cert().unwrap_err(), Error::NoCertificate);
 }
 
 #[test]
@@ -40,10 +37,7 @@ fn env_get_content_encryption_aid_from_fixture() {
     let decoded = EnvelopedDataContainer::decode(FIXTURE).unwrap();
     let aid = env_get_content_encryption_aid(Some(&decoded)).unwrap();
     assert!(!aid.is_empty());
-    assert_eq!(
-        aid,
-        decoded.content_encryption_algorithm_der().unwrap()
-    );
+    assert_eq!(aid, decoded.content_encryption_algorithm_der().unwrap());
 }
 
 #[test]

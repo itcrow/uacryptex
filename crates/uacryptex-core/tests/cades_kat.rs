@@ -38,7 +38,10 @@ fn pki_example_ocsp_response() -> Vec<u8> {
     .unwrap();
     let ocsp_key = include_bytes!("../../../testdata/pki/pki_example/ocsp_private_key_ba.dat");
     let full = Crl::decode(include_bytes!("../../../testdata/pki/pki_example/full.crl")).unwrap();
-    let delta = Crl::decode(include_bytes!("../../../testdata/pki/pki_example/delta.crl")).unwrap();
+    let delta = Crl::decode(include_bytes!(
+        "../../../testdata/pki/pki_example/delta.crl"
+    ))
+    .unwrap();
     let crls = [full, delta];
 
     let root_va = VerifyAdapter::init_by_cert(&root).unwrap();
@@ -64,9 +67,7 @@ fn pki_example_ocsp_response() -> Vec<u8> {
         "../../../testdata/pki/pki_example/ocsp_request.der"
     ))
     .unwrap();
-    let response = engine
-        .generate(&request, &req_va, 1_359_151_200)
-        .unwrap();
+    let response = engine.generate(&request, &req_va, 1_359_151_200).unwrap();
     response.verify(&ocsp_va).unwrap();
     assert_eq!(response.response_status(), OcspResponseStatus::Successful);
     response.encode().unwrap()
@@ -79,16 +80,8 @@ fn cades_t_build_and_verify_bes() {
     let serial = Int::new(&128u8.to_be_bytes()).unwrap();
     let tsp_time = 1_359_151_200i64;
 
-    let cms = build_content_info_cades_t(
-        &sa,
-        &data,
-        OidId::Data,
-        &sa,
-        &serial,
-        tsp_time,
-        None,
-    )
-    .unwrap();
+    let cms =
+        build_content_info_cades_t(&sa, &data, OidId::Data, &sa, &serial, tsp_time, None).unwrap();
 
     let container = SignedDataContainer::decode(&cms).unwrap();
     let sinfo = container.inner().signer_info(0).unwrap();
@@ -106,10 +99,8 @@ fn cades_c_build_and_verify_bes() {
         "../../../testdata/pki/pki_example/root_certificate.cer"
     ))
     .unwrap();
-    let full_crl = Crl::decode(include_bytes!(
-        "../../../testdata/pki/pki_example/full.crl"
-    ))
-    .unwrap();
+    let full_crl =
+        Crl::decode(include_bytes!("../../../testdata/pki/pki_example/full.crl")).unwrap();
     let data = vec![0xf0; 100];
 
     let cms = build_content_info_cades_c(&sa, &data, OidId::Data, &root_cert, &full_crl).unwrap();
@@ -133,14 +124,8 @@ fn cades_x_build_and_verify_bes() {
     let ocsp_response = pki_example_ocsp_response();
     let data = vec![0xf0; 100];
 
-    let cms = build_content_info_cades_x(
-        &sa,
-        &data,
-        OidId::Data,
-        &root_cert,
-        &ocsp_response,
-    )
-    .unwrap();
+    let cms =
+        build_content_info_cades_x(&sa, &data, OidId::Data, &root_cert, &ocsp_response).unwrap();
 
     let container = SignedDataContainer::decode(&cms).unwrap();
     let sinfo = container.inner().signer_info(0).unwrap();
@@ -157,10 +142,8 @@ fn cades_lt_build_and_verify_bes() {
         "../../../testdata/pki/pki_example/root_certificate.cer"
     ))
     .unwrap();
-    let full_crl = Crl::decode(include_bytes!(
-        "../../../testdata/pki/pki_example/full.crl"
-    ))
-    .unwrap();
+    let full_crl =
+        Crl::decode(include_bytes!("../../../testdata/pki/pki_example/full.crl")).unwrap();
     let delta_crl = Crl::decode(include_bytes!(
         "../../../testdata/pki/pki_example/delta.crl"
     ))
@@ -197,10 +180,8 @@ fn cades_a_build_and_verify_bes() {
         "../../../testdata/pki/pki_example/root_certificate.cer"
     ))
     .unwrap();
-    let full_crl = Crl::decode(include_bytes!(
-        "../../../testdata/pki/pki_example/full.crl"
-    ))
-    .unwrap();
+    let full_crl =
+        Crl::decode(include_bytes!("../../../testdata/pki/pki_example/full.crl")).unwrap();
     let delta_crl = Crl::decode(include_bytes!(
         "../../../testdata/pki/pki_example/delta.crl"
     ))

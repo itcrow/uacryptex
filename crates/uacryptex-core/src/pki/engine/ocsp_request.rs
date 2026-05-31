@@ -44,7 +44,9 @@ impl OcspRequestEngine {
         if let Some(ocsp) = ocsp_va {
             let ocsp_cert = ocsp.cert()?;
             if !ocsp_cert.is_ocsp_responder()? {
-                return Err(Error::InvalidParam("adapter is not OCSP certificate".into()));
+                return Err(Error::InvalidParam(
+                    "adapter is not OCSP certificate".into(),
+                ));
             }
             ocsp_cert.verify(root_va)?;
         }
@@ -110,10 +112,7 @@ impl OcspRequestEngine {
             tbs.request_extensions = Some(vec![ext]);
         }
 
-        let signed = self
-            .requestor_sa
-            .as_ref()
-            .is_some_and(|sa| sa.has_cert());
+        let signed = self.requestor_sa.as_ref().is_some_and(|sa| sa.has_cert());
 
         if !signed {
             return Ok(OcspReq::from_inner(OcspRequest {
@@ -125,7 +124,11 @@ impl OcspRequestEngine {
         let sa = self.requestor_sa.as_ref().expect("checked above");
         let requestor_cert = sa.cert()?;
         tbs.requestor_name = Some(GeneralName::DirectoryName(
-            requestor_cert.inner_certificate().tbs_certificate.subject.clone(),
+            requestor_cert
+                .inner_certificate()
+                .tbs_certificate
+                .subject
+                .clone(),
         ));
 
         let tbs_der = tbs
@@ -164,13 +167,22 @@ impl OcspRequestEngine {
             return Err(Error::InvalidParam("ocsp response not successful".into()));
         }
         let bytes = response.response_bytes()?;
-        if !bytes.response_type.to_string().contains("1.3.6.1.5.5.7.48.1.1") {
+        if !bytes
+            .response_type
+            .to_string()
+            .contains("1.3.6.1.5.5.7.48.1.1")
+        {
             return Err(Error::Unsupported("unsupported OCSP response type".into()));
         }
         let basic = BasicOcspResponse::from_der(bytes.response.as_bytes())
             .map_err(|e| Error::Internal(format!("basic ocsp response decode: {e}")))?;
         if timeout_minutes >= 0 {
-            let produced = basic.tbs_response_data.produced_at.0.to_unix_duration().as_secs() as i64;
+            let produced = basic
+                .tbs_response_data
+                .produced_at
+                .0
+                .to_unix_duration()
+                .as_secs() as i64;
             if current_time > produced + i64::from(timeout_minutes) * 60 {
                 return Err(Error::InvalidParam("ocsp response timeout".into()));
             }

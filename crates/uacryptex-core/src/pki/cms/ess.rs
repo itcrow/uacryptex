@@ -43,14 +43,17 @@ pub fn ess_cert_id_v2(cert: &Cert, ess_da: &DigestAdapter) -> Result<EssCertIdV2
     let mut hasher = ess_da.clone_state()?;
     hasher.update(&cert_der)?;
     let digest = hasher.finalize()?;
-    let cert_hash = OctetString::new(digest).map_err(|e| {
-        Error::Internal(format!("ess cert hash octet string: {e}"))
-    })?;
+    let cert_hash = OctetString::new(digest)
+        .map_err(|e| Error::Internal(format!("ess cert hash octet string: {e}")))?;
 
     let issuer = vec![GeneralName::DirectoryName(
         cert.inner_certificate().tbs_certificate.issuer.clone(),
     )];
-    let serial_number = cert.inner_certificate().tbs_certificate.serial_number.clone();
+    let serial_number = cert
+        .inner_certificate()
+        .tbs_certificate
+        .serial_number
+        .clone();
 
     Ok(EssCertIdV2 {
         hash_algorithm,
@@ -64,7 +67,5 @@ pub fn ess_cert_id_v2(cert: &Cert, ess_da: &DigestAdapter) -> Result<EssCertIdV2
 
 pub fn signing_certificate_v2(cert: &Cert, ess_da: &DigestAdapter) -> Result<SigningCertificateV2> {
     let ess = ess_cert_id_v2(cert, ess_da)?;
-    Ok(SigningCertificateV2 {
-        certs: vec![ess],
-    })
+    Ok(SigningCertificateV2 { certs: vec![ess] })
 }

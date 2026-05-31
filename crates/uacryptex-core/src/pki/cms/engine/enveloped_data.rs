@@ -92,7 +92,9 @@ impl<'a> EnvelopedDataEngine<'a> {
     /// `eenvel_data_generate`.
     pub fn generate(&self) -> Result<(EnvelopedDataContainer, Option<Vec<u8>>)> {
         if self.recipient_certs.is_empty() {
-            return Err(Error::InvalidParam("enveloped data has no recipient".into()));
+            return Err(Error::InvalidParam(
+                "enveloped data has no recipient".into(),
+            ));
         }
         let cipher_oid = self
             .cipher_oid
@@ -232,10 +234,12 @@ fn originator_id_by_public_key(
     use der::asn1::BitString;
     let bit_string = BitString::from_bytes(compressed)
         .map_err(|e| Error::Internal(format!("originator public key bit string: {e}")))?;
-    Ok(OriginatorIdentifierOrKey::OriginatorKey(OriginatorPublicKey {
-        algorithm: decode_aid(spki_aid)?,
-        public_key: bit_string,
-    }))
+    Ok(OriginatorIdentifierOrKey::OriginatorKey(
+        OriginatorPublicKey {
+            algorithm: decode_aid(spki_aid)?,
+            public_key: bit_string,
+        },
+    ))
 }
 
 fn generate_recipient_info(

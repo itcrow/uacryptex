@@ -24,7 +24,10 @@ fn tsresp_decode_encode_roundtrip() {
 #[test]
 fn tsresp_get_status() {
     let resp = load_tsp_response();
-    assert_eq!(resp.status().status, uacryptex_core::pki::tsp::PkiStatus::Accepted);
+    assert_eq!(
+        resp.status().status,
+        uacryptex_core::pki::tsp::PkiStatus::Accepted
+    );
 }
 
 #[test]

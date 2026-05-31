@@ -16,9 +16,7 @@ pub struct Handle {
 
 impl Handle {
     pub fn into_raw(self) -> *mut super::UacryptexHandle {
-        Box::into_raw(Box::new(super::UacryptexHandle {
-            inner: Some(self),
-        }))
+        Box::into_raw(Box::new(super::UacryptexHandle { inner: Some(self) }))
     }
 }
 
@@ -39,9 +37,12 @@ impl super::UacryptexHandle {
     }
 
     pub(crate) fn pkcs12_ref(&self) -> Result<&Pkcs12, uacryptex_core::Error> {
-        match &self.inner.as_ref().ok_or_else(|| {
-            uacryptex_core::Error::InvalidParam("handle is freed".into())
-        })?.inner {
+        match &self
+            .inner
+            .as_ref()
+            .ok_or_else(|| uacryptex_core::Error::InvalidParam("handle is freed".into()))?
+            .inner
+        {
             HandleInner::Pkcs12(store) => Ok(store),
             HandleInner::Sign(_) => Err(uacryptex_core::Error::InvalidParam(
                 "handle is not a PKCS#12 store".into(),

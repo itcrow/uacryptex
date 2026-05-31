@@ -2,7 +2,7 @@
 
 use std::time::Duration;
 
-use der::asn1::{GeneralizedTime, ObjectIdentifier, PrintableStringRef, Utf8StringRef, UtcTime};
+use der::asn1::{GeneralizedTime, ObjectIdentifier, PrintableStringRef, UtcTime, Utf8StringRef};
 use der::{Decode, Encode};
 use x509_cert::attr::AttributeTypeAndValue;
 use x509_cert::name::{Name, RdnSequence, RelativeDistinguishedName};
@@ -28,9 +28,7 @@ pub fn parse_key_value(input: &str) -> Result<Vec<(String, String)>> {
             .find('}')
             .ok_or_else(|| Error::InvalidParam("subject attribute missing '}'".into()))?;
         if eq > rbrace {
-            return Err(Error::InvalidParam(
-                "malformed subject attribute".into(),
-            ));
+            return Err(Error::InvalidParam("malformed subject attribute".into()));
         }
         let key = &after_brace[..eq];
         let value = &after_brace[eq + 1..rbrace];
@@ -51,9 +49,8 @@ pub fn name_from_subject_string(subject_name: &str) -> Result<Name> {
     let mut rdns = Vec::with_capacity(pairs.len());
     for (key, value) in pairs {
         let atv = attribute_type_and_value(&key, &value)?;
-        let rdn = RelativeDistinguishedName::try_from(vec![atv]).map_err(|e| {
-            Error::Internal(format!("relative distinguished name: {e}"))
-        })?;
+        let rdn = RelativeDistinguishedName::try_from(vec![atv])
+            .map_err(|e| Error::Internal(format!("relative distinguished name: {e}")))?;
         rdns.push(rdn);
     }
     Ok(RdnSequence(rdns))

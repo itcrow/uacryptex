@@ -12,12 +12,11 @@ pub use builders::{
     ext_create_invalidity_date, ext_create_key_usage, ext_create_nonce,
     ext_create_private_key_usage, ext_create_qc_statements, ext_create_subj_alt_name_directly,
     ext_create_subj_dir_attr_directly, ext_create_subj_info_access, ext_create_subj_key_id,
-    qc_statement_compliance, qc_statement_limit_value, CrlReasonCode,
-    KeyUsageBits, QcStatement,
+    qc_statement_compliance, qc_statement_limit_value, CrlReasonCode, KeyUsageBits, QcStatement,
 };
 
-use der::Encode;
 use der::Decode;
+use der::Encode;
 use x509_cert::ext::Extension;
 
 use crate::pki::oid::{oid_to_str, OidId};
@@ -43,7 +42,8 @@ pub fn ext_from_der(bytes: &[u8]) -> Result<Extension> {
 }
 
 pub(crate) fn object_identifier(id: OidId) -> Result<der::asn1::ObjectIdentifier> {
-    let dot = oid_to_str(id).ok_or_else(|| Error::InvalidParam(format!("unknown OID id {id:?}")))?;
+    let dot =
+        oid_to_str(id).ok_or_else(|| Error::InvalidParam(format!("unknown OID id {id:?}")))?;
     der::asn1::ObjectIdentifier::new(&dot)
         .map_err(|e| Error::Internal(format!("object identifier: {e}")))
 }

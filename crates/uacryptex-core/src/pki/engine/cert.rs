@@ -66,16 +66,10 @@ pub fn ecert_generate(
     };
 
     let (issuer, subject) = if engine.is_self_signed {
-        (
-            request.info.subject.clone(),
-            request.info.subject.clone(),
-        )
+        (request.info.subject.clone(), request.info.subject.clone())
     } else {
         let issuer_cert = engine.sign_adapter.cert()?;
-        (
-            issuer_cert.subject().clone(),
-            request.info.subject.clone(),
-        )
+        (issuer_cert.subject().clone(), request.info.subject.clone())
     };
 
     let validity = Validity {

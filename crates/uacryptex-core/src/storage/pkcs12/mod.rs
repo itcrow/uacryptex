@@ -22,13 +22,13 @@ pub use types::{
 
 use crate::pki::cert::Cert;
 use crate::pki::crypto::{SignAdapter, VerifyAdapter};
-use crate::storage::pkcs5::{pkcs5_decrypt_dstu, EncryptedPrivateKeyInfo};
-use crate::storage::pkcs8::{
-    is_private_key_info, pkcs8_decode, pkcs8_get_sign_adapter,
-    pkcs8_get_verify_adapter, PrivateKeyInfo,
-};
 use crate::pki::oid::{oid_matches_str, OidId};
 use crate::storage::pkcs12::content::auth_safe_octets;
+use crate::storage::pkcs5::{pkcs5_decrypt_dstu, EncryptedPrivateKeyInfo};
+use crate::storage::pkcs8::{
+    is_private_key_info, pkcs8_decode, pkcs8_get_sign_adapter, pkcs8_get_verify_adapter,
+    PrivateKeyInfo,
+};
 use crate::{Error, Result};
 
 /// Cryptonite `Pkcs12MacType`.
@@ -185,11 +185,7 @@ pub fn pkcs12_enum_keys(store: &mut Pkcs12) -> Result<&[Pkcs12Keypair]> {
 }
 
 /// `pkcs12_select_key`.
-pub fn pkcs12_select_key(
-    store: &mut Pkcs12,
-    alias: Option<&str>,
-    pwd: Option<&str>,
-) -> Result<()> {
+pub fn pkcs12_select_key(store: &mut Pkcs12, alias: Option<&str>, pwd: Option<&str>) -> Result<()> {
     if store.keypairs.is_empty() {
         store.rebuild_keypairs()?;
     }
@@ -213,9 +209,7 @@ pub fn pkcs12_select_key(
                         let pki = bag
                             .bag_value
                             .decode_as::<PrivateKeyInfo>()
-                            .map_err(|e| {
-                                Error::Internal(format!("PrivateKeyInfo decode: {e}"))
-                            })?;
+                            .map_err(|e| Error::Internal(format!("PrivateKeyInfo decode: {e}")))?;
                         store.curr_key = Some(pki);
                         return Ok(());
                     }

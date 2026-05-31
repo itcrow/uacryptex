@@ -4,13 +4,13 @@ use der::{Any, Decode};
 use x509_cert::spki::SubjectPublicKeyInfo;
 
 use crate::pki::cert::Cert;
+#[cfg(feature = "legacy-gost3410")]
+use crate::pki::crypto::aid::is_gost3410_signature_oid;
 use crate::pki::crypto::aid::{
     curve_params_from_spki_algorithm, digest_aid_from_signature_oid,
     ecdsa_signature_oid_for_digest_oid, is_dstu4145_signature_oid, is_ecdsa_signature_oid,
     spki_algorithm_der,
 };
-#[cfg(feature = "legacy-gost3410")]
-use crate::pki::crypto::aid::is_gost3410_signature_oid;
 use crate::pki::crypto::digest::DigestAdapter;
 use crate::primitives::dstu4145::{
     compressed_key_from_spki_bitstring, decompress_public_key, verify, Signature,
@@ -70,7 +70,8 @@ impl VerifyAdapter {
 
         let (kind, digest_aid) = if is_dstu4145_signature_oid(&sign_oid) {
             let params = curve_params_from_spki_algorithm(spki_aid_der)?;
-            let compressed = compressed_key_from_spki_bitstring(spki.subject_public_key.raw_bytes())?;
+            let compressed =
+                compressed_key_from_spki_bitstring(spki.subject_public_key.raw_bytes())?;
             let public_key = decompress_public_key(&params, &compressed)?;
             (
                 VerifyKind::Dstu4145 { params, public_key },
@@ -95,11 +96,10 @@ impl VerifyAdapter {
             #[cfg(feature = "legacy-gost3410")]
             {
                 use crate::primitives::gost3410::{pubkey_be_from_spki_bitstring, ParamsId};
-                let params = ParamsId::Id1.curve_params().ok_or_else(|| {
-                    Error::Internal("GOST3410 params ID 1 unavailable".into())
-                })?;
-                let (qx, qy) =
-                    pubkey_be_from_spki_bitstring(spki.subject_public_key.raw_bytes())?;
+                let params = ParamsId::Id1
+                    .curve_params()
+                    .ok_or_else(|| Error::Internal("GOST3410 params ID 1 unavailable".into()))?;
+                let (qx, qy) = pubkey_be_from_spki_bitstring(spki.subject_public_key.raw_bytes())?;
                 (
                     VerifyKind::Gost3410 { params, qx, qy },
                     crate::pki::crypto::aid::gost3411_algorithm_der().to_vec(),
@@ -107,7 +107,9 @@ impl VerifyAdapter {
             }
             #[cfg(not(feature = "legacy-gost3410"))]
             {
-                return Err(Error::Unsupported("legacy-gost3410 feature disabled".into()));
+                return Err(Error::Unsupported(
+                    "legacy-gost3410 feature disabled".into(),
+                ));
             }
         } else {
             return Err(Error::Unsupported(format!(
@@ -240,9 +242,7 @@ impl VerifyAdapter {
                 let sig = split_dstu_signature(signature)?;
                 verify(params, public_key, hash, &sig)
             }
-            VerifyKind::Ecdsa { curve, qx, qy } => {
-                ecdsa_verify(*curve, qx, qy, hash, signature)
-            }
+            VerifyKind::Ecdsa { curve, qx, qy } => ecdsa_verify(*curve, qx, qy, hash, signature),
             #[cfg(feature = "legacy-gost3410")]
             VerifyKind::Gost3410 { params, qx, qy } => {
                 use crate::primitives::gost3410::{split_signature_be, verify as gost3410_verify};
@@ -262,7 +262,9 @@ fn algorithm_oid_string(algorithm_der: &[u8]) -> Result<String> {
 
 fn split_dstu_signature(signature: &[u8]) -> Result<Signature> {
     if signature.len() % 2 != 0 || signature.is_empty() {
-        return Err(Error::InvalidParam("invalid DSTU4145 signature length".into()));
+        return Err(Error::InvalidParam(
+            "invalid DSTU4145 signature length".into(),
+        ));
     }
     let mid = signature.len() / 2;
     Ok(Signature::from_le(
