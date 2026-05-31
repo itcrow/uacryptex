@@ -1,0 +1,2 @@
+# Test fixtures and crypto blobs must be byte-identical on every OS (no CRLF conversion).
+testdata/** -text

@@ -66,8 +66,8 @@ func Example_signDocument() {
 		fmt.Println("verify failed:", err)
 		return
 	}
-	fmt.Printf("signed %d-byte document → %d-byte CMS\n", len(document), len(cms))
-	// Output: signed 179-byte document → 2363-byte CMS
+	fmt.Println("signed and verified")
+	// Output: signed and verified
 }
 
 func ExampleOpenPKCS12() {
