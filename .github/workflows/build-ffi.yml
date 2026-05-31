@@ -44,7 +44,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
           rustup target add aarch64-unknown-linux-gnu
-      - run: ./scripts/build-ffi.sh ${{ matrix.goos }} ${{ matrix.goarch }}
+      - name: Build FFI
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_AR: aarch64-linux-gnu-ar
+        run: ./scripts/build-ffi.sh ${{ matrix.goos }} ${{ matrix.goarch }}
       - uses: actions/upload-artifact@v4
         with:
           name: native-${{ matrix.goos }}-${{ matrix.goarch }}

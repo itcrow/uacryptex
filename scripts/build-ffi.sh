@@ -23,6 +23,26 @@ esac
 OUT_DIR="${ROOT}/native/lib/${GOOS}/${GOARCH}"
 mkdir -p "$OUT_DIR"
 
+# Cross-compile: Rust defaults to the host linker (x86_64 on GitHub ubuntu-latest),
+# which fails with "incompatible with elf64-x86-64" for aarch64 object files.
+setup_cross_linker() {
+  case "$1" in
+    aarch64-unknown-linux-gnu)
+      if [[ "$(uname -s)" == "Linux" && "$(uname -m)" != "aarch64" ]]; then
+        export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER="${CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER:-aarch64-linux-gnu-gcc}"
+        export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_AR="${CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_AR:-aarch64-linux-gnu-ar}"
+        if ! command -v "${CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER}" >/dev/null; then
+          echo "Cross linker not found: ${CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER}" >&2
+          echo "Install gcc-aarch64-linux-gnu (Debian/Ubuntu) or gcc-aarch64-linux-gnu (Fedora)." >&2
+          exit 1
+        fi
+      fi
+      ;;
+  esac
+}
+
+setup_cross_linker "$TARGET"
+
 echo "Building uacryptex-ffi for ${TARGET} -> ${OUT_DIR}"
 FEATURES="${UACRYPTEX_FEATURES:-}"
 if [[ -n "$FEATURES" ]]; then
