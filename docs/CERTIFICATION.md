@@ -5,6 +5,7 @@
 This document maps Cryptonite certified functionality to the uacryptex port. It supports **re-expertise preparation** for ДССЗЗІ / stakeholder review — **uacryptex is not a certified product** until an accredited evaluation is completed on a frozen release.
 
 **Reference baseline:** Cryptonite (C library, IIT test vectors).  
+**Coverage summary:** [CRYPTONITE_PARITY.md](CRYPTONITE_PARITY.md)  
 **Evidence oracle:** `../cryptonite/src/cryptoniteAtest`, `pkixUtest`, `storageUtest`, `pkiExample`.
 
 ## Status legend
@@ -36,7 +37,7 @@ This document maps Cryptonite certified functionality to the uacryptex port. It 
 | Requirement | Cryptonite | uacryptex | Evidence |
 |-------------|------------|-----------|----------|
 | X.509 certificate parse/verify | ✅ | ✅ | `pki/cert/`; `tests/cert_kat.rs` |
-| DSTU extensions (QC, SKI, …) | ✅ | 🟡 | `pki/ext/`; `tests/ext_kat.rs` (24 tests); some attrs deferred |
+| DSTU extensions (QC, SKI, CRL ID, …) | ✅ | ✅ | `pki/ext/`; `tests/ext_kat.rs` (28 tests); `exts_*`, `creq_get_ext_by_oid` |
 | Digest / sign / verify adapters | ✅ | ✅ | `pki/crypto/`; `tests/adapter_kat.rs` |
 | CMS SignedData (CAdES-BES subset) | ✅ | ✅ | `pki/cms/`; `tests/cms_kat.rs`; Go `SignCMS`/`VerifyCMS` |
 | CRL verify | ✅ | ✅ | `pki/crl.rs`; `tests/crl_kat.rs` |
@@ -78,7 +79,7 @@ This document maps Cryptonite certified functionality to the uacryptex port. It 
 
 1. **No accredited evaluation** of uacryptex itself — only functional parity evidence vs Cryptonite KATs.
 2. **Constant-time** private-key operations: optional `ct-scalar-mul` feature; external timing review still required ([CT_REVIEW.md](CT_REVIEW.md)).
-3. **Full API surface** — ~1039 Cryptonite symbols in [API_INVENTORY.md](API_INVENTORY.md); many PKI helpers still Phase 2/TBD.
+3. **Full API surface** — see [CRYPTONITE_PARITY.md](CRYPTONITE_PARITY.md) and [API_INVENTORY.md](API_INVENTORY.md) (~1039 Cryptonite symbols; many PKI helpers still Phase 2/TBD).
 4. **Legacy GOST 34.10-94** — optional `--features legacy-gost3410` (off by default); params ID 1 and 2 KAT (`gost3410_kat`, `gost3410_compress_kat`); deprecated for new deployments (see [SECURITY.md](SECURITY.md)).
 5. **Reproducible build** process documented in [REPRODUCIBLE_BUILD.md](REPRODUCIBLE_BUILD.md); artifact hashes must be recorded per release tag.
 

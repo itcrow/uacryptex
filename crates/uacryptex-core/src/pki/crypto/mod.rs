@@ -16,11 +16,17 @@ pub use aid::{
     ecdsa_signature_oid_for_digest_oid, gost3411_algorithm_der, is_dstu4145_signature_oid,
     is_ecdsa_signature_oid, oid_str_under, sbox_from_algorithm_der, spki_algorithm_der,
 };
-pub use cipher::{create_gost28147_wrap_aid, get_gost28147_aid, CipherAdapter};
+pub use cipher::{
+    content_cipher_key_len, create_gost28147_wrap_aid, get_content_cipher_aid,
+    get_dstu7624_gcm_aid, get_gost28147_aid, session_key_wrap_len, ContentCipherOid,
+    CipherAdapter,
+};
 pub use dh::DhAdapter;
 pub use digest::DigestAdapter;
 pub use prng::MasterPrng;
-pub use session_key::{gost28147_generate_session_key, unwrap_session_key, wrap_session_key};
+pub use session_key::{
+    generate_session_key, gost28147_generate_session_key, unwrap_session_key, wrap_session_key,
+};
 pub use sign::SignAdapter;
 pub use verify::VerifyAdapter;
 

@@ -13,8 +13,9 @@ use super::super::enveloped_types::{
 use super::super::types::{CertificateChoices, CertificateSet, IssuerAndSerialNumber};
 use crate::pki::cert::Cert;
 use crate::pki::crypto::{
-    create_gost28147_wrap_aid, curve_params_from_spki_algorithm, get_gost28147_aid,
-    gost28147_generate_session_key, wrap_session_key, CipherAdapter, DhAdapter, MasterPrng,
+    create_gost28147_wrap_aid, curve_params_from_spki_algorithm, generate_session_key,
+    get_content_cipher_aid, session_key_wrap_len, wrap_session_key, CipherAdapter, DhAdapter,
+    MasterPrng,
 };
 use crate::pki::ext::object_identifier;
 use crate::pki::oid::OidId;
@@ -122,7 +123,8 @@ impl<'a> EnvelopedDataEngine<'a> {
         }
 
         let mut dstu_prng = prng.dstu_prng()?;
-        let session_key = gost28147_generate_session_key(&mut dstu_prng)?;
+        let session_key_len = session_key_wrap_len(cipher_oid)?;
+        let session_key = generate_session_key(session_key_len, &mut dstu_prng)?;
 
         let originator_params =
             curve_params_from_spki_algorithm(&originator_cert.spki_algorithm_der()?)?;
@@ -159,7 +161,7 @@ impl<'a> EnvelopedDataEngine<'a> {
             recipient_infos_vec.push(recipient_info);
         }
 
-        let cipher_aid = get_gost28147_aid(&mut dstu_prng, cipher_oid, originator_cert)?;
+        let cipher_aid = get_content_cipher_aid(&mut dstu_prng, cipher_oid, originator_cert)?;
         let cipher = CipherAdapter::init(&cipher_aid)?;
         let encrypted_data = cipher.encrypt(&session_key, data)?;
 

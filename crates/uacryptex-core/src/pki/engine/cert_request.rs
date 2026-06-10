@@ -10,7 +10,7 @@ use crate::pki::creq::{
 };
 use crate::pki::crypto::SignAdapter;
 use crate::pki::ext::{
-    ext_create_subj_alt_name_directly, ext_create_subj_dir_attr_directly, ext_create_subj_key_id,
+    ext_create_subj_alt_name_dns_email, ext_create_subj_dir_attr_directly, ext_create_subj_key_id,
 };
 use crate::pki::utils::name_from_subject_string;
 use crate::Result;
@@ -54,7 +54,7 @@ pub fn ecert_request_set_subj_alt_name(
     email: Option<&str>,
 ) -> Result<()> {
     engine.subj_alt_name = match (dns, email) {
-        (Some(dns), Some(email)) => Some(ext_create_subj_alt_name_directly(false, dns, email)?),
+        (Some(dns), Some(email)) => Some(ext_create_subj_alt_name_dns_email(false, dns, email)?),
         _ => None,
     };
     Ok(())

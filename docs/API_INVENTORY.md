@@ -36,10 +36,13 @@ Generated from `include/uacryptex.h`. Python, PHP, and Node.js bindings mirror t
 | `uacryptex_cert_verify` | `VerifyCertificate()` | Go, Python, PHP, Node |
 | `uacryptex_cms_envelop_decrypt` | `DecryptCMS()` | Go, Python, PHP, Node |
 | `uacryptex_cms_envelop_encrypt` | `EnvelopCMS()` | Go, Python, PHP, Node |
+| `uacryptex_cms_envelop_encrypt_with_cipher` | `EnvelopCMSWithCipher()` | Go |
 | `uacryptex_cms_sign` | `SignCMS()` | Go, Python, PHP, Node |
 | `uacryptex_cms_sign_cades_a` | `SignCmsCadesA()` | Go, Python, PHP, Node |
 | `uacryptex_cms_sign_cades_c` | `SignCmsCadesC()` | Go, Python, PHP, Node |
 | `uacryptex_cms_sign_cades_lt` | `SignCmsCadesLT()` | Go, Python, PHP, Node |
+| `uacryptex_cms_sign_cades_xl_type1` | `SignCmsCadesXLType1()` | Go |
+| `uacryptex_cms_sign_cades_xl_type2` | `SignCmsCadesXLType2()` | Go |
 | `uacryptex_cms_sign_cades_t` | `SignCmsCadesT()` | Go, Python, PHP, Node |
 | `uacryptex_cms_sign_cades_x` | `SignCmsCadesX()` | Go, Python, PHP, Node |
 | `uacryptex_cms_verify` | `VerifyCMS()` | Go, Python, PHP, Node |
@@ -78,7 +81,7 @@ Generated from `include/uacryptex.h`. Python, PHP, and Node.js bindings mirror t
 
 | Area | Notes |
 |------|-------|
-| CAdES-C/X/LT | `CompleteCertificateRefs`, `CertValues`, … — needs ESS attribute types in core |
+| CAdES-C/X/LT/X-L | implemented in core (`cades.rs`) |
 | ONB DSTU4145 verify | low-level; PB verify exported as `uacryptex_dstu4145_verify_pb` |
 
 ## Symbol table

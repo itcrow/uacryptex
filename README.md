@@ -173,7 +173,8 @@ Full index: [docs/README.md](docs/README.md) · [docs/uk/README.md](docs/uk/READ
 | [Security](docs/SECURITY.md) | [Безпека](docs/uk/SECURITY.md) |
 | [Publishing](docs/PUBLISHING.md) | [Публікація](docs/uk/PUBLISHING.md) |
 | [Certification](docs/CERTIFICATION.md) | [Сертифікація](docs/uk/CERTIFICATION.md) |
+| [Cryptonite parity](docs/CRYPTONITE_PARITY.md) | [Покриття Cryptonite](docs/uk/CRYPTONITE_PARITY.md) |
 | [Semver](docs/SEMVER.md) | [Semver (UK)](docs/uk/SEMVER.md) |
 | [Roadmap](docs/ROADMAP.md) | [Roadmap (UK)](docs/uk/ROADMAP.md) |
 
-Reference (English only): [API inventory](docs/API_INVENTORY.md), [Reproducible builds](docs/REPRODUCIBLE_BUILD.md), [Package map](docs/PACKAGE_MAP.md).
+Reference (English only): [API inventory](docs/API_INVENTORY.md), [Cryptonite parity](docs/CRYPTONITE_PARITY.md), [Reproducible builds](docs/REPRODUCIBLE_BUILD.md), [Package map](docs/PACKAGE_MAP.md).

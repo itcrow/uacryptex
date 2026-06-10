@@ -165,7 +165,100 @@ fn cades_lt_build_and_verify_bes() {
     assert!(container.has_certs());
     assert!(container.has_crls());
     let sinfo = container.inner().signer_info(0).unwrap();
-    assert_eq!(sinfo.unsigned_attrs.as_ref().unwrap().len(), 2);
+    assert_eq!(sinfo.unsigned_attrs.as_ref().unwrap().len(), 4);
+
+    let da = DigestAdapter::init_by_cert(sa.cert().unwrap()).unwrap();
+    container.verify_internal_data(&da, &va, 0).unwrap();
+}
+
+fn cades_xl_fixtures() -> (
+    SignAdapter,
+    VerifyAdapter,
+    Cert,
+    Vec<Crl>,
+    Vec<u8>,
+    Int,
+) {
+    let (sa, va) = userfiz_adapters();
+    let root_cert = Cert::decode(include_bytes!(
+        "../../../testdata/pki/pki_example/root_certificate.cer"
+    ))
+    .unwrap();
+    let full_crl =
+        Crl::decode(include_bytes!("../../../testdata/pki/pki_example/full.crl")).unwrap();
+    let delta_crl = Crl::decode(include_bytes!(
+        "../../../testdata/pki/pki_example/delta.crl"
+    ))
+    .unwrap();
+    let ocsp_response = pki_example_ocsp_response();
+    let serial = Int::new(&128u8.to_be_bytes()).unwrap();
+    (
+        sa,
+        va,
+        root_cert,
+        vec![full_crl, delta_crl],
+        ocsp_response,
+        serial,
+    )
+}
+
+#[test]
+fn cades_xl_type1_build_and_verify_bes() {
+    use uacryptex_core::pki::cms::build_content_info_cades_xl_type1;
+
+    let (sa, va, root_cert, crls, ocsp_response, serial) = cades_xl_fixtures();
+    let data = vec![0xf0; 100];
+    let tsp_time = 1_359_151_200i64;
+
+    let cms = build_content_info_cades_xl_type1(
+        &sa,
+        &data,
+        OidId::Data,
+        &root_cert,
+        &crls,
+        &ocsp_response,
+        &sa,
+        &serial,
+        tsp_time,
+        None,
+    )
+    .unwrap();
+
+    let container = SignedDataContainer::decode(&cms).unwrap();
+    assert!(container.has_certs());
+    assert!(container.has_crls());
+    let sinfo = container.inner().signer_info(0).unwrap();
+    assert_eq!(sinfo.unsigned_attrs.as_ref().unwrap().len(), 5);
+
+    let da = DigestAdapter::init_by_cert(sa.cert().unwrap()).unwrap();
+    container.verify_internal_data(&da, &va, 0).unwrap();
+}
+
+#[test]
+fn cades_xl_type2_build_and_verify_bes() {
+    use uacryptex_core::pki::cms::build_content_info_cades_xl_type2;
+
+    let (sa, va, root_cert, crls, ocsp_response, serial) = cades_xl_fixtures();
+    let data = vec![0xf0; 100];
+    let tsp_time = 1_359_151_200i64;
+
+    let cms = build_content_info_cades_xl_type2(
+        &sa,
+        &data,
+        OidId::Data,
+        &root_cert,
+        &crls,
+        &ocsp_response,
+        &sa,
+        &serial,
+        tsp_time,
+        None,
+    )
+    .unwrap();
+
+    let container = SignedDataContainer::decode(&cms).unwrap();
+    let sinfo = container.inner().signer_info(0).unwrap();
+    assert_eq!(sinfo.unsigned_attrs.as_ref().unwrap().len(), 5);
 
     let da = DigestAdapter::init_by_cert(sa.cert().unwrap()).unwrap();
     container.verify_internal_data(&da, &va, 0).unwrap();

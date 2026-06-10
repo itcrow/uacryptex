@@ -1,18 +1,27 @@
 //! X.509 extension encode/decode (`cryptonite/src/pkix/c/api/ext.c`).
 
 mod builders;
+mod exts;
+mod san;
 
 pub(crate) use builders::pkix_key_id_from_spki_der;
 
 pub use builders::{
     ext_create_any, ext_create_auth_info_access, ext_create_auth_key_id_from_cert,
     ext_create_auth_key_id_from_spki, ext_create_basic_constraints, ext_create_cert_policies,
-    ext_create_crl_distr_points, ext_create_crl_number, ext_create_crl_reason,
+    ext_create_crl_distr_points, ext_create_crl_id, ext_create_crl_number, ext_create_crl_reason,
     ext_create_delta_crl_indicator, ext_create_ext_key_usage, ext_create_freshest_crl,
     ext_create_invalidity_date, ext_create_key_usage, ext_create_nonce,
-    ext_create_private_key_usage, ext_create_qc_statements, ext_create_subj_alt_name_directly,
-    ext_create_subj_dir_attr_directly, ext_create_subj_info_access, ext_create_subj_key_id,
-    qc_statement_compliance, qc_statement_limit_value, CrlReasonCode, KeyUsageBits, QcStatement,
+    ext_create_private_key_usage, ext_create_private_key_usage_from_cert,
+    ext_create_qc_statements, ext_create_subj_dir_attr_directly, ext_create_subj_info_access,
+    ext_create_subj_key_id, qc_statement_compliance, qc_statement_limit_value, CrlReasonCode,
+    KeyUsageBits, QcStatement,
+};
+pub use exts::{
+    exts_add_extension, exts_get_ext_by_oid, exts_get_ext_value_by_oid, Extensions,
+};
+pub use san::{
+    ext_create_subj_alt_name_directly, ext_create_subj_alt_name_dns_email, GeneralNameKind,
 };
 
 use der::Decode;

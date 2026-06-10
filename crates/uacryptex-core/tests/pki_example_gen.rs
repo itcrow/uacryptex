@@ -19,7 +19,7 @@ use uacryptex_core::pki::ext::{
     ext_create_auth_key_id_from_spki, ext_create_basic_constraints, ext_create_cert_policies,
     ext_create_crl_distr_points, ext_create_crl_number, ext_create_delta_crl_indicator,
     ext_create_ext_key_usage, ext_create_freshest_crl, ext_create_key_usage,
-    ext_create_private_key_usage, ext_create_qc_statements, ext_create_subj_alt_name_directly,
+    ext_create_private_key_usage, ext_create_qc_statements, ext_create_subj_alt_name_dns_email,
     ext_create_subj_dir_attr_directly, ext_create_subj_key_id, qc_statement_compliance,
     qc_statement_limit_value, CrlReasonCode, KeyUsageBits, QcStatement,
 };
@@ -276,7 +276,7 @@ fn build_csr_parts(
     ecert_request_set_subj_name(&mut eng, Some(subject))?;
     let san = if let Some((dns, email)) = dns_email {
         ecert_request_set_subj_alt_name(&mut eng, Some(dns), Some(email))?;
-        Some(ext_create_subj_alt_name_directly(false, dns, email)?)
+        Some(ext_create_subj_alt_name_dns_email(false, dns, email)?)
     } else {
         None
     };

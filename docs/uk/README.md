@@ -22,6 +22,7 @@
 | Публікація | [PUBLISHING.md](../PUBLISHING.md) | [PUBLISHING.md](PUBLISHING.md) |
 | Безпека | [SECURITY.md](../SECURITY.md) | [SECURITY.md](SECURITY.md) |
 | Сертифікація | [CERTIFICATION.md](../CERTIFICATION.md) | [CERTIFICATION.md](CERTIFICATION.md) |
+| Покриття Cryptonite | [CRYPTONITE_PARITY.md](../CRYPTONITE_PARITY.md) | [CRYPTONITE_PARITY.md](CRYPTONITE_PARITY.md) |
 | Roadmap | [ROADMAP.md](../ROADMAP.md) | [ROADMAP.md](ROADMAP.md) |
 
 ## Довідники (лише англійською)
@@ -29,6 +30,7 @@
 | Документ | Опис |
 |----------|------|
 | [API_INVENTORY.md](../API_INVENTORY.md) | Мапінг Cryptonite → uacryptex (~1039 символів) |
+| [CRYPTONITE_PARITY.md](../CRYPTONITE_PARITY.md) | Огляд покриття vs Cryptonite |
 | [REPRODUCIBLE_BUILD.md](../REPRODUCIBLE_BUILD.md) | Відтворювана збірка релізу |
 | [PACKAGE_MAP.md](../PACKAGE_MAP.md) | Структура каталогів |
 | [CT_REVIEW.md](../CT_REVIEW.md) | Чеклист constant-time аудиту |

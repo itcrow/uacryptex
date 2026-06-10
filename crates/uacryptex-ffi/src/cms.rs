@@ -373,6 +373,226 @@ pub extern "C" fn uacryptex_cms_sign_cades_a(
     }
 }
 
+fn parse_cades_lt_inputs(
+    payload: &[u8],
+    cert_der: &[u8],
+    full_der: &[u8],
+    delta_crl_len: usize,
+    delta_crl: *const u8,
+    ocsp_der: &[u8],
+    sign_key: *mut UacryptexHandle,
+) -> Result<
+    (
+        Vec<u8>,
+        uacryptex_core::pki::crypto::SignAdapter,
+        Cert,
+        Vec<uacryptex_core::pki::crl::Crl>,
+        Vec<u8>,
+    ),
+    Error,
+> {
+    if sign_key.is_null() {
+        return Err(Error::InvalidParam("sign_key handle is null".into()));
+    }
+    let handle = unsafe { &mut *sign_key };
+    let sa = handle.sign_adapter()?;
+    let ref_cert = Cert::decode(cert_der)?;
+    let full_crl = uacryptex_core::pki::crl::Crl::decode(full_der)?;
+    let mut validation_crls = vec![full_crl];
+    if delta_crl_len > 0 {
+        let delta_der = bytes_from_ptr(delta_crl, delta_crl_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid delta_crl: code {code}")))?;
+        validation_crls.push(uacryptex_core::pki::crl::Crl::decode(delta_der)?);
+    }
+    Ok((
+        payload.to_vec(),
+        sa,
+        ref_cert,
+        validation_crls,
+        ocsp_der.to_vec(),
+    ))
+}
+
+/// Sign `data` with CAdES-X Long Type 1 (LT + id-aa-ets-escTimeStamp).
+#[no_mangle]
+pub extern "C" fn uacryptex_cms_sign_cades_xl_type1(
+    data: *const u8,
+    data_len: usize,
+    sign_key: *mut UacryptexHandle,
+    ref_cert: *const u8,
+    ref_cert_len: usize,
+    full_crl: *const u8,
+    full_crl_len: usize,
+    delta_crl: *const u8,
+    delta_crl_len: usize,
+    ocsp_response: *const u8,
+    ocsp_response_len: usize,
+    tsa_key: *mut UacryptexHandle,
+    serial: *const u8,
+    serial_len: usize,
+    current_time: i64,
+    policy_oid: *const std::os::raw::c_char,
+    out: *mut UacryptexBuf,
+    err: *mut UacryptexError,
+) -> i32 {
+    let run = || -> Result<UacryptexBuf, Error> {
+        use der::asn1::Int;
+
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
+        let payload = bytes_from_ptr(data, data_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
+        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ref_cert: code {code}")))?;
+        let full_der = bytes_from_ptr(full_crl, full_crl_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid full_crl: code {code}")))?;
+        let ocsp_der = bytes_from_ptr(ocsp_response, ocsp_response_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ocsp_response: code {code}")))?;
+        let serial_bytes = bytes_from_ptr(serial, serial_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid serial: code {code}")))?;
+        if tsa_key.is_null() {
+            return Err(Error::InvalidParam("tsa_key handle is null".into()));
+        }
+        let policy = if policy_oid.is_null() {
+            None
+        } else {
+            let s = crate::error::cstr_to_str(policy_oid)
+                .map_err(|code| Error::InvalidParam(format!("invalid policy_oid: code {code}")))?;
+            if s.is_empty() {
+                None
+            } else {
+                Some(s.to_string())
+            }
+        };
+        let (payload, sa, ref_cert, validation_crls, ocsp_der) = parse_cades_lt_inputs(
+            payload,
+            cert_der,
+            full_der,
+            delta_crl_len,
+            delta_crl,
+            ocsp_der,
+            sign_key,
+        )?;
+        let tsa_handle = unsafe { &mut *tsa_key };
+        let tsp_sa = tsa_handle.sign_adapter()?;
+        let serial =
+            Int::new(serial_bytes).map_err(|e| Error::Internal(format!("serial integer: {e}")))?;
+        let cms = uacryptex_core::pki::cms::build_content_info_cades_xl_type1(
+            &sa,
+            &payload,
+            OidId::Data,
+            &ref_cert,
+            &validation_crls,
+            &ocsp_der,
+            &tsp_sa,
+            &serial,
+            current_time,
+            policy.as_deref(),
+        )?;
+        Ok(UacryptexBuf::from_vec(cms))
+    };
+
+    match run() {
+        Ok(buf) => {
+            unsafe {
+                *out = buf;
+            }
+            RET_OK
+        }
+        Err(e) => write_error(err, e),
+    }
+}
+
+/// Sign `data` with CAdES-X Long Type 2 (LT + id-aa-ets-certCRLTimestamp).
+#[no_mangle]
+pub extern "C" fn uacryptex_cms_sign_cades_xl_type2(
+    data: *const u8,
+    data_len: usize,
+    sign_key: *mut UacryptexHandle,
+    ref_cert: *const u8,
+    ref_cert_len: usize,
+    full_crl: *const u8,
+    full_crl_len: usize,
+    delta_crl: *const u8,
+    delta_crl_len: usize,
+    ocsp_response: *const u8,
+    ocsp_response_len: usize,
+    tsa_key: *mut UacryptexHandle,
+    serial: *const u8,
+    serial_len: usize,
+    current_time: i64,
+    policy_oid: *const std::os::raw::c_char,
+    out: *mut UacryptexBuf,
+    err: *mut UacryptexError,
+) -> i32 {
+    let run = || -> Result<UacryptexBuf, Error> {
+        use der::asn1::Int;
+
+        check_out(out as *mut _)
+            .map_err(|code| Error::InvalidParam(format!("invalid out pointer: code {code}")))?;
+        let payload = bytes_from_ptr(data, data_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid data: code {code}")))?;
+        let cert_der = bytes_from_ptr(ref_cert, ref_cert_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ref_cert: code {code}")))?;
+        let full_der = bytes_from_ptr(full_crl, full_crl_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid full_crl: code {code}")))?;
+        let ocsp_der = bytes_from_ptr(ocsp_response, ocsp_response_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid ocsp_response: code {code}")))?;
+        let serial_bytes = bytes_from_ptr(serial, serial_len)
+            .map_err(|code| Error::InvalidParam(format!("invalid serial: code {code}")))?;
+        if tsa_key.is_null() {
+            return Err(Error::InvalidParam("tsa_key handle is null".into()));
+        }
+        let policy = if policy_oid.is_null() {
+            None
+        } else {
+            let s = crate::error::cstr_to_str(policy_oid)
+                .map_err(|code| Error::InvalidParam(format!("invalid policy_oid: code {code}")))?;
+            if s.is_empty() {
+                None
+            } else {
+                Some(s.to_string())
+            }
+        };
+        let (payload, sa, ref_cert, validation_crls, ocsp_der) = parse_cades_lt_inputs(
+            payload,
+            cert_der,
+            full_der,
+            delta_crl_len,
+            delta_crl,
+            ocsp_der,
+            sign_key,
+        )?;
+        let tsa_handle = unsafe { &mut *tsa_key };
+        let tsp_sa = tsa_handle.sign_adapter()?;
+        let serial =
+            Int::new(serial_bytes).map_err(|e| Error::Internal(format!("serial integer: {e}")))?;
+        let cms = uacryptex_core::pki::cms::build_content_info_cades_xl_type2(
+            &sa,
+            &payload,
+            OidId::Data,
+            &ref_cert,
+            &validation_crls,
+            &ocsp_der,
+            &tsp_sa,
+            &serial,
+            current_time,
+            policy.as_deref(),
+        )?;
+        Ok(UacryptexBuf::from_vec(cms))
+    };
+
+    match run() {
+        Ok(buf) => {
+            unsafe {
+                *out = buf;
+            }
+            RET_OK
+        }
+        Err(e) => write_error(err, e),
+    }
+}
+
 /// Verify a CMS SignedData signature.
 ///
 /// When `data_len > 0`, verifies the signature over `data` (detached or matching

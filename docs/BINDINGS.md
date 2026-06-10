@@ -14,6 +14,7 @@ uacryptex exposes a **stable C ABI** (`crates/uacryptex-ffi`, header `include/ua
 | Python | `python/uacryptex/` | ctypes (shared `.so`) | [python/README.md](../python/README.md) |
 | PHP | `php/src/` | `ext-ffi` (shared) | [php/README.md](../php/README.md) |
 | Node.js | `nodejs/lib/` | koffi (shared) | [nodejs/README.md](../nodejs/README.md) |
+| Dart / Flutter | `dart/uacryptex/` | `dart:ffi` (shared) | [dart/uacryptex/README.md](../dart/uacryptex/README.md) |
 
 ## Build native library
 
@@ -41,6 +42,7 @@ Each client package embeds the same tree under its own `native/lib/`:
 | Python | `python/uacryptex/native/lib/.../shared/` |
 | PHP | `php/native/lib/.../shared/` |
 | Node.js | `nodejs/native/lib/.../shared/` |
+| Dart / Flutter | `dart/uacryptex/native/lib/.../shared/` (+ Android `jniLibs` when NDK libs built) |
 
 Override at runtime: `UACRYPTEX_LIB=/path/to/libuacryptex_ffi.so`
 
@@ -61,9 +63,12 @@ All bindings expose the same surface as Go:
 | CMS CAdES-C | `SignCmsCadesC` | `sign_cms_cades_c` | `signCmsCadesC` | `signCmsCadesC` |
 | CMS CAdES-X | `SignCmsCadesX` | `sign_cms_cades_x` | `signCmsCadesX` | `signCmsCadesX` |
 | CMS CAdES-LT | `SignCmsCadesLT` | `sign_cms_cades_lt` | `signCmsCadesLt` | `signCmsCadesLt` |
+| CMS CAdES-X-L Type 1 | `SignCmsCadesXLType1` | — | — | — |
+| CMS CAdES-X-L Type 2 | `SignCmsCadesXLType2` | — | — | — |
 | CMS CAdES-A | `SignCmsCadesA` | `sign_cms_cades_a` | `signCmsCadesA` | `signCmsCadesA` |
 | CMS verify | `VerifyCMS` | `verify_cms` | `verifyCms` | `verifyCms` |
 | Envelop | `EnvelopCMS` | `envelop_cms` | `envelopCms` | `envelopCms` |
+| Envelop (cipher) | `EnvelopCMSWithCipher` | — | — | — |
 | Decrypt envelop | `DecryptCMS` | `decrypt_cms` | `decryptCms` | `decryptCms` |
 | Digest | `Digest` | `digest` | `digest` | `digest` |
 | Sign data | `PrivateKey.SignData` | `sign_data` | `signData` | `signData` |

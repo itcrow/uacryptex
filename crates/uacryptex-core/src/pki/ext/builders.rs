@@ -1,7 +1,8 @@
 //! Extension builders (`ext.c`).
 
-use der::asn1::{GeneralizedTime, Ia5String, Ia5StringRef, OctetString, PrintableStringRef, Uint};
+use der::asn1::{GeneralizedTime, Ia5StringRef, OctetString, PrintableStringRef, Uint};
 use der::{Any, Decode, Encode, Sequence};
+use x509_cert::time::Time;
 use x509_cert::attr::AttributeTypeAndValue;
 use x509_cert::ext::pkix::certpolicy::{CertificatePolicies, PolicyInformation};
 use x509_cert::ext::pkix::constraints::BasicConstraints;
@@ -10,7 +11,7 @@ use x509_cert::ext::pkix::crl::{CrlDistributionPoints, CrlNumber, CrlReason, Fre
 use x509_cert::ext::pkix::name::{DistributionPointName, GeneralName};
 use x509_cert::ext::pkix::{
     AccessDescription, AuthorityInfoAccessSyntax, AuthorityKeyIdentifier, ExtendedKeyUsage,
-    PrivateKeyUsagePeriod, SubjectAltName, SubjectDirectoryAttributes, SubjectInfoAccessSyntax,
+    PrivateKeyUsagePeriod, SubjectDirectoryAttributes, SubjectInfoAccessSyntax,
     SubjectKeyIdentifier,
 };
 use x509_cert::ext::Extension;
@@ -39,6 +40,10 @@ impl KeyUsageBits {
 
     pub const fn bits(self) -> u32 {
         self.0
+    }
+
+    pub const fn from_bits(bits: u32) -> Self {
+        Self(bits)
     }
 
     pub const fn union(self, other: Self) -> Self {
@@ -215,6 +220,46 @@ pub fn ext_create_subj_info_access(
     build_extension(OidId::SubjectInfoAccessExtension, critical, value)
 }
 
+/// OCSP `CrlID` extension value (RFC 2560).
+#[derive(Sequence)]
+struct CrlId<'a> {
+    #[asn1(context_specific = "0", optional = "true", tag_mode = "EXPLICIT")]
+    crl_url: Option<Ia5StringRef<'a>>,
+    #[asn1(context_specific = "1", optional = "true", tag_mode = "EXPLICIT")]
+    crl_num: Option<Uint>,
+    #[asn1(context_specific = "2", optional = "true", tag_mode = "EXPLICIT")]
+    crl_time: Option<GeneralizedTime>,
+}
+
+/// `ext_create_crl_id`.
+pub fn ext_create_crl_id(
+    critical: bool,
+    distr_url: Option<&str>,
+    crl_number: Option<&[u8]>,
+    crl_time: Option<GeneralizedTime>,
+) -> Result<Extension> {
+    let crl_url = match distr_url {
+        Some(url) => Some(
+            Ia5StringRef::new(url)
+                .map_err(|e| Error::InvalidParam(format!("crl url: {e}")))?,
+        ),
+        None => None,
+    };
+    let crl_num = match crl_number {
+        Some(bytes) => Some(
+            Uint::new(bytes).map_err(|e| Error::InvalidParam(format!("crl number: {e}")))?,
+        ),
+        None => None,
+    };
+    let crlid = CrlId {
+        crl_url,
+        crl_num,
+        crl_time,
+    };
+    let value = encode_as_ext_value(&crlid)?;
+    build_extension(OidId::CrlIdExtension, critical, value)
+}
+
 /// `ext_create_crl_number`.
 pub fn ext_create_crl_number(critical: bool, crl_sn: &[u8]) -> Result<Extension> {
     if crl_sn.is_empty() {
@@ -291,12 +336,35 @@ pub fn ext_create_private_key_usage(
             ));
         }
     };
+    build_private_key_usage_extension(critical, not_before, not_after)
+}
+
+/// `ext_create_private_key_usage` with certificate validity (`validity` branch in Cryptonite).
+pub fn ext_create_private_key_usage_from_cert(critical: bool, cert: &Cert) -> Result<Extension> {
+    let validity = &cert.inner_certificate().tbs_certificate.validity;
+    let not_before = pkix_time_to_generalized(&validity.not_before)?;
+    let not_after = pkix_time_to_generalized(&validity.not_after)?;
+    build_private_key_usage_extension(critical, Some(not_before), Some(not_after))
+}
+
+fn build_private_key_usage_extension(
+    critical: bool,
+    not_before: Option<GeneralizedTime>,
+    not_after: Option<GeneralizedTime>,
+) -> Result<Extension> {
     let pkup = PrivateKeyUsagePeriod {
         not_before,
         not_after,
     };
     let value = encode_as_ext_value(&pkup)?;
     build_extension(OidId::PrivateKeyUsagePeriodExtension, critical, value)
+}
+
+fn pkix_time_to_generalized(time: &Time) -> Result<GeneralizedTime> {
+    use std::time::Duration;
+    let secs = time.to_unix_duration().as_secs();
+    GeneralizedTime::from_unix_duration(Duration::from_secs(secs))
+        .map_err(|e| Error::Internal(format!("private key usage time: {e}")))
 }
 
 /// Single QC statement for `ext_create_qc_statements`.
@@ -337,24 +405,6 @@ pub fn ext_create_qc_statements(critical: bool, statements: &[QcStatement]) -> R
     }
     let value = encode_qc_statements(statements)?;
     build_extension(OidId::QcStatementsExtension, critical, value)
-}
-
-/// `ext_create_subj_alt_name_directly`.
-pub fn ext_create_subj_alt_name_directly(
-    critical: bool,
-    dns: &str,
-    email: &str,
-) -> Result<Extension> {
-    let san = SubjectAltName(vec![
-        GeneralName::DnsName(
-            Ia5String::new(dns).map_err(|e| Error::Internal(format!("dns name: {e}")))?,
-        ),
-        GeneralName::Rfc822Name(
-            Ia5String::new(email).map_err(|e| Error::Internal(format!("email: {e}")))?,
-        ),
-    ]);
-    let value = encode_as_ext_value(&san)?;
-    build_extension(OidId::SubjectAltNameExtension, critical, value)
 }
 
 /// `ext_create_subj_dir_attr_directly`.

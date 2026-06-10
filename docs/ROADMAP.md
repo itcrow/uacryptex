@@ -6,6 +6,8 @@ High-level timeline. Detailed step-by-step agent plan: see repository history / 
 
 Migration from Cryptonite C (~146K LOC) to pure Rust core + multi-language bindings.
 
+**Coverage overview:** [CRYPTONITE_PARITY.md](CRYPTONITE_PARITY.md) · [API_INVENTORY.md](API_INVENTORY.md)
+
 KAT oracle: `../cryptonite/src/cryptoniteAtest`, `cryptoniteUtest`, `pkixUtest`, `storageUtest`.
 
 ## Phase 0 — Scaffold (2–3 weeks)
@@ -95,4 +97,4 @@ DSTU4145 keygen → sign digest → CMS SignedData → Go VerifyCMS → PKCS#12 
 
 ## TODO
 
-- [ ] **CAdES-X-L Type 1/2** — timestamps on certificate/revocation refs (Phase 5; planned in [FFI.md](FFI.md))
+- [x] **CAdES-X-L Type 1/2** — `uacryptex_cms_sign_cades_xl_type1` / `_type2` (escTimeStamp / certCRLTimestamp)

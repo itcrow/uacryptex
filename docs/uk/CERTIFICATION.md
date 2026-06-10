@@ -4,7 +4,8 @@
 
 Мапінг сертифікованої функціональності Cryptonite на порт uacryptex. Підготовка до **повторної експертизи** ДССЗЗІ — **uacryptex не є сертифікованим продуктом** до завершення акредитованої оцінки на frozen release.
 
-**Baseline:** Cryptonite (C, IIT test vectors).
+**Baseline:** Cryptonite (C, IIT test vectors).  
+**Огляд покриття:** [CRYPTONITE_PARITY.md](CRYPTONITE_PARITY.md)
 
 ## Легенда
 
@@ -33,7 +34,7 @@
 | X.509, CMS, CRL, OCSP, TSP | ✅ |
 | EnvelopedData | ✅ |
 | Cert/CRL engines | ✅ |
-| DSTU extensions | 🟡 |
+| DSTU extensions | ✅ (`ext_kat.rs`, 28 тестів) |
 
 ## Storage
 

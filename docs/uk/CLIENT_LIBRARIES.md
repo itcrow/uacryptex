@@ -171,7 +171,9 @@ try {
 | **T** | BES + timestamp підпису | `SignCmsCadesT` |
 | **C** | BES + refs cert/CRL | `SignCmsCadesC` |
 | **X** | BES + values cert/OCSP | `SignCmsCadesX` |
-| **LT** | X + validation data в SignedData | `SignCmsCadesLT` |
+| **LT** | X Long (refs + values + validation data) | `SignCmsCadesLT` |
+| **X-L Type 1** | LT + escTimeStamp на CAdES-C | `SignCmsCadesXLType1` (Go) |
+| **X-L Type 2** | LT + certCRLTimestamp на refs | `SignCmsCadesXLType2` (Go) |
 | **A** | LT + archive timestamp | `SignCmsCadesA` |
 
 Перевірка всіх профілів: **`VerifyCMS`** над **оригінальними** підписаними байтами.
@@ -198,9 +200,12 @@ try {
 | Go | Python | PHP | Node.js |
 |----|--------|-----|---------|
 | `EnvelopCMS` | `envelop_cms` | `envelopCms` | `envelopCms` |
+| `EnvelopCMSWithCipher` | — | — | — |
 | `DecryptCMS` | `decrypt_cms` | `decryptCms` | `decryptCms` |
 
-Шифрування: DSTU4145 DH + GOST28147-CFB.
+Узгодження ключів: DSTU4145 DH + GOST28147-Wrap. За замовчуванням — GOST28147-CFB.
+
+Go: `EnvelopCMSWithCipher` — вибір content cipher: `ContentCipherGost28147CFB` (0), `ContentCipherKalyna256GCM` (1), `ContentCipherKalyna128GCM` (2), `ContentCipherKalyna512GCM` (3). `DecryptCMS` визначає алгоритм з OID у CMS.
 
 ---
 
@@ -297,4 +302,3 @@ make node-test
 | Збірка binding-ів | [BINDINGS.md](BINDINGS.md) |
 | C API | [FFI.md](../FFI.md) |
 | Релізи | [PUBLISHING.md](../PUBLISHING.md) |
-| CAdES-X-L Type 1/2 (planned) | [ROADMAP.md](ROADMAP.md#todo) |

@@ -20,6 +20,7 @@ Primary language: **English**. Ukrainian translations live under [`uk/`](uk/READ
 | Publishing | [PUBLISHING.md](PUBLISHING.md) | [uk/PUBLISHING.md](uk/PUBLISHING.md) |
 | Security | [SECURITY.md](SECURITY.md) | [uk/SECURITY.md](uk/SECURITY.md) |
 | Certification matrix | [CERTIFICATION.md](CERTIFICATION.md) | [uk/CERTIFICATION.md](uk/CERTIFICATION.md) |
+| **Cryptonite parity** | [CRYPTONITE_PARITY.md](CRYPTONITE_PARITY.md) | [uk/CRYPTONITE_PARITY.md](uk/CRYPTONITE_PARITY.md) |
 | Roadmap | [ROADMAP.md](ROADMAP.md) | [uk/ROADMAP.md](uk/ROADMAP.md) |
 
 ## Reference (English only)
@@ -27,6 +28,7 @@ Primary language: **English**. Ukrainian translations live under [`uk/`](uk/READ
 | Document | Description |
 |----------|-------------|
 | [API_INVENTORY.md](API_INVENTORY.md) | Cryptonite → uacryptex symbol map (~1039 entries) |
+| [CRYPTONITE_PARITY.md](CRYPTONITE_PARITY.md) | Coverage overview vs Cryptonite (summary) |
 | [REPRODUCIBLE_BUILD.md](REPRODUCIBLE_BUILD.md) | Auditable release build recipe |
 | [PACKAGE_MAP.md](PACKAGE_MAP.md) | Directory layout |
 | [CT_REVIEW.md](CT_REVIEW.md) | Constant-time review checklist |

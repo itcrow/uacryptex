@@ -72,5 +72,6 @@ MIT — [LICENSE](LICENSE).
 | [Безпека](docs/uk/SECURITY.md) | [SECURITY.md](docs/SECURITY.md) |
 | [Публікація](docs/uk/PUBLISHING.md) | [PUBLISHING.md](docs/PUBLISHING.md) |
 | [Сертифікація](docs/uk/CERTIFICATION.md) | [CERTIFICATION.md](docs/CERTIFICATION.md) |
+| [Покриття Cryptonite](docs/uk/CRYPTONITE_PARITY.md) | [CRYPTONITE_PARITY.md](docs/CRYPTONITE_PARITY.md) |
 
-Довідники лише англійською: [API_INVENTORY.md](docs/API_INVENTORY.md), [REPRODUCIBLE_BUILD.md](docs/REPRODUCIBLE_BUILD.md).
+Довідники: [API_INVENTORY.md](docs/API_INVENTORY.md), [CRYPTONITE_PARITY.md](docs/CRYPTONITE_PARITY.md) / [uk](docs/uk/CRYPTONITE_PARITY.md), [REPRODUCIBLE_BUILD.md](docs/REPRODUCIBLE_BUILD.md).

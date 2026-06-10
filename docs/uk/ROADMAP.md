@@ -4,6 +4,8 @@
 
 Високорівневий timeline. Міграція з Cryptonite C (~146K LOC) на pure Rust core + мовні binding-и.
 
+**Покриття:** [CRYPTONITE_PARITY.md](CRYPTONITE_PARITY.md) · [API_INVENTORY.md](../API_INVENTORY.md)
+
 KAT oracle: `../cryptonite/src/cryptoniteAtest`, `*Utest`, `pkiExample`.
 
 ## Фаза 0 — Scaffold ✅
@@ -53,4 +55,4 @@ DSTU4145 keygen → sign → CMS → verify → PKCS#12
 
 ## TODO
 
-- [ ] **CAdES-X-L Type 1/2** — timestamp-и на certificate/revocation refs (Фаза 5; заплановано в [FFI.md](../FFI.md))
+- [x] **CAdES-X-L Type 1/2** — `uacryptex_cms_sign_cades_xl_type1` / `_type2`

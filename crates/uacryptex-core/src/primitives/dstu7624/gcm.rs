@@ -40,8 +40,14 @@ impl Dstu7624Gcm {
     pub fn encrypt(&self, plain: &[u8], auth: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
         let block_len = self.core.block_len();
         let w = block_len / 8;
+        let plain_len_orig = plain.len();
         let mut plain_buf = plain.to_vec();
-        let plain_len_orig = plain_buf.len();
+        if plain_len_orig % block_len != 0 {
+            plain_buf.resize(
+                plain_len_orig + (block_len - plain_len_orig % block_len),
+                0,
+            );
+        }
         let auth_len_orig = auth.len();
 
         let mut gamma_old = self.iv;
@@ -61,7 +67,7 @@ impl Dstu7624Gcm {
             plain_buf[i..i + take].copy_from_slice(&x);
         }
 
-        let cipher_text = plain_buf.clone();
+        let cipher_text = plain_buf[..plain_len_orig].to_vec();
 
         let mut plain_len = plain_len_orig;
         kalyna_padding(&mut plain_buf, &mut plain_len, block_len);
@@ -91,9 +97,15 @@ impl Dstu7624Gcm {
     pub fn decrypt(&self, cipher: &[u8], tag: &[u8], auth: &[u8]) -> Result<Vec<u8>> {
         let block_len = self.core.block_len();
         let plain_len_orig = cipher.len();
+        let mut plain_buf = cipher.to_vec();
+        if plain_len_orig % block_len != 0 {
+            plain_buf.resize(
+                plain_len_orig + (block_len - plain_len_orig % block_len),
+                0,
+            );
+        }
         let auth_len_orig = auth.len();
 
-        let mut plain_buf = cipher.to_vec();
         let mut plain_len = plain_len_orig;
         kalyna_padding(&mut plain_buf, &mut plain_len, block_len);
 

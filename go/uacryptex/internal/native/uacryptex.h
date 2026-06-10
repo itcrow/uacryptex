@@ -7,6 +7,47 @@
 #include <stdlib.h>
 
 /**
+ * GOST 28147-CFB content encryption (default, Cryptonite-compatible).
+ */
+#define UACRYPTEX_CONTENT_CIPHER_GOST28147_CFB 0
+
+/**
+ * Kalyna-256/256-GMAC-256 (DSTU 7624 GCM AEAD).
+ */
+#define UACRYPTEX_CONTENT_CIPHER_KALYNA256_GCM 1
+
+/**
+ * Kalyna-128/128-GMAC-128 (DSTU 7624 GCM AEAD).
+ */
+#define UACRYPTEX_CONTENT_CIPHER_KALYNA128_GCM 2
+
+/**
+ * Kalyna-512/512-GMAC-512 (DSTU 7624 GCM AEAD).
+ */
+#define UACRYPTEX_CONTENT_CIPHER_KALYNA512_GCM 3
+
+/**
+ * Cryptonite `GeneralName_PR` values for [`uacryptex_ext_create_subj_alt_name`].
+ */
+#define UACRYPTEX_GN_OTHER_NAME 0
+
+#define UACRYPTEX_GN_RFC822_NAME 1
+
+#define UACRYPTEX_GN_DNS_NAME 2
+
+#define UACRYPTEX_GN_X400_ADDRESS 3
+
+#define UACRYPTEX_GN_DIRECTORY_NAME 4
+
+#define UACRYPTEX_GN_EDI_PARTY_NAME 5
+
+#define UACRYPTEX_GN_URI 6
+
+#define UACRYPTEX_GN_IP_ADDRESS 7
+
+#define UACRYPTEX_GN_REGISTERED_ID 8
+
+/**
  * Opaque handle for keys, PKCS#12 sessions, etc.
  */
 typedef struct UacryptexHandle UacryptexHandle;
@@ -160,6 +201,50 @@ int32_t uacryptex_cms_sign_cades_a(const uint8_t *data,
                                    struct UacryptexError *err);
 
 /**
+ * Sign `data` with CAdES-X Long Type 1 (LT + id-aa-ets-escTimeStamp).
+ */
+int32_t uacryptex_cms_sign_cades_xl_type1(const uint8_t *data,
+                                          uintptr_t data_len,
+                                          struct UacryptexHandle *sign_key,
+                                          const uint8_t *ref_cert,
+                                          uintptr_t ref_cert_len,
+                                          const uint8_t *full_crl,
+                                          uintptr_t full_crl_len,
+                                          const uint8_t *delta_crl,
+                                          uintptr_t delta_crl_len,
+                                          const uint8_t *ocsp_response,
+                                          uintptr_t ocsp_response_len,
+                                          struct UacryptexHandle *tsa_key,
+                                          const uint8_t *serial,
+                                          uintptr_t serial_len,
+                                          int64_t current_time,
+                                          const char *policy_oid,
+                                          struct UacryptexBuf *out,
+                                          struct UacryptexError *err);
+
+/**
+ * Sign `data` with CAdES-X Long Type 2 (LT + id-aa-ets-certCRLTimestamp).
+ */
+int32_t uacryptex_cms_sign_cades_xl_type2(const uint8_t *data,
+                                          uintptr_t data_len,
+                                          struct UacryptexHandle *sign_key,
+                                          const uint8_t *ref_cert,
+                                          uintptr_t ref_cert_len,
+                                          const uint8_t *full_crl,
+                                          uintptr_t full_crl_len,
+                                          const uint8_t *delta_crl,
+                                          uintptr_t delta_crl_len,
+                                          const uint8_t *ocsp_response,
+                                          uintptr_t ocsp_response_len,
+                                          struct UacryptexHandle *tsa_key,
+                                          const uint8_t *serial,
+                                          uintptr_t serial_len,
+                                          int64_t current_time,
+                                          const char *policy_oid,
+                                          struct UacryptexBuf *out,
+                                          struct UacryptexError *err);
+
+/**
  * Verify a CMS SignedData signature.
  *
  * When `data_len > 0`, verifies the signature over `data` (detached or matching
@@ -279,6 +364,9 @@ int32_t uacryptex_dstu4145_verify_pb(const uint32_t *f,
  *
  * `originator_key` must be a DSTU4145 (or ECDSA) private key handle with a matching certificate
  * (via `uacryptex_sign_open` or PKCS#12 with bound cert).
+ *
+ * Uses GOST28147-CFB for content encryption (see `uacryptex_cms_envelop_encrypt_with_cipher`
+ * for Kalyna-GCM).
  */
 int32_t uacryptex_cms_envelop_encrypt(const uint8_t *data,
                                       uintptr_t data_len,
@@ -287,6 +375,21 @@ int32_t uacryptex_cms_envelop_encrypt(const uint8_t *data,
                                       uintptr_t recipient_cert_len,
                                       struct UacryptexBuf *out,
                                       struct UacryptexError *err);
+
+/**
+ * Like `uacryptex_cms_envelop_encrypt`, but selects the content encryption algorithm.
+ *
+ * `content_cipher` is one of `UACRYPTEX_CONTENT_CIPHER_*`. Key agreement remains DSTU4145 DH
+ * with GOST28147-Wrap; only the content cipher differs.
+ */
+int32_t uacryptex_cms_envelop_encrypt_with_cipher(const uint8_t *data,
+                                                  uintptr_t data_len,
+                                                  struct UacryptexHandle *originator_key,
+                                                  const uint8_t *recipient_cert,
+                                                  uintptr_t recipient_cert_len,
+                                                  int32_t content_cipher,
+                                                  struct UacryptexBuf *out,
+                                                  struct UacryptexError *err);
 
 /**
  * Decrypt CMS EnvelopedData.
@@ -314,6 +417,43 @@ int32_t uacryptex_cms_envelop_decrypt(const uint8_t *cms,
  * `err` must be a valid pointer to a writable `UacryptexError`, or null (no-op).
  */
 void uacryptex_error_init(struct UacryptexError *err);
+
+/**
+ * Build SubjectAltName extension from GeneralName kind / value pairs (extension DER).
+ */
+int32_t uacryptex_ext_create_subj_alt_name(int32_t critical,
+                                           const int32_t *types,
+                                           const char *const *names,
+                                           uintptr_t count,
+                                           struct UacryptexBuf *out,
+                                           struct UacryptexError *err);
+
+/**
+ * Build SubjectAltName with DNS + RFC822 entries (extension DER).
+ */
+int32_t uacryptex_ext_create_subj_alt_name_dns_email(int32_t critical,
+                                                     const char *dns,
+                                                     const char *email,
+                                                     struct UacryptexBuf *out,
+                                                     struct UacryptexError *err);
+
+/**
+ * Build keyUsage extension (extension DER). `usage_bits` uses Cryptonite `KeyUsageBits` flags.
+ */
+int32_t uacryptex_ext_create_key_usage(int32_t critical,
+                                       uint32_t usage_bits,
+                                       struct UacryptexBuf *out,
+                                       struct UacryptexError *err);
+
+/**
+ * Build arbitrary X.509 extension from dotted OID and raw extnValue bytes (extension DER).
+ */
+int32_t uacryptex_ext_create_any(int32_t critical,
+                                 const char *oid,
+                                 const uint8_t *value,
+                                 uintptr_t value_len,
+                                 struct UacryptexBuf *out,
+                                 struct UacryptexError *err);
 
 /**
  * Build a signed OCSP request for `user_cert` issued by `root_cert`.

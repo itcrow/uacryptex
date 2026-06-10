@@ -178,6 +178,10 @@ pub enum OidId {
     AaEtsCertValues = 84,
     /// `1.2.840.113549.1.9.16.2.24`
     AaEtsRevocationValues = 85,
+    /// `1.2.840.113549.1.9.16.2.25` (CAdES-C-time-stamp / CAdES-X Type 1)
+    AaEtsEscTimeStamp = 167,
+    /// `1.2.840.113549.1.9.16.2.26` (time-stamped-certs-crls-references / CAdES-X Type 2)
+    AaEtsCertCrlTimestamp = 168,
     /// `1.2.840.113549.1.9.16.2.27`
     AaEtsArchiveTimeStamp = 161,
     /// `2.5.29.9`
@@ -320,6 +324,16 @@ pub enum OidId {
     PkiGost3410 = 159,
     /// `1.2.398.3.10.1.1.1.2`
     Gost3410Kz = 160,
+    /// `1.2.804.2.1.1.1.1.1.3`
+    Dstu7624 = 162,
+    /// `1.2.804.2.1.1.1.1.1.3.7`
+    Dstu7624Gmac = 163,
+    /// `1.2.804.2.1.1.1.1.1.3.7.1` — Kalyna-128/128-GMAC-128 (GCM AEAD)
+    Dstu7624Gmac128 = 164,
+    /// `1.2.804.2.1.1.1.1.1.3.7.2` — Kalyna-256/256-GMAC-256 (GCM AEAD)
+    Dstu7624Gmac256 = 165,
+    /// `1.2.804.2.1.1.1.1.1.3.7.3` — Kalyna-512/512-GMAC-512 (GCM AEAD)
+    Dstu7624Gmac512 = 166,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -674,6 +688,14 @@ const OID_REGISTRY: &[OidDef] = &[
         components: &[1, 2, 840, 113549, 1, 9, 16, 2, 24],
     },
     OidDef {
+        id: OidId::AaEtsEscTimeStamp,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 25],
+    },
+    OidDef {
+        id: OidId::AaEtsCertCrlTimestamp,
+        components: &[1, 2, 840, 113549, 1, 9, 16, 2, 26],
+    },
+    OidDef {
         id: OidId::AaEtsArchiveTimeStamp,
         components: &[1, 2, 840, 113549, 1, 9, 16, 2, 27],
     },
@@ -780,6 +802,10 @@ const OID_REGISTRY: &[OidDef] = &[
     OidDef {
         id: OidId::NonceExtension,
         components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 2],
+    },
+    OidDef {
+        id: OidId::CrlIdExtension,
+        components: &[1, 3, 6, 1, 5, 5, 7, 48, 1, 3],
     },
     OidDef {
         id: OidId::AcceptableResponsesExtension,
@@ -952,6 +978,26 @@ const OID_REGISTRY: &[OidDef] = &[
     OidDef {
         id: OidId::Gost3410Kz,
         components: &[1, 2, 398, 3, 10, 1, 1, 1, 2],
+    },
+    OidDef {
+        id: OidId::Dstu7624,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 3],
+    },
+    OidDef {
+        id: OidId::Dstu7624Gmac,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 3, 7],
+    },
+    OidDef {
+        id: OidId::Dstu7624Gmac128,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 3, 7, 1],
+    },
+    OidDef {
+        id: OidId::Dstu7624Gmac256,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 3, 7, 2],
+    },
+    OidDef {
+        id: OidId::Dstu7624Gmac512,
+        components: &[1, 2, 804, 2, 1, 1, 1, 1, 1, 3, 7, 3],
     },
 ];
 

@@ -3,7 +3,7 @@
 use crate::pki::crypto::aid::sbox_from_algorithm_der;
 use crate::pki::crypto::DhAdapter;
 use crate::primitives::dstu4145::{Dstu4145Prng, RandomBytes, SystemRandom};
-use crate::primitives::gost28147::{generate_key, unwrap_key, wrap_key, WRAP_KEY_LEN};
+use crate::primitives::gost28147::{unwrap_key, wrap_key, WRAP_KEY_LEN};
 use crate::primitives::gost34_311::Gost34311;
 use crate::{Error, Result};
 
@@ -13,6 +13,7 @@ const CFB_WRAP_OID: [u8; 13] = [
 ];
 
 const KEY_LENGTH_BITS: i32 = 256;
+const WRAP_KEY_LEN_DOUBLE: usize = WRAP_KEY_LEN * 2;
 
 /// `wrap_session_key`.
 pub fn wrap_session_key(
@@ -21,9 +22,6 @@ pub fn wrap_session_key(
     session_key: &[u8],
     rnd_bytes: &[u8],
 ) -> Result<Vec<u8>> {
-    if session_key.len() != 32 {
-        return Err(Error::InvalidParam("session key must be 32 bytes".into()));
-    }
     if rnd_bytes.len() != 64 {
         return Err(Error::InvalidParam("UKM must be 64 bytes".into()));
     }
@@ -31,14 +29,35 @@ pub fn wrap_session_key(
     let (zx, _zy) = dha.dh(recipient_pub_key)?;
     let kek = iso15946_generate_secretc(&zx, Some(rnd_bytes))?;
     let sbox = sbox_from_algorithm_der(dha.algorithm_der())?;
-    let session_key: [u8; 32] = session_key
-        .try_into()
-        .map_err(|_| Error::InvalidParam("session key must be 32 bytes".into()))?;
     let mut seed = [0u8; 40];
     SystemRandom.fill(&mut seed)?;
     let mut prng = Dstu4145Prng::new(&seed)?;
-    let wrapped = wrap_key(&sbox, &kek, &session_key, &mut prng)?;
-    Ok(wrapped.to_vec())
+
+    match session_key.len() {
+        32 => {
+            let session_key: [u8; 32] = session_key
+                .try_into()
+                .map_err(|_| Error::InvalidParam("session key must be 32 bytes".into()))?;
+            Ok(wrap_key(&sbox, &kek, &session_key, &mut prng)?.to_vec())
+        }
+        64 => {
+            let first: [u8; 32] = session_key[..32]
+                .try_into()
+                .map_err(|_| Error::InvalidParam("invalid session key".into()))?;
+            let second: [u8; 32] = session_key[32..]
+                .try_into()
+                .map_err(|_| Error::InvalidParam("invalid session key".into()))?;
+            let w1 = wrap_key(&sbox, &kek, &first, &mut prng)?;
+            let w2 = wrap_key(&sbox, &kek, &second, &mut prng)?;
+            let mut out = Vec::with_capacity(WRAP_KEY_LEN_DOUBLE);
+            out.extend_from_slice(&w1);
+            out.extend_from_slice(&w2);
+            Ok(out)
+        }
+        n => Err(Error::InvalidParam(format!(
+            "session key must be 32 or 64 bytes, got {n}"
+        ))),
+    }
 }
 
 /// `unwrap_session_key`.
@@ -48,11 +67,6 @@ pub fn unwrap_session_key(
     rnd_bytes: Option<&[u8]>,
     originator_pub_key: &[u8],
 ) -> Result<Vec<u8>> {
-    if wrapped_key.len() != WRAP_KEY_LEN {
-        return Err(Error::InvalidParam(format!(
-            "wrapped key must be {WRAP_KEY_LEN} bytes"
-        )));
-    }
     if let Some(ukm) = rnd_bytes {
         if ukm.len() != 64 {
             return Err(Error::InvalidParam("UKM must be 64 bytes".into()));
@@ -62,11 +76,33 @@ pub fn unwrap_session_key(
     let (zx, _zy) = dha.dh(originator_pub_key)?;
     let kek = iso15946_generate_secretc(&zx, rnd_bytes)?;
     let sbox = sbox_from_algorithm_der(dha.algorithm_der())?;
-    let wrapped_arr: [u8; WRAP_KEY_LEN] = wrapped_key
-        .try_into()
-        .map_err(|_| Error::InvalidParam("invalid wrapped key length".into()))?;
-    let key = unwrap_key(&sbox, &kek, &wrapped_arr)?;
-    Ok(key.to_vec())
+
+    match wrapped_key.len() {
+        WRAP_KEY_LEN => {
+            let wrapped_arr: [u8; WRAP_KEY_LEN] = wrapped_key
+                .try_into()
+                .map_err(|_| Error::InvalidParam("invalid wrapped key length".into()))?;
+            Ok(unwrap_key(&sbox, &kek, &wrapped_arr)?.to_vec())
+        }
+        WRAP_KEY_LEN_DOUBLE => {
+            let w1: [u8; WRAP_KEY_LEN] = wrapped_key[..WRAP_KEY_LEN]
+                .try_into()
+                .map_err(|_| Error::InvalidParam("invalid wrapped key length".into()))?;
+            let w2: [u8; WRAP_KEY_LEN] = wrapped_key[WRAP_KEY_LEN..]
+                .try_into()
+                .map_err(|_| Error::InvalidParam("invalid wrapped key length".into()))?;
+            let k1 = unwrap_key(&sbox, &kek, &w1)?;
+            let k2 = unwrap_key(&sbox, &kek, &w2)?;
+            let mut out = Vec::with_capacity(64);
+            out.extend_from_slice(&k1);
+            out.extend_from_slice(&k2);
+            Ok(out)
+        }
+        n => Err(Error::InvalidParam(format!(
+            "wrapped key must be {WRAP_KEY_LEN} or {} bytes, got {n}",
+            WRAP_KEY_LEN * 2
+        ))),
+    }
 }
 
 fn iso15946_generate_secretc(zx: &[u8], entity_info: Option<&[u8]>) -> Result<[u8; 32]> {
@@ -146,5 +182,15 @@ fn strip_trailing_zero(zx: &[u8]) -> Vec<u8> {
 
 /// `gost28147_generate_key`.
 pub fn gost28147_generate_session_key(rng: &mut dyn RandomBytes) -> Result<Vec<u8>> {
-    generate_key(rng).map(|k| k.to_vec())
+    generate_session_key(32, rng)
+}
+
+/// Generate a random content-encryption key of `len` bytes.
+pub fn generate_session_key(len: usize, rng: &mut dyn RandomBytes) -> Result<Vec<u8>> {
+    if len == 0 {
+        return Err(Error::InvalidParam("session key length is zero".into()));
+    }
+    let mut key = vec![0u8; len];
+    rng.fill(&mut key)?;
+    Ok(key)
 }

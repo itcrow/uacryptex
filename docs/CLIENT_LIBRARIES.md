@@ -2,7 +2,7 @@
 
 > **Languages:** English · [Українська](uk/CLIENT_LIBRARIES.md)
 
-This guide is for application developers using **Go**, **Python**, **PHP**, or **Node.js** bindings. All packages call the same Rust implementation through a stable C ABI (`uacryptex-ffi`). There is no cryptographic logic in the binding layers.
+This guide is for application developers using **Go**, **Python**, **PHP**, **Node.js**, or **Dart/Flutter** bindings. All packages call the same Rust implementation through a stable C ABI (`uacryptex-ffi`). There is no cryptographic logic in the binding layers.
 
 For build layout and FFI maintenance, see [BINDINGS.md](BINDINGS.md). For the C contract, see [FFI.md](FFI.md).
 
@@ -16,6 +16,7 @@ For build layout and FFI maintenance, see [BINDINGS.md](BINDINGS.md). For the C 
 | **Python** | `pip install uacryptex` (planned) / `pip install -e python/` | `import uacryptex` | Python 3.9+ |
 | **PHP** | `composer require itcrow/uacryptex` | `Itcrow\Uacryptex\Uacryptex` | PHP 8.1+, **ext-ffi** |
 | **Node.js** | `npm install @itcrow/uacryptex` (planned) / `npm install` in `nodejs/` | `require('@itcrow/uacryptex')` | Node.js 18+ |
+| **Dart / Flutter** | path: `dart/uacryptex` in monorepo | `package:uacryptex/uacryptex.dart` | Dart SDK 3.3+, Flutter 3.x |
 
 Published package names and registry flow: [PUBLISHING.md](PUBLISHING.md).
 
@@ -36,7 +37,7 @@ Every client package needs a prebuilt **`uacryptex-ffi`** binary for your OS and
 
 ```bash
 ./scripts/build-ffi.sh              # host only
-./scripts/sync-native-libs.sh       # copy into go/python/php/nodejs trees
+./scripts/sync-native-libs.sh       # copy into go/python/php/nodejs/dart trees
 
 # or download a release tarball:
 ./scripts/fetch-native-lib.sh 0.1.0
@@ -206,7 +207,9 @@ Password is a string; P12 must be DER bytes (`[]byte` / `bytes` / `string` / `Bu
 | **T** | BES + signature timestamp | `SignCmsCadesT` (+ TSA key, serial, time) |
 | **C** | BES + cert/CRL refs | `SignCmsCadesC` (+ ref cert, CRL) |
 | **X** | BES + cert/OCSP values | `SignCmsCadesX` (+ ref cert, OCSP response) |
-| **LT** | X + validation data in SignedData | `SignCmsCadesLT` (+ full CRL, optional delta CRL) |
+| **LT** | X Long (refs + values + validation data in SignedData) | `SignCmsCadesLT` (+ full CRL, optional delta CRL) |
+| **X-L Type 1** | LT + `escTimeStamp` on CAdES-C | `SignCmsCadesXLType1` (Go; + TSA key, serial, time) |
+| **X-L Type 2** | LT + `certCRLTimestamp` on refs | `SignCmsCadesXLType2` (Go; + TSA key, serial, time) |
 | **A** | LT + archive timestamp | `SignCmsCadesA` (+ TSA key, serial, time) |
 
 Verify all profiles with **`VerifyCMS`** / `verify_cms` / `verifyCms` over the **original signed payload** (not the CMS blob alone).
@@ -234,9 +237,14 @@ Verify all profiles with **`VerifyCMS`** / `verify_cms` / `verifyCms` over the *
 | Go | Python | PHP | Node.js |
 |----|--------|-----|---------|
 | `EnvelopCMS(data, originatorKey, recipientCert)` | `envelop_cms` | `envelopCms` | `envelopCms` |
+| `EnvelopCMSWithCipher(..., cipher)` | — | — | — |
 | `DecryptCMS(cms, recipientKey, recipientCert, originatorCert, external)` | `decrypt_cms` | `decryptCms` | `decryptCms` |
 
-Encryption: DSTU4145 key agreement + GOST28147-CFB. `originatorCert` and `external` are optional depending on how the EnvelopedData was built.
+Key agreement is always DSTU4145 DH + GOST28147-Wrap. Default content encryption is GOST28147-CFB (`EnvelopCMS` / `uacryptex_cms_envelop_encrypt`).
+
+Go-only: `EnvelopCMSWithCipher` calls `uacryptex_cms_envelop_encrypt_with_cipher`. Select `ContentCipherGost28147CFB` (0), `ContentCipherKalyna256GCM` (1), `ContentCipherKalyna128GCM` (2), or `ContentCipherKalyna512GCM` (3). `DecryptCMS` detects the cipher from the CMS OID for all variants.
+
+`originatorCert` and `external` are optional depending on how the EnvelopedData was built.
 
 ---
 
@@ -312,6 +320,14 @@ CRL types: `CRLTypeFull` / `CRL_TYPE_FULL` (1), `CRLTypeDelta` / `CRL_TYPE_DELTA
 - Pass binary data as `Buffer`; empty optional buffers as `null`.
 - Type hints: `nodejs/lib/index.d.ts` (if present).
 
+### Dart / Flutter
+
+- Uses [`dart:ffi`](https://dart.dev/interop/c-interop) + `package:ffi`.
+- Binary data: `Uint8List`; close `Keystore` / `PrivateKey` when done (`close()`).
+- **X.509 extensions:** `X509Extensions.createSubjectAltName`, `createKeyUsage`, `createAny` (not yet in Python/Node).
+- Flutter: add `uacryptex` as a path/plugin dependency; Android needs `libuacryptex_ffi.so` under plugin `jniLibs` (see [dart/uacryptex/README.md](../dart/uacryptex/README.md)).
+- Tests: `cd dart/uacryptex && dart test`.
+
 ---
 
 ## Troubleshooting
@@ -348,4 +364,3 @@ Integration vectors live under `testdata/` (Cryptonite KAT). Go MVP test: `go/ua
 | Build matrix & parity table | [BINDINGS.md](BINDINGS.md) |
 | C function signatures | [FFI.md](FFI.md) |
 | Release & registries | [PUBLISHING.md](PUBLISHING.md) |
-| Planned CAdES-X-L Type 1/2 | [ROADMAP.md](ROADMAP.md#todo) |

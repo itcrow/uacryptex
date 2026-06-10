@@ -39,7 +39,8 @@ typedef struct UacryptexHandle UacryptexHandle;
 | `uacryptex_sign_open` | ключ + cert → handle |
 | `uacryptex_sign_hash` | підпис digest |
 | `uacryptex_cms_sign` / `cms_verify` | CMS SignedData |
-| `uacryptex_cms_envelop_encrypt` / `decrypt` | EnvelopedData |
+| `uacryptex_cms_envelop_encrypt` / `decrypt` | EnvelopedData (GOST28147-CFB by default) |
+| `uacryptex_cms_envelop_encrypt_with_cipher` | EnvelopedData з вибором content cipher (GOST28147-CFB або Kalyna-GCM 128/256/512) |
 | `uacryptex_digest` | GOST3411 / cert-selected hash |
 | `uacryptex_sign_data` | підпис сирих даних |
 | `uacryptex_verify_hash` / `verify_data` | detached verify |
@@ -69,5 +70,7 @@ typedef struct UacryptexHandle UacryptexHandle;
 | Node.js | `nodejs/lib/native.js` (koffi) |
 
 Регенерація заголовка: `./scripts/sync-header.sh` → `include/uacryptex.h`.
+
+**Content cipher для EnvelopedData** (`UACRYPTEX_CONTENT_CIPHER_*`): `0` GOST28147-CFB, `1` Kalyna-256-GCM, `2` Kalyna-128-GCM, `3` Kalyna-512-GCM. Деталі — [FFI.md](../FFI.md) (розділ Phase 2, EnvelopedData).
 
 Див. [BINDINGS.md](BINDINGS.md), [ARCHITECTURE.md](ARCHITECTURE.md).

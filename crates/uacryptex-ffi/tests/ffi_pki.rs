@@ -240,6 +240,112 @@ fn ffi_cms_sign_cades_x_verify() {
 }
 
 #[test]
+fn ffi_cms_sign_cades_xl_type1_verify() {
+    use uacryptex_ffi::{
+        uacryptex_buf_free, uacryptex_cms_sign_cades_xl_type1, uacryptex_cms_verify,
+        uacryptex_handle_free, uacryptex_ocsp_request_from_cert, uacryptex_ocsp_response_generate,
+        uacryptex_sign_open,
+    };
+
+    const ROOT_CERT: &[u8] =
+        include_bytes!("../../../testdata/pki/pki_example/root_certificate.cer");
+    const OCSP_CERT: &[u8] =
+        include_bytes!("../../../testdata/pki/pki_example/ocsp_certificate.cer");
+    const OCSP_KEY: &[u8] =
+        include_bytes!("../../../testdata/pki/pki_example/ocsp_private_key_ba.dat");
+    const FULL_CRL: &[u8] = include_bytes!("../../../testdata/pki/pki_example/full.crl");
+    const DELTA_CRL: &[u8] = include_bytes!("../../../testdata/pki/pki_example/delta.crl");
+
+    let mut err = UacryptexError::default();
+    let mut key: *mut UacryptexHandle = std::ptr::null_mut();
+    let rc = uacryptex_sign_open(
+        USERFIZ_KEY.as_ptr(),
+        USERFIZ_KEY.len(),
+        USERFIZ_CERT.as_ptr(),
+        USERFIZ_CERT.len(),
+        &mut key,
+        &mut err,
+    );
+    assert_eq!(rc, RET_OK, "sign_open err={err:?}");
+
+    let mut req = UacryptexBuf::empty();
+    let rc = uacryptex_ocsp_request_from_cert(
+        ROOT_CERT.as_ptr(),
+        ROOT_CERT.len(),
+        USERFIZ_CERT.as_ptr(),
+        USERFIZ_CERT.len(),
+        &mut req,
+        &mut err,
+    );
+    assert_eq!(rc, RET_OK, "ocsp request err={err:?}");
+
+    let mut ocsp_key: *mut UacryptexHandle = std::ptr::null_mut();
+    let rc = uacryptex_sign_open(
+        OCSP_KEY.as_ptr(),
+        OCSP_KEY.len(),
+        OCSP_CERT.as_ptr(),
+        OCSP_CERT.len(),
+        &mut ocsp_key,
+        &mut err,
+    );
+    assert_eq!(rc, RET_OK, "ocsp key err={err:?}");
+
+    let mut ocsp_resp = UacryptexBuf::empty();
+    let tsp_time = 1_359_151_200i64;
+    let rc = uacryptex_ocsp_response_generate(
+        req.ptr,
+        req.len,
+        ROOT_CERT.as_ptr(),
+        ROOT_CERT.len(),
+        USERFIZ_CERT.as_ptr(),
+        USERFIZ_CERT.len(),
+        FULL_CRL.as_ptr(),
+        FULL_CRL.len(),
+        DELTA_CRL.as_ptr(),
+        DELTA_CRL.len(),
+        ocsp_key,
+        tsp_time,
+        &mut ocsp_resp,
+        &mut err,
+    );
+    assert_eq!(rc, RET_OK, "ocsp generate err={err:?}");
+
+    let data = [0xf0; 100];
+    let serial = 128u8.to_be_bytes();
+    let mut cms = UacryptexBuf::empty();
+    let rc = uacryptex_cms_sign_cades_xl_type1(
+        data.as_ptr(),
+        data.len(),
+        key,
+        ROOT_CERT.as_ptr(),
+        ROOT_CERT.len(),
+        FULL_CRL.as_ptr(),
+        FULL_CRL.len(),
+        DELTA_CRL.as_ptr(),
+        DELTA_CRL.len(),
+        ocsp_resp.ptr,
+        ocsp_resp.len,
+        key,
+        serial.as_ptr(),
+        serial.len(),
+        tsp_time,
+        std::ptr::null(),
+        &mut cms,
+        &mut err,
+    );
+    assert_eq!(rc, RET_OK, "cms_sign_cades_xl_type1 err={err:?}");
+
+    let rc = uacryptex_cms_verify(data.as_ptr(), data.len(), cms.ptr, cms.len, &mut err);
+    assert_eq!(rc, RET_OK, "verify err={err:?}");
+
+    uacryptex_buf_free(cms);
+    uacryptex_buf_free(ocsp_resp);
+    uacryptex_buf_free(req);
+    uacryptex_handle_free(ocsp_key);
+    uacryptex_handle_free(key);
+}
+
+#[test]
 fn ffi_cms_sign_cades_a_verify() {
     use uacryptex_ffi::{
         uacryptex_buf_free, uacryptex_cms_sign_cades_a, uacryptex_cms_verify,
@@ -906,4 +1012,43 @@ fn ffi_crl_generate_full_merge() {
 
     uacryptex_buf_free(crl);
     uacryptex_handle_free(key);
+}
+
+#[test]
+fn ffi_ext_create_subj_alt_name_and_key_usage() {
+    use uacryptex_ffi::{
+        uacryptex_buf_free, uacryptex_ext_create_key_usage, uacryptex_ext_create_subj_alt_name,
+        uacryptex_ext_create_subj_alt_name_dns_email, UACRYPTEX_GN_DNS_NAME,
+        UACRYPTEX_GN_RFC822_NAME,
+    };
+
+    let mut err = UacryptexError::default();
+    let dns = c"ca.ua";
+    let email = c"info@ca.ua";
+    let mut san = UacryptexBuf::empty();
+    let rc = uacryptex_ext_create_subj_alt_name_dns_email(0, dns.as_ptr(), email.as_ptr(), &mut san, &mut err);
+    assert_eq!(rc, RET_OK, "san dns/email err={err:?}");
+    assert!(san.len > 0);
+    uacryptex_buf_free(san);
+
+    let types = [UACRYPTEX_GN_DNS_NAME, UACRYPTEX_GN_RFC822_NAME];
+    let names = [dns.as_ptr(), email.as_ptr()];
+    let mut san2 = UacryptexBuf::empty();
+    let rc = uacryptex_ext_create_subj_alt_name(
+        0,
+        types.as_ptr(),
+        names.as_ptr(),
+        2,
+        &mut san2,
+        &mut err,
+    );
+    assert_eq!(rc, RET_OK, "san kinds err={err:?}");
+    assert!(san2.len > 0);
+    uacryptex_buf_free(san2);
+
+    let mut ku = UacryptexBuf::empty();
+    let rc = uacryptex_ext_create_key_usage(1, 0x60, &mut ku, &mut err);
+    assert_eq!(rc, RET_OK, "key usage err={err:?}");
+    assert!(ku.len > 0);
+    uacryptex_buf_free(ku);
 }

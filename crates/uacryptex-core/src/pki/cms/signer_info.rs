@@ -14,6 +14,29 @@ use crate::pki::ext::object_identifier;
 use crate::pki::oid::OidId;
 use crate::{Error, Result};
 
+/// RFC 5126 imprint bytes: DER(attrType) || DER(attrValues SET), without outer SEQUENCE.
+pub(crate) fn attribute_imprint(attr: &Attribute) -> Result<Vec<u8>> {
+    let mut out = attr
+        .oid
+        .to_der()
+        .map_err(|e| Error::Internal(format!("attribute oid encode: {e}")))?;
+    out.extend_from_slice(
+        &attr
+            .values
+            .to_der()
+            .map_err(|e| Error::Internal(format!("attribute values encode: {e}")))?,
+    );
+    Ok(out)
+}
+
+pub(crate) fn unsigned_attr_imprint(attrs: &Attributes, target: OidId) -> Result<Option<Vec<u8>>> {
+    let oid = object_identifier(target)?;
+    let Some(attr) = attrs.iter().find(|attr| attr.oid == oid) else {
+        return Ok(None);
+    };
+    attribute_imprint(attr).map(Some)
+}
+
 pub(crate) fn unsigned_attr_value_bytes(
     attrs: &Attributes,
     target: OidId,
@@ -280,6 +303,24 @@ pub fn signature_time_stamp_token_attribute(
     let value = Any::encode_from(token)
         .map_err(|e| Error::Internal(format!("timestamp token encode: {e}")))?;
     attribute_with_value(OidId::AaSignatureTimeStampToken, value)
+}
+
+/// Create id-aa-ets-escTimeStamp unsigned attribute (CAdES-X Type 1 / X-L Type 1).
+pub fn esc_time_stamp_token_attribute(
+    token: &crate::pki::cms::types::ContentInfo,
+) -> Result<Attribute> {
+    let value = Any::encode_from(token)
+        .map_err(|e| Error::Internal(format!("esc timestamp token encode: {e}")))?;
+    attribute_with_value(OidId::AaEtsEscTimeStamp, value)
+}
+
+/// Create id-aa-ets-certCRLTimestamp unsigned attribute (CAdES-X Type 2 / X-L Type 2).
+pub fn cert_crl_timestamp_token_attribute(
+    token: &crate::pki::cms::types::ContentInfo,
+) -> Result<Attribute> {
+    let value = Any::encode_from(token)
+        .map_err(|e| Error::Internal(format!("cert/crl timestamp token encode: {e}")))?;
+    attribute_with_value(OidId::AaEtsCertCrlTimestamp, value)
 }
 
 /// `sinfo_verify_signing_cert_v2`.

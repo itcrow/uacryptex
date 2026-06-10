@@ -65,6 +65,28 @@ if err := uacryptex.VerifyCMS(document, cms); err != nil {
 
 Demo mode (no flags) uses `testdata/documents/sample.txt` and writes CMS to `$TMPDIR/sample.txt.p7s`.
 
+## Enveloped CMS
+
+Encrypt data for a recipient certificate (DSTU4145 DH key agreement + GOST28147-Wrap). Default content cipher is GOST28147-CFB:
+
+```go
+cms, err := uacryptex.EnvelopCMS(plaintext, originatorKey, recipientCertDER)
+plain, err := uacryptex.DecryptCMS(cms, recipientKey, recipientCertDER, nil, nil)
+```
+
+Select Kalyna-GCM via `EnvelopCMSWithCipher` (DSTU 7624 AEAD):
+
+```go
+cms, err := uacryptex.EnvelopCMSWithCipher(
+    plaintext, originatorKey, recipientCertDER, uacryptex.ContentCipherKalyna256GCM,
+)
+// ContentCipherKalyna128GCM (2), ContentCipherKalyna512GCM (3)
+```
+
+`DecryptCMS` reads the content cipher from the CMS OID — one API for GOST28147-CFB and all Kalyna-GCM variants.
+
+Pass `nil` for `originatorCert` when the originator certificate is embedded in the CMS; `nil` for `external` when ciphertext is inside the structure.
+
 ## Demo
 
 Runnable walkthrough (CMS, CAdES-T/C, enveloped data, OCSP, PKCS#12):

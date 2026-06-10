@@ -16,6 +16,7 @@ DESTS=(
   "${ROOT}/python/uacryptex/native/lib"
   "${ROOT}/php/native/lib"
   "${ROOT}/nodejs/native/lib"
+  "${ROOT}/dart/uacryptex/native/lib"
 )
 
 for dest in "${DESTS[@]}"; do
@@ -34,6 +35,23 @@ if [[ -f "$WIN_STATIC" ]]; then
   }
   # Co-locate for cgo: MinGW on Windows often fails -L/-l search with ${SRCDIR} paths.
   cp "$WIN_STATIC" "${ROOT}/go/uacryptex/internal/native/libuacryptex_ffi.a"
+fi
+
+# Optional: Android NDK-built libs under native/lib/android/{abi}/shared/
+ANDROID_LIB_ROOT="${ROOT}/native/lib/android"
+DART_JNI="${ROOT}/dart/uacryptex/android/src/main/jniLibs"
+if [[ -d "$ANDROID_LIB_ROOT" ]]; then
+  rm -rf "$DART_JNI"
+  for abi_dir in "$ANDROID_LIB_ROOT"/*; do
+    [[ -d "$abi_dir" ]] || continue
+    abi="$(basename "$abi_dir")"
+    so="${abi_dir}/shared/libuacryptex_ffi.so"
+    if [[ -f "$so" ]]; then
+      mkdir -p "${DART_JNI}/${abi}"
+      cp "$so" "${DART_JNI}/${abi}/libuacryptex_ffi.so"
+      echo "synced android jniLibs -> ${DART_JNI}/${abi}"
+    fi
+  done
 fi
 
 echo "Done. Client packages now embed native/lib for all built platforms."

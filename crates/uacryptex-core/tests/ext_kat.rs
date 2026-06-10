@@ -1,18 +1,28 @@
 //! X.509 extension KAT (`pkixUtest/c/utest_ext.c`).
 
 use der::asn1::GeneralizedTime;
+use der::Decode;
 use std::time::Duration;
 use uacryptex_core::pki::cert::Cert;
+use uacryptex_core::pki::creq::creq_get_ext_by_oid;
+use uacryptex_core::pki::crl::Crl;
+use uacryptex_core::pki::engine::{
+    ecert_request_add_ext, ecert_request_alloc, ecert_request_generate,
+};
 use uacryptex_core::pki::ext::{
     ext_create_any, ext_create_auth_info_access, ext_create_auth_key_id_from_cert,
     ext_create_auth_key_id_from_spki, ext_create_basic_constraints, ext_create_cert_policies,
-    ext_create_crl_distr_points, ext_create_crl_number, ext_create_crl_reason,
+    ext_create_crl_distr_points, ext_create_crl_id, ext_create_crl_number, ext_create_crl_reason,
     ext_create_delta_crl_indicator, ext_create_ext_key_usage, ext_create_freshest_crl,
     ext_create_invalidity_date, ext_create_key_usage, ext_create_nonce,
-    ext_create_private_key_usage, ext_create_qc_statements, ext_create_subj_info_access,
-    ext_create_subj_key_id, ext_from_der, ext_get_value, ext_to_der, qc_statement_compliance,
-    qc_statement_limit_value, CrlReasonCode, KeyUsageBits,
+    ext_create_private_key_usage, ext_create_private_key_usage_from_cert,
+    ext_create_qc_statements, ext_create_subj_alt_name_directly, ext_create_subj_alt_name_dns_email,
+    ext_create_subj_info_access, ext_create_subj_key_id, GeneralNameKind,
+    ext_from_der, ext_get_value, ext_to_der, exts_add_extension, exts_get_ext_by_oid,
+    exts_get_ext_value_by_oid, qc_statement_compliance, qc_statement_limit_value, CrlReasonCode,
+    KeyUsageBits,
 };
+use uacryptex_core::pki::crypto::SignAdapter;
 use uacryptex_core::pki::oid::OidId;
 use uacryptex_core::Error;
 
@@ -168,6 +178,63 @@ fn subject_alt_name_raw_value_from_utest() {
     );
     let ext = ext_create_any(false, OidId::SubjectAltNameExtension, &value).unwrap();
     assert_eq!(ext_get_value(&ext), value);
+
+    let reference = x509_cert::ext::pkix::SubjectAltName::from_der(&value).unwrap();
+    let mut kinds = Vec::new();
+    let mut names = Vec::new();
+    for gn in &reference.0 {
+        match gn {
+            x509_cert::ext::pkix::name::GeneralName::OtherName(on) => {
+                let text = der::asn1::Utf8StringRef::try_from(&on.value).unwrap();
+                kinds.push(GeneralNameKind::OtherName);
+                names.push(format!("{}=utf8:{text}", on.type_id));
+            }
+            x509_cert::ext::pkix::name::GeneralName::DnsName(s) => {
+                kinds.push(GeneralNameKind::DnsName);
+                names.push(s.to_string());
+            }
+            x509_cert::ext::pkix::name::GeneralName::Rfc822Name(s) => {
+                kinds.push(GeneralNameKind::Rfc822Name);
+                names.push(s.to_string());
+            }
+            other => panic!("unexpected general name in utest fixture: {other:?}"),
+        }
+    }
+    let name_refs: Vec<&str> = names.iter().map(String::as_str).collect();
+    let built = ext_create_subj_alt_name_directly(false, &kinds, &name_refs).unwrap();
+    assert_eq!(ext_get_value(&built), value);
+}
+
+#[test]
+fn ext_create_subj_alt_name_dns_email_matches_directly() {
+    let direct = ext_create_subj_alt_name_dns_email(false, "ca.ua", "info@ca.ua").unwrap();
+    let manual = ext_create_subj_alt_name_directly(
+        false,
+        &[GeneralNameKind::DnsName, GeneralNameKind::Rfc822Name],
+        &["ca.ua", "info@ca.ua"],
+    )
+    .unwrap();
+    assert_eq!(ext_get_value(&direct), ext_get_value(&manual));
+}
+
+#[test]
+fn ext_create_subj_alt_name_directly_rejects_invalid_params() {
+    assert!(ext_create_subj_alt_name_directly(false, &[], &[]).is_err());
+    assert!(ext_create_subj_alt_name_directly(
+        false,
+        &[GeneralNameKind::DnsName],
+        &["ca.ua", "info@ca.ua"]
+    )
+    .is_err());
+    assert!(matches!(
+        ext_create_subj_alt_name_directly(
+            false,
+            &[GeneralNameKind::X400Address],
+            &["ignored"]
+        )
+        .unwrap_err(),
+        Error::Unsupported(_)
+    ));
 }
 
 #[test]
@@ -209,4 +276,69 @@ fn ext_create_auth_key_id_from_tov_issuer_ski() {
     let cert = Cert::decode(include_bytes!("../../../testdata/pki/tov_test.der")).unwrap();
     let ext = ext_create_auth_key_id_from_cert(false, &cert).unwrap();
     assert_ext_value_roundtrip(&ext);
+}
+
+#[test]
+fn ext_create_crl_id_from_czo_full() {
+    let crl = Crl::decode(include_bytes!("../../../testdata/pki/czo_full.crl")).unwrap();
+    let crl_number = crl.crl_number().unwrap();
+    let crl_time = GeneralizedTime::from_unix_duration(Duration::from_secs(
+        crl.this_update_unix() as u64,
+    ))
+    .unwrap();
+    let ext = ext_create_crl_id(
+        false,
+        Some("http://czo.gov.ua/download/crls/CZO-Full.crl"),
+        Some(&crl_number),
+        Some(crl_time),
+    )
+    .unwrap();
+    assert_eq!(ext.extn_id.to_string(), "1.3.6.1.5.5.7.48.1.3");
+    assert_ext_value_roundtrip(&ext);
+}
+
+#[test]
+fn ext_create_private_key_usage_from_certificate257_validity() {
+    let cert = Cert::decode(include_bytes!("../../../testdata/pki/certificate257.der")).unwrap();
+    let ext = ext_create_private_key_usage_from_cert(false, &cert).unwrap();
+    assert_ext_value_roundtrip(&ext);
+}
+
+#[test]
+fn exts_collection_helpers() {
+    let sn = hex("0123");
+    let number = ext_create_crl_number(false, &sn).unwrap();
+    let reason = ext_create_crl_reason(false, CrlReasonCode::KeyCompromise).unwrap();
+    let mut exts = Vec::new();
+    exts_add_extension(&mut exts, &number);
+    exts_add_extension(&mut exts, &reason);
+
+    let found = exts_get_ext_by_oid(&exts, OidId::CrlNumberExtension).unwrap();
+    assert_eq!(ext_get_value(&found), ext_get_value(&number));
+
+    let value = exts_get_ext_value_by_oid(&exts, OidId::CrlReasonExtension).unwrap();
+    assert_eq!(value, ext_get_value(&reason));
+
+    assert!(exts_get_ext_by_oid(&exts, OidId::NonceExtension).is_err());
+}
+
+#[test]
+fn creq_get_ext_by_oid_from_generated_request() {
+    let cert = Cert::decode(include_bytes!("../../../testdata/pki/certificate257.der")).unwrap();
+    let private_key = hex("7B66B62C23673C1299B84AE4AACFBBCA1C50FC134A846EF2E24A37407D01D32A");
+    let sa = SignAdapter::init_by_cert(&private_key, &cert).unwrap();
+    let subj_dir_attr = hex(
+        "304F301A060C2A8624020101010B01040201310A13083131313131313131301C060C2A8624020101010B01040101310C130A313131313131313131313013060C2A8624020101010B010407013103130130",
+    );
+    let req_ext = ext_create_any(false, OidId::SubjectDirectoryAttributesExtension, &subj_dir_attr)
+        .unwrap();
+
+    let mut engine = ecert_request_alloc(&sa).unwrap();
+    ecert_request_add_ext(&mut engine, req_ext.clone()).unwrap();
+    let mut request = None;
+    ecert_request_generate(&engine, &mut request).unwrap();
+    let request = request.unwrap();
+
+    let found = creq_get_ext_by_oid(&request, OidId::SubjectDirectoryAttributesExtension).unwrap();
+    assert_eq!(ext_get_value(&found), ext_get_value(&req_ext));
 }

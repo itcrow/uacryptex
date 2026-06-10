@@ -192,6 +192,67 @@ pub fn revocation_values_from_crls(crls: &[Crl]) -> Result<RevocationValues> {
     })
 }
 
+/// Message imprint for id-aa-ets-escTimeStamp (CAdES-X Type 1 / X-L Type 1), RFC 5126 §6.3.5.
+pub fn cades_c_timestamp_imprint(
+    container: &crate::pki::cms::signed_data::SignedDataContainer,
+    signer_index: usize,
+) -> Result<Vec<u8>> {
+    use crate::pki::cms::signer_info::{signature_octets, unsigned_attr_imprint};
+
+    let inner = container.inner();
+    let sinfo = inner
+        .signer_info(signer_index)
+        .ok_or_else(|| Error::InvalidParam("signer info index out of bounds".into()))?;
+
+    let sig_alg = sinfo
+        .signature_algorithm
+        .to_der()
+        .map_err(|e| Error::Internal(format!("signature algorithm encode: {e}")))?;
+    let mut imprint = signature_octets(&sinfo.signature, &sig_alg)?;
+
+    let unsigned = sinfo.unsigned_attrs.as_ref().ok_or_else(|| {
+        Error::InvalidParam("CAdES-C refs required for escTimeStamp imprint".into())
+    })?;
+
+    if let Some(bytes) = unsigned_attr_imprint(unsigned, OidId::AaSignatureTimeStampToken)? {
+        imprint.extend_from_slice(&bytes);
+    }
+    let cert_refs = unsigned_attr_imprint(unsigned, OidId::AaEtsCertificateRefs)?
+        .ok_or_else(|| Error::InvalidParam("missing complete-certificate-references".into()))?;
+    imprint.extend_from_slice(&cert_refs);
+    let rev_refs = unsigned_attr_imprint(unsigned, OidId::AaEtsRevocationRefs)?
+        .ok_or_else(|| Error::InvalidParam("missing complete-revocation-references".into()))?;
+    imprint.extend_from_slice(&rev_refs);
+
+    Ok(imprint)
+}
+
+/// Message imprint for id-aa-ets-certCRLTimestamp (CAdES-X Type 2 / X-L Type 2), RFC 5126 §6.3.6.
+pub fn cades_refs_timestamp_imprint(
+    container: &crate::pki::cms::signed_data::SignedDataContainer,
+    signer_index: usize,
+) -> Result<Vec<u8>> {
+    use crate::pki::cms::signer_info::unsigned_attr_imprint;
+
+    let inner = container.inner();
+    let sinfo = inner
+        .signer_info(signer_index)
+        .ok_or_else(|| Error::InvalidParam("signer info index out of bounds".into()))?;
+
+    let unsigned = sinfo.unsigned_attrs.as_ref().ok_or_else(|| {
+        Error::InvalidParam("CAdES-C refs required for certCRLTimestamp imprint".into())
+    })?;
+
+    let cert_refs = unsigned_attr_imprint(unsigned, OidId::AaEtsCertificateRefs)?
+        .ok_or_else(|| Error::InvalidParam("missing complete-certificate-references".into()))?;
+    let rev_refs = unsigned_attr_imprint(unsigned, OidId::AaEtsRevocationRefs)?
+        .ok_or_else(|| Error::InvalidParam("missing complete-revocation-references".into()))?;
+
+    let mut imprint = cert_refs;
+    imprint.extend_from_slice(&rev_refs);
+    Ok(imprint)
+}
+
 /// Build archive timestamp message imprint (ETSI CAdES-A order for present attributes).
 pub fn archive_timestamp_imprint(
     container: &crate::pki::cms::signed_data::SignedDataContainer,
@@ -225,6 +286,8 @@ pub fn archive_timestamp_imprint(
             OidId::AaEtsRevocationRefs,
             OidId::AaEtsCertValues,
             OidId::AaEtsRevocationValues,
+            OidId::AaEtsEscTimeStamp,
+            OidId::AaEtsCertCrlTimestamp,
         ] {
             if let Some(bytes) = unsigned_attr_value_bytes(unsigned, oid)? {
                 imprint.extend_from_slice(&bytes);

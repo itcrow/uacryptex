@@ -1,13 +1,17 @@
 //! PKCS#10 certification request (`certification_request.c`).
 
+use der::oid::AssociatedOid;
 use der::{Decode, Encode};
 use x509_cert::attr::{Attribute, Attributes};
+use x509_cert::ext::Extension;
 use x509_cert::request::{CertReq, CertReqInfo, ExtensionReq};
 use x509_cert::spki::{AlgorithmIdentifierOwned, SubjectPublicKeyInfoOwned};
 
 use crate::pki::crypto::SignAdapter;
 use crate::pki::crypto::VerifyAdapter;
 use crate::pki::crypto::{sign_bitstring_to_raw, sign_raw_to_bitstring};
+use crate::pki::ext::exts_get_ext_by_oid;
+use crate::pki::oid::OidId;
 use crate::{Error, Result};
 
 /// `creq_init_by_adapter`.
@@ -50,6 +54,25 @@ fn signature_algorithm_without_params(sign_aid_der: &[u8]) -> Result<AlgorithmId
             .map_err(|e| Error::Internal(format!("signature aid encode: {e}")))?,
     )
     .map_err(|e| Error::Internal(format!("signature aid owned decode: {e}")))
+}
+
+/// `creq_get_ext_by_oid` — extension from PKCS#10 `extensionRequest` attribute.
+pub fn creq_get_ext_by_oid(request: &CertReq, oid: OidId) -> Result<Extension> {
+    for attr in request.info.attributes.iter() {
+        if attr.oid != ExtensionReq::OID {
+            continue;
+        }
+        let Some(any) = attr.values.iter().next() else {
+            continue;
+        };
+        let ext_req: ExtensionReq = any
+            .decode_as()
+            .map_err(|e| Error::Internal(format!("extensionRequest decode: {e}")))?;
+        return exts_get_ext_by_oid(&ext_req.0, oid);
+    }
+    Err(Error::Unsupported(format!(
+        "extension {oid:?} not found in certification request"
+    )))
 }
 
 /// Build PKCS#10 attributes with extensionRequest wrapping the given extensions.

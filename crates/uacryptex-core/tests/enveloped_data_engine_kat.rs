@@ -129,6 +129,78 @@ fn enveloped_data_engine_external_ciphertext_path() {
 }
 
 #[test]
+fn enveloped_data_engine_generate_decrypt_kalyna256_gcm() {
+    let originator = load_userfiz();
+    let recipient = load_userur();
+    let originator_dh = userfiz_dh();
+    let recipient_dh = userur_dh();
+    let prng = MasterPrng::new().unwrap();
+
+    let mut engine = EnvelopedDataEngine::new(&originator_dh);
+    engine.set_originator_cert(&originator).unwrap();
+    engine.set_data(OidId::Data, PLAINTEXT).unwrap();
+    engine.set_encryption_oid(OidId::Dstu7624Gmac256);
+    engine.set_save_cert(true);
+    engine.set_save_data(true);
+    engine.set_prng(prng);
+    engine.add_recipient(&recipient);
+
+    let (container, _) = engine.generate().unwrap();
+    let decrypted = container
+        .decrypt_data(None, None, &recipient_dh, &recipient)
+        .unwrap();
+    assert_eq!(decrypted, PLAINTEXT);
+}
+
+#[test]
+fn enveloped_data_engine_generate_decrypt_kalyna128_gcm() {
+    let originator = load_userfiz();
+    let recipient = load_userur();
+    let originator_dh = userfiz_dh();
+    let recipient_dh = userur_dh();
+    let prng = MasterPrng::new().unwrap();
+
+    let mut engine = EnvelopedDataEngine::new(&originator_dh);
+    engine.set_originator_cert(&originator).unwrap();
+    engine.set_data(OidId::Data, PLAINTEXT).unwrap();
+    engine.set_encryption_oid(OidId::Dstu7624Gmac128);
+    engine.set_save_cert(true);
+    engine.set_save_data(true);
+    engine.set_prng(prng);
+    engine.add_recipient(&recipient);
+
+    let (container, _) = engine.generate().unwrap();
+    let decrypted = container
+        .decrypt_data(None, None, &recipient_dh, &recipient)
+        .unwrap();
+    assert_eq!(decrypted, PLAINTEXT);
+}
+
+#[test]
+fn enveloped_data_engine_generate_decrypt_kalyna512_gcm() {
+    let originator = load_userfiz();
+    let recipient = load_userur();
+    let originator_dh = userfiz_dh();
+    let recipient_dh = userur_dh();
+    let prng = MasterPrng::new().unwrap();
+
+    let mut engine = EnvelopedDataEngine::new(&originator_dh);
+    engine.set_originator_cert(&originator).unwrap();
+    engine.set_data(OidId::Data, PLAINTEXT).unwrap();
+    engine.set_encryption_oid(OidId::Dstu7624Gmac512);
+    engine.set_save_cert(true);
+    engine.set_save_data(true);
+    engine.set_prng(prng);
+    engine.add_recipient(&recipient);
+
+    let (container, _) = engine.generate().unwrap();
+    let decrypted = container
+        .decrypt_data(None, None, &recipient_dh, &recipient)
+        .unwrap();
+    assert_eq!(decrypted, PLAINTEXT);
+}
+
+#[test]
 fn cipher_adapter_roundtrip_like_cryptonite_manager_utest() {
     use uacryptex_core::pki::crypto::{get_gost28147_aid, CipherAdapter};
     use uacryptex_core::primitives::dstu4145::RandomBytes;

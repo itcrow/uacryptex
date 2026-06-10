@@ -38,6 +38,8 @@ go_api_for_ffi() {
         uacryptex_cms_sign_cades_c) echo "SignCmsCadesC()" ;;
         uacryptex_cms_sign_cades_x) echo "SignCmsCadesX()" ;;
         uacryptex_cms_sign_cades_lt) echo "SignCmsCadesLT()" ;;
+        uacryptex_cms_sign_cades_xl_type1) echo "SignCmsCadesXLType1()" ;;
+        uacryptex_cms_sign_cades_xl_type2) echo "SignCmsCadesXLType2()" ;;
         uacryptex_cms_sign_cades_a) echo "SignCmsCadesA()" ;;
         uacryptex_cms_verify) echo "VerifyCMS()" ;;
         uacryptex_cms_envelop_encrypt) echo "EnvelopCMS()" ;;

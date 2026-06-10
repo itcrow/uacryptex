@@ -59,7 +59,7 @@ func SignCmsCadesX(data, refCert, ocspResponse []byte, signKey *PrivateKey) ([]b
 	return cms, fromNative(err)
 }
 
-// SignCmsCadesLT signs data and returns CAdES-LT CMS (X + embedded validation data).
+// SignCmsCadesLT signs data and returns CAdES-LT CMS (X Long: refs + values + embedded validation data).
 func SignCmsCadesLT(
 	data, refCert, fullCrl, deltaCrl, ocspResponse []byte,
 	signKey *PrivateKey,
@@ -68,6 +68,40 @@ func SignCmsCadesLT(
 		return nil, ErrInvalidParam
 	}
 	cms, err := native.CMSSignCadesLT(data, refCert, fullCrl, deltaCrl, ocspResponse, signKey.handle)
+	return cms, fromNative(err)
+}
+
+// SignCmsCadesXLType1 signs data and returns CAdES-X Long Type 1 (LT + escTimeStamp on CAdES-C).
+func SignCmsCadesXLType1(
+	data, refCert, fullCrl, deltaCrl, ocspResponse, serial []byte,
+	signKey, tsaKey *PrivateKey,
+	currentTime int64,
+	policyOID *string,
+) ([]byte, error) {
+	if signKey == nil || signKey.handle == nil || tsaKey == nil || tsaKey.handle == nil {
+		return nil, ErrInvalidParam
+	}
+	cms, err := native.CMSSignCadesXLType1(
+		data, refCert, fullCrl, deltaCrl, ocspResponse, serial,
+		signKey.handle, tsaKey.handle, currentTime, policyOID,
+	)
+	return cms, fromNative(err)
+}
+
+// SignCmsCadesXLType2 signs data and returns CAdES-X Long Type 2 (LT + certCRLTimestamp on refs).
+func SignCmsCadesXLType2(
+	data, refCert, fullCrl, deltaCrl, ocspResponse, serial []byte,
+	signKey, tsaKey *PrivateKey,
+	currentTime int64,
+	policyOID *string,
+) ([]byte, error) {
+	if signKey == nil || signKey.handle == nil || tsaKey == nil || tsaKey.handle == nil {
+		return nil, ErrInvalidParam
+	}
+	cms, err := native.CMSSignCadesXLType2(
+		data, refCert, fullCrl, deltaCrl, ocspResponse, serial,
+		signKey.handle, tsaKey.handle, currentTime, policyOID,
+	)
 	return cms, fromNative(err)
 }
 

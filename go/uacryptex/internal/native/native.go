@@ -257,6 +257,80 @@ func CMSSignCadesLT(data, refCert, fullCrl, deltaCrl, ocspResponse []byte, signK
 	return bufToBytes(out), nil
 }
 
+// CMSSignCadesXLType1 builds CAdES-X Long Type 1 (LT + escTimeStamp on CAdES-C).
+func CMSSignCadesXLType1(
+	data, refCert, fullCrl, deltaCrl, ocspResponse, serial []byte,
+	signKey, tsaKey *Handle,
+	currentTime int64,
+	policyOID *string,
+) ([]byte, error) {
+	return cmsSignCadesXL(data, refCert, fullCrl, deltaCrl, ocspResponse, serial, signKey, tsaKey, currentTime, policyOID, true)
+}
+
+// CMSSignCadesXLType2 builds CAdES-X Long Type 2 (LT + certCRLTimestamp on refs).
+func CMSSignCadesXLType2(
+	data, refCert, fullCrl, deltaCrl, ocspResponse, serial []byte,
+	signKey, tsaKey *Handle,
+	currentTime int64,
+	policyOID *string,
+) ([]byte, error) {
+	return cmsSignCadesXL(data, refCert, fullCrl, deltaCrl, ocspResponse, serial, signKey, tsaKey, currentTime, policyOID, false)
+}
+
+func cmsSignCadesXL(
+	data, refCert, fullCrl, deltaCrl, ocspResponse, serial []byte,
+	signKey, tsaKey *Handle,
+	currentTime int64,
+	policyOID *string,
+	type1 bool,
+) ([]byte, error) {
+	if signKey == nil || signKey.h == nil || tsaKey == nil || tsaKey.h == nil {
+		return nil, fmt.Errorf("native: nil handle")
+	}
+	var policyC *C.char
+	if policyOID != nil && *policyOID != "" {
+		p := C.CString(*policyOID)
+		defer C.free(unsafe.Pointer(p))
+		policyC = p
+	}
+	var out C.UacryptexBuf
+	err := initError()
+	var rc C.int32_t
+	if type1 {
+		rc = C.uacryptex_cms_sign_cades_xl_type1(
+			bytesPtr(data), C.uintptr_t(len(data)),
+			signKey.h,
+			bytesPtr(refCert), C.uintptr_t(len(refCert)),
+			bytesPtr(fullCrl), C.uintptr_t(len(fullCrl)),
+			bytesPtr(deltaCrl), C.uintptr_t(len(deltaCrl)),
+			bytesPtr(ocspResponse), C.uintptr_t(len(ocspResponse)),
+			tsaKey.h,
+			bytesPtr(serial), C.uintptr_t(len(serial)),
+			C.int64_t(currentTime),
+			policyC,
+			&out, &err,
+		)
+	} else {
+		rc = C.uacryptex_cms_sign_cades_xl_type2(
+			bytesPtr(data), C.uintptr_t(len(data)),
+			signKey.h,
+			bytesPtr(refCert), C.uintptr_t(len(refCert)),
+			bytesPtr(fullCrl), C.uintptr_t(len(fullCrl)),
+			bytesPtr(deltaCrl), C.uintptr_t(len(deltaCrl)),
+			bytesPtr(ocspResponse), C.uintptr_t(len(ocspResponse)),
+			tsaKey.h,
+			bytesPtr(serial), C.uintptr_t(len(serial)),
+			C.int64_t(currentTime),
+			policyC,
+			&out, &err,
+		)
+	}
+	if e := statusError(int32(rc), &err); e != nil {
+		return nil, e
+	}
+	return bufToBytes(out), nil
+}
+
 // CMSSignCadesA builds CAdES-A (LT + archive timestamp).
 func CMSSignCadesA(
 	data, refCert, fullCrl, deltaCrl, ocspResponse, serial []byte,
@@ -305,17 +379,23 @@ func CMSVerify(data, cms []byte) error {
 	return statusError(int32(rc), &err)
 }
 
-// CMSEnvelopEncrypt builds CMS EnvelopedData for recipientCert using originatorKey.
+// CMSEnvelopEncrypt builds CMS EnvelopedData for recipientCert using originatorKey (GOST28147-CFB).
 func (h *Handle) CMSEnvelopEncrypt(data, recipientCert []byte) ([]byte, error) {
+	return h.CMSEnvelopEncryptWithCipher(data, recipientCert, 0)
+}
+
+// CMSEnvelopEncryptWithCipher builds CMS EnvelopedData with the selected content cipher.
+func (h *Handle) CMSEnvelopEncryptWithCipher(data, recipientCert []byte, contentCipher int32) ([]byte, error) {
 	if h == nil || h.h == nil {
 		return nil, fmt.Errorf("native: nil handle")
 	}
 	var out C.UacryptexBuf
 	err := initError()
-	rc := C.uacryptex_cms_envelop_encrypt(
+	rc := C.uacryptex_cms_envelop_encrypt_with_cipher(
 		bytesPtr(data), C.uintptr_t(len(data)),
 		h.h,
 		bytesPtr(recipientCert), C.uintptr_t(len(recipientCert)),
+		C.int(contentCipher),
 		&out,
 		&err,
 	)

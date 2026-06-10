@@ -15,7 +15,8 @@ mod types;
 pub use builder::{build_content_info, build_signed_data, build_signed_data_with_stores};
 pub use cades::{
     build_content_info_cades_a, build_content_info_cades_c, build_content_info_cades_lt,
-    build_content_info_cades_t, build_content_info_cades_x,
+    build_content_info_cades_t, build_content_info_cades_x, build_content_info_cades_xl_type1,
+    build_content_info_cades_xl_type2,
 };
 pub use engine::{EnvelopedDataEngine, SignedDataEngine, SignerInfoEngine};
 pub use enveloped_data::{

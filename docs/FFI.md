@@ -135,6 +135,15 @@ int32_t uacryptex_cms_envelop_encrypt(
     UacryptexError *err
 );
 
+int32_t uacryptex_cms_envelop_encrypt_with_cipher(
+    const uint8_t *data, size_t data_len,
+    UacryptexHandle *originator_key,
+    const uint8_t *recipient_cert, size_t recipient_cert_len,
+    int32_t content_cipher,
+    UacryptexBuf *out,
+    UacryptexError *err
+);
+
 int32_t uacryptex_cms_envelop_decrypt(
     const uint8_t *cms, size_t cms_len,
     const uint8_t *external, size_t external_len,
@@ -147,6 +156,17 @@ int32_t uacryptex_cms_envelop_decrypt(
 ```
 
 `uacryptex_cms_envelop_encrypt` uses GOST28147-CFB content encryption and DSTU4145 DH key agreement (originator cert embedded in CMS). Decrypt with `originator_cert_len == 0` when the originator is embedded; `external_len == 0` when ciphertext is inside the structure.
+
+`uacryptex_cms_envelop_encrypt_with_cipher` selects the content encryption algorithm via `content_cipher`. Key agreement remains DSTU4145 DH with GOST28147-Wrap; decrypt reads the cipher from the CMS OID (same `uacryptex_cms_envelop_decrypt` for all variants).
+
+| Constant | Value | Content encryption |
+|----------|------:|--------------------|
+| `UACRYPTEX_CONTENT_CIPHER_GOST28147_CFB` | 0 | GOST 28147-CFB (default, Cryptonite-compatible) |
+| `UACRYPTEX_CONTENT_CIPHER_KALYNA256_GCM` | 1 | DSTU 7624 Kalyna-256/256-GMAC-256 (AEAD GCM) |
+| `UACRYPTEX_CONTENT_CIPHER_KALYNA128_GCM` | 2 | DSTU 7624 Kalyna-128/128-GMAC-128 (AEAD GCM) |
+| `UACRYPTEX_CONTENT_CIPHER_KALYNA512_GCM` | 3 | DSTU 7624 Kalyna-512/512-GMAC-512 (AEAD GCM) |
+
+Kalyna-128 wraps a 32-byte CEK with GOST28147-Wrap and uses the first 16 bytes as the cipher key. Kalyna-512 uses a 64-byte CEK wrapped as two GOST28147-Wrap blocks (88 bytes in `encrypted_key`).
 
 `uacryptex_cms_sign` accepts handles from `uacryptex_pkcs12_open` (when a matching certificate is bound) or `uacryptex_sign_open`.
 
@@ -269,8 +289,19 @@ Bindings: `sign_cms_cades_x` / `SignCmsCadesX`.
 int32_t uacryptex_cms_sign_cades_lt(data, sign_key, ref_cert, full_crl, delta_crl, ocsp_response, out, err);
 ```
 
-CAdES-LT: CAdES-X + validation certificates/CRLs stored in SignedData (`delta_crl` optional when `delta_crl_len == 0`).
+CAdES-LT: CAdES-X Long (refs + values + validation certificates/CRLs in SignedData). `delta_crl` optional when `delta_crl_len == 0`.
 Bindings: `sign_cms_cades_lt` / `SignCmsCadesLT`.
+
+```c
+int32_t uacryptex_cms_sign_cades_xl_type1(data, sign_key, ref_cert, full_crl, delta_crl, ocsp_response,
+    tsa_key, serial, current_time, policy_oid, out, err);
+int32_t uacryptex_cms_sign_cades_xl_type2(data, sign_key, ref_cert, full_crl, delta_crl, ocsp_response,
+    tsa_key, serial, current_time, policy_oid, out, err);
+```
+
+CAdES-X Long Type 1: LT + `id-aa-ets-escTimeStamp` (timestamp over CAdES-C imprint per RFC 5126 §6.3.5).
+CAdES-X Long Type 2: LT + `id-aa-ets-certCRLTimestamp` (timestamp over certificate/revocation refs per §6.3.6).
+Bindings (Go): `SignCmsCadesXLType1` / `SignCmsCadesXLType2`.
 
 ```c
 int32_t uacryptex_cms_sign_cades_a(data, sign_key, ref_cert, full_crl, delta_crl, ocsp_response,
@@ -284,7 +315,7 @@ Bindings: `sign_cms_cades_a` / `SignCmsCadesA` (Go, Python, PHP, Node).
 
 ### Phase 5 — Advanced CMS / PKI (remaining)
 
-- CAdES-X-L Type 1/2 (timestamps on refs)
+(none — CAdES-X-L Type 1/2 implemented; see `uacryptex_cms_sign_cades_xl_type1` / `_type2` above)
 
 ### Phase 1 — Primitives (remaining)
 
